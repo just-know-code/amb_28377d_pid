@@ -1,0 +1,405 @@
+/**
+ * These arguments were used when this file was generated. They will be automatically applied on subsequent loads
+ * via the GUI or CLI. Run CLI with '--help' for additional information on how to override these arguments.
+ * @cliArgs --device "F2837xD" --package "F2837xD_176PTP" --part "F2837xD_176PTP" --product "C2000WARE@3.01.00.00"
+ * @versions {"tool":"1.10.0+2163"}
+ */
+
+/**
+ * Import the modules used in this configuration.
+ */
+const adc    = scripting.addModule("/driverlib/adc.js", {}, false);
+const adc1   = adc.addInstance();
+const adc2   = adc.addInstance();
+const adc3   = adc.addInstance();
+const adc4   = adc.addInstance();
+const can    = scripting.addModule("/driverlib/can.js", {}, false);
+const can1   = can.addInstance();
+const emif1  = scripting.addModule("/driverlib/emif1.js", {}, false);
+const emif11 = emif1.addInstance();
+const epwm   = scripting.addModule("/driverlib/epwm.js", {}, false);
+const epwm1  = epwm.addInstance();
+const epwm2  = epwm.addInstance();
+const epwm3  = epwm.addInstance();
+const epwm4  = epwm.addInstance();
+const epwm5  = epwm.addInstance();
+const epwm6  = epwm.addInstance();
+const epwm7  = epwm.addInstance();
+const epwm8  = epwm.addInstance();
+const gpio   = scripting.addModule("/driverlib/gpio.js", {}, false);
+const gpio1  = gpio.addInstance();
+const gpio2  = gpio.addInstance();
+const gpio3  = gpio.addInstance();
+const gpio4  = gpio.addInstance();
+const gpio5  = gpio.addInstance();
+const gpio6  = gpio.addInstance();
+const gpio7  = gpio.addInstance();
+const gpio8  = gpio.addInstance();
+const gpio9  = gpio.addInstance();
+const gpio10 = gpio.addInstance();
+const gpio11 = gpio.addInstance();
+const gpio12 = gpio.addInstance();
+const gpio13 = gpio.addInstance();
+const gpio14 = gpio.addInstance();
+const gpio15 = gpio.addInstance();
+const gpio16 = gpio.addInstance();
+const i2c    = scripting.addModule("/driverlib/i2c.js", {}, false);
+const i2c1   = i2c.addInstance();
+const sci    = scripting.addModule("/driverlib/sci.js", {}, false);
+const sci1   = sci.addInstance();
+const sci2   = sci.addInstance();
+const sci3   = sci.addInstance();
+const spi    = scripting.addModule("/driverlib/spi.js", {}, false);
+const spi1   = spi.addInstance();
+const spi2   = spi.addInstance();
+const usb    = scripting.addModule("/driverlib/usb.js", {}, false);
+const usb1   = usb.addInstance();
+
+/**
+ * Write custom configuration values to the imported modules.
+ */
+adc1.$name                = "myADC0";
+adc1.useInterrupts        = false;
+adc1.interruptPulseMode   = "ADC_PULSE_END_OF_CONV";
+adc1.interrupt1SOCSource  = "ADC_SOC_NUMBER5";
+adc1.soc0SampleWindow     = 20;
+adc1.soc1SampleWindow     = 20;
+adc1.soc5SampleWindow     = 20;
+adc1.soc4SampleWindow     = 20;
+adc1.soc4InterruptTrigger = "ADC_INT_SOC_TRIGGER_ADCINT1";
+adc1.soc3SampleWindow     = 20;
+adc1.soc2SampleWindow     = 20;
+adc1.soc0Trigger          = "ADC_TRIGGER_EPWM6_SOCA";
+adc1.soc1Trigger          = "ADC_TRIGGER_EPWM6_SOCA";
+adc1.soc2Trigger          = "ADC_TRIGGER_EPWM6_SOCA";
+adc1.soc3Trigger          = "ADC_TRIGGER_EPWM6_SOCA";
+adc1.soc5Trigger          = "ADC_TRIGGER_EPWM6_SOCA";
+adc1.soc9Channel          = "ADC_CH_ADCIN3";
+adc1.soc10Channel         = "ADC_CH_ADCIN4";
+adc1.soc11Channel         = "ADC_CH_ADCIN5";
+adc1.soc6Trigger          = "ADC_TRIGGER_EPWM6_SOCA";
+adc1.soc6SampleWindow     = 20;
+adc1.soc7SampleWindow     = 20;
+adc1.soc8SampleWindow     = 20;
+adc1.soc11SampleWindow    = 20;
+adc1.soc9SampleWindow     = 20;
+adc1.soc7Trigger          = "ADC_TRIGGER_EPWM6_SOCA";
+adc1.soc8Trigger          = "ADC_TRIGGER_EPWM6_SOCA";
+adc1.soc9Trigger          = "ADC_TRIGGER_EPWM6_SOCA";
+adc1.soc11Trigger         = "ADC_TRIGGER_EPWM6_SOCA";
+adc1.soc10SampleWindow    = 20;
+adc1.soc10Trigger         = "ADC_TRIGGER_EPWM6_SOCA";
+adc1.soc4Trigger          = "ADC_TRIGGER_EPWM6_SOCA";
+adc1.adcResolutionMode    = "ADC_RESOLUTION_16BIT";
+adc1.adcSignalMode        = "ADC_MODE_DIFFERENTIAL";
+adc1.soc0Channel          = "ADC_CH_ADCIN0_ADCIN1";
+adc1.soc1Channel          = "ADC_CH_ADCIN2_ADCIN3";
+adc1.soc2Channel          = "ADC_CH_ADCIN4_ADCIN5";
+adc1.soc8Channel          = "ADC_CH_ADCIN6_ADCIN7";
+adc1.enabledSOCs          = ["ADC_SOC_NUMBER0","ADC_SOC_NUMBER1","ADC_SOC_NUMBER2","ADC_SOC_NUMBER3","ADC_SOC_NUMBER4","ADC_SOC_NUMBER5","ADC_SOC_NUMBER6","ADC_SOC_NUMBER7"];
+adc1.soc3Channel          = "ADC_CH_ADCIN6_ADCIN7";
+adc1.soc4Channel          = "ADC_CH_ADCIN0_ADCIN1";
+adc1.soc5Channel          = "ADC_CH_ADCIN2_ADCIN3";
+adc1.soc6Channel          = "ADC_CH_ADCIN4_ADCIN5";
+adc1.soc7Channel          = "ADC_CH_ADCIN6_ADCIN7";
+
+adc2.$name                          = "myADC1";
+adc2.adcBase                        = "ADCB_BASE";
+adc2.interruptPulseMode             = "ADC_PULSE_END_OF_CONV";
+adc2.enableInterrupt2               = true;
+adc2.enableInterrupt2ContinuousMode = true;
+adc2.interrupt2SOCSource            = "ADC_SOC_NUMBER3";
+adc2.soc3SampleWindow               = 20;
+adc2.soc2SampleWindow               = 20;
+adc2.soc1SampleWindow               = 20;
+adc2.soc0SampleWindow               = 20;
+adc2.soc0Trigger                    = "ADC_TRIGGER_EPWM6_SOCA";
+adc2.soc1Trigger                    = "ADC_TRIGGER_EPWM6_SOCA";
+adc2.soc2Trigger                    = "ADC_TRIGGER_EPWM6_SOCA";
+adc2.soc3Trigger                    = "ADC_TRIGGER_EPWM6_SOCA";
+adc2.soc4Trigger                    = "ADC_TRIGGER_EPWM6_SOCA";
+adc2.soc4SampleWindow               = 20;
+adc2.soc5Trigger                    = "ADC_TRIGGER_EPWM6_SOCA";
+adc2.soc5SampleWindow               = 20;
+adc2.soc6SampleWindow               = 20;
+adc2.soc7Channel                    = "ADC_CH_ADCIN3";
+adc2.soc7SampleWindow               = 20;
+adc2.soc7Trigger                    = "ADC_TRIGGER_EPWM6_SOCA";
+adc2.soc6Trigger                    = "ADC_TRIGGER_EPWM6_SOCA";
+adc2.soc5Channel                    = "ADC_CH_ADCIN1";
+adc2.soc6Channel                    = "ADC_CH_ADCIN2";
+adc2.adcResolutionMode              = "ADC_RESOLUTION_16BIT";
+adc2.adcSignalMode                  = "ADC_MODE_DIFFERENTIAL";
+adc2.enabledSOCs                    = ["ADC_SOC_NUMBER0","ADC_SOC_NUMBER1","ADC_SOC_NUMBER2","ADC_SOC_NUMBER3"];
+adc2.soc0Channel                    = "ADC_CH_ADCIN0_ADCIN1";
+adc2.soc1Channel                    = "ADC_CH_ADCIN2_ADCIN3";
+adc2.soc2Channel                    = "ADC_CH_ADCIN0_ADCIN1";
+adc2.soc3Channel                    = "ADC_CH_ADCIN2_ADCIN3";
+
+adc3.$name               = "myADC2";
+adc3.adcBase             = "ADCC_BASE";
+adc3.soc1Channel         = "ADC_CH_ADCIN1";
+adc3.soc2Channel         = "ADC_CH_ADCIN2";
+adc3.interruptPulseMode  = "ADC_PULSE_END_OF_CONV";
+adc3.interrupt3SOCSource = "ADC_SOC_NUMBER2";
+adc3.soc0Trigger         = "ADC_TRIGGER_EPWM6_SOCA";
+adc3.soc0SampleWindow    = 20;
+adc3.soc1Trigger         = "ADC_TRIGGER_EPWM6_SOCA";
+adc3.soc1SampleWindow    = 20;
+adc3.soc2SampleWindow    = 20;
+adc3.soc2Trigger         = "ADC_TRIGGER_EPWM6_SOCA";
+adc3.enabledSOCs         = ["ADC_SOC_NUMBER0","ADC_SOC_NUMBER1","ADC_SOC_NUMBER2","ADC_SOC_NUMBER3","ADC_SOC_NUMBER4","ADC_SOC_NUMBER5"];
+adc3.soc3Trigger         = "ADC_TRIGGER_EPWM6_SOCA";
+adc3.soc3SampleWindow    = 20;
+adc3.soc4Channel         = "ADC_CH_ADCIN1";
+adc3.soc4Trigger         = "ADC_TRIGGER_EPWM6_SOCA";
+adc3.soc4SampleWindow    = 20;
+adc3.soc5Channel         = "ADC_CH_ADCIN2";
+adc3.soc5Trigger         = "ADC_TRIGGER_EPWM6_SOCA";
+adc3.soc5SampleWindow    = 20;
+
+adc4.$name                          = "myADC3";
+adc4.adcBase                        = "ADCD_BASE";
+adc4.soc1Channel                    = "ADC_CH_ADCIN1";
+adc4.soc2Channel                    = "ADC_CH_ADCIN2";
+adc4.soc3Channel                    = "ADC_CH_ADCIN3";
+adc4.soc4Channel                    = "ADC_CH_ADCIN4";
+adc4.interruptPulseMode             = "ADC_PULSE_END_OF_CONV";
+adc4.enableInterrupt4               = true;
+adc4.enableInterrupt4ContinuousMode = true;
+adc4.soc0SampleWindow               = 20;
+adc4.soc0Trigger                    = "ADC_TRIGGER_EPWM6_SOCA";
+adc4.soc1Trigger                    = "ADC_TRIGGER_EPWM6_SOCA";
+adc4.soc1SampleWindow               = 20;
+adc4.soc2Trigger                    = "ADC_TRIGGER_EPWM6_SOCA";
+adc4.soc2SampleWindow               = 20;
+adc4.soc3Trigger                    = "ADC_TRIGGER_EPWM6_SOCA";
+adc4.soc3SampleWindow               = 20;
+adc4.soc4SampleWindow               = 20;
+adc4.soc4Trigger                    = "ADC_TRIGGER_EPWM6_SOCA";
+adc4.soc5Channel                    = "ADC_CH_ADCIN14";
+adc4.soc5Trigger                    = "ADC_TRIGGER_EPWM6_SOCA";
+adc4.soc5SampleWindow               = 20;
+adc4.enabledSOCs                    = ["ADC_SOC_NUMBER0","ADC_SOC_NUMBER1","ADC_SOC_NUMBER10","ADC_SOC_NUMBER11","ADC_SOC_NUMBER12","ADC_SOC_NUMBER13","ADC_SOC_NUMBER2","ADC_SOC_NUMBER3","ADC_SOC_NUMBER4","ADC_SOC_NUMBER5","ADC_SOC_NUMBER6","ADC_SOC_NUMBER7","ADC_SOC_NUMBER8","ADC_SOC_NUMBER9"];
+adc4.soc6Channel                    = "ADC_CH_ADCIN15";
+adc4.soc6Trigger                    = "ADC_TRIGGER_EPWM6_SOCA";
+adc4.soc6SampleWindow               = 20;
+adc4.soc7SampleWindow               = 20;
+adc4.soc7Trigger                    = "ADC_TRIGGER_EPWM6_SOCA";
+adc4.soc8Channel                    = "ADC_CH_ADCIN1";
+adc4.soc8Trigger                    = "ADC_TRIGGER_EPWM6_SOCA";
+adc4.soc8SampleWindow               = 20;
+adc4.soc9Channel                    = "ADC_CH_ADCIN2";
+adc4.soc9Trigger                    = "ADC_TRIGGER_EPWM6_SOCA";
+adc4.soc9SampleWindow               = 20;
+adc4.soc10Channel                   = "ADC_CH_ADCIN3";
+adc4.soc10Trigger                   = "ADC_TRIGGER_EPWM6_SOCA";
+adc4.soc10SampleWindow              = 20;
+adc4.soc11Channel                   = "ADC_CH_ADCIN4";
+adc4.soc11Trigger                   = "ADC_TRIGGER_EPWM6_SOCA";
+adc4.soc11SampleWindow              = 20;
+adc4.soc12Channel                   = "ADC_CH_ADCIN14";
+adc4.soc12Trigger                   = "ADC_TRIGGER_EPWM6_SOCA";
+adc4.soc12SampleWindow              = 20;
+adc4.soc13Channel                   = "ADC_CH_ADCIN15";
+adc4.soc13Trigger                   = "ADC_TRIGGER_EPWM6_SOCA";
+adc4.soc13SampleWindow              = 20;
+adc4.interrupt4SOCSource            = "ADC_SOC_NUMBER13";
+adc4.enabledInts                    = ["ADC_INT_NUMBER1"];
+adc4.interrupt1SOCSource            = "ADC_SOC_NUMBER13";
+adc4.enableInterrupt1               = true;
+
+can1.$name                = "myCAN0";
+can1.can.$assign          = "CANA";
+can1.can.canrxPin.$assign = "ball.108";
+can1.can.cantxPin.$assign = "ball.109";
+
+emif11.$name            = "myEMIF10";
+emif11.useCase          = "CUSTOM";
+emif11.useInterfacePins = ["EM1A0","EM1A1","EM1A10","EM1A11","EM1A12","EM1A13","EM1A14","EM1A15","EM1A16","EM1A17","EM1A18","EM1A2","EM1A3","EM1A4","EM1A5","EM1A6","EM1A7","EM1A8","EM1A9","EM1BA0","EM1BA1","EM1CLK","EM1CS2n","EM1CS3n","EM1D0","EM1D1","EM1D10","EM1D11","EM1D12","EM1D13","EM1D14","EM1D15","EM1D2","EM1D3","EM1D4","EM1D5","EM1D6","EM1D7","EM1D8","EM1D9","EM1OEn","EM1SDCKE","EM1WAIT","EM1WEn"];
+
+epwm1.$name                 = "myEPWM0";
+epwm1.epwm.$assign          = "EPWM1";
+epwm1.epwm.epwmaPin.$assign = "ball.160";
+epwm1.epwm.epwmbPin.$assign = "ball.161";
+
+epwm2.$name                 = "myEPWM1";
+epwm2.epwm.$assign          = "EPWM2";
+epwm2.epwm.epwmaPin.$assign = "ball.162";
+epwm2.epwm.epwmbPin.$assign = "ball.163";
+
+epwm3.$name                 = "myEPWM2";
+epwm3.epwm.$assign          = "EPWM3";
+epwm3.epwm.epwmaPin.$assign = "ball.164";
+epwm3.epwm.epwmbPin.$assign = "ball.165";
+
+epwm4.$name                 = "myEPWM3";
+epwm4.epwm.$assign          = "EPWM4";
+epwm4.epwm.epwmaPin.$assign = "ball.166";
+epwm4.epwm.epwmbPin.$assign = "ball.167";
+
+epwm5.$name                 = "myEPWM4";
+epwm5.epwm.$assign          = "EPWM5";
+epwm5.epwm.epwmaPin.$assign = "ball.18";
+epwm5.epwm.epwmbPin.$assign = "ball.19";
+
+epwm6.$name                 = "myEPWM5";
+epwm6.epwm.$assign          = "EPWM6";
+epwm6.epwm.epwmaPin.$assign = "ball.1";
+epwm6.epwm.epwmbPin.$assign = "ball.2";
+
+epwm7.$name                 = "myEPWM6";
+epwm7.epwm.$assign          = "EPWM7";
+epwm7.epwm.epwmaPin.$assign = "ball.4";
+epwm7.epwm.epwmbPin.$assign = "ball.5";
+
+epwm8.$name                 = "myEPWM7";
+epwm8.epwm.$assign          = "EPWM8";
+epwm8.epwm.epwmaPin.$assign = "ball.6";
+epwm8.epwm.epwmbPin.$assign = "ball.7";
+
+gpio1.$name           = "myGPIO0";
+gpio1.gpioPin.$assign = "ball.97";
+
+gpio2.$name           = "myGPIO1";
+gpio2.gpioPin.$assign = "ball.112";
+
+gpio3.$name           = "myGPIO2";
+gpio3.gpioPin.$assign = "ball.132";
+
+gpio4.$name           = "myGPIO3";
+gpio4.gpioPin.$assign = "ball.133";
+
+gpio5.$name           = "myGPIO4";
+gpio5.gpioPin.$assign = "ball.154";
+
+gpio6.$name           = "myGPIO5";
+gpio6.gpioPin.$assign = "ball.176";
+
+gpio7.$name           = "myGPIO6";
+gpio7.gpioPin.$assign = "ball.17";
+
+gpio8.$name           = "myGPIO7";
+gpio8.gpioPin.$assign = "ball.118";
+
+gpio9.$name           = "myGPIO8";
+gpio9.gpioPin.$assign = "ball.13";
+
+gpio10.$name           = "myGPIO9";
+gpio10.gpioPin.$assign = "ball.14";
+
+gpio11.$name           = "myGPIO10";
+gpio11.gpioPin.$assign = "ball.22";
+
+gpio12.$name           = "myGPIO11";
+gpio12.gpioPin.$assign = "ball.23";
+
+gpio13.$name           = "myGPIO12";
+gpio13.gpioPin.$assign = "ball.24";
+
+gpio14.$name           = "myGPIO13";
+gpio14.gpioPin.$assign = "ball.25";
+
+gpio15.$name           = "myGPIO14";
+gpio15.gpioPin.$assign = "ball.27";
+
+gpio16.$name           = "myGPIO15";
+gpio16.gpioPin.$assign = "ball.28";
+
+i2c1.$name                 = "myI2C0";
+i2c1.enabledFIFOInterrupts = ["I2C_INT_RXFF","I2C_INT_TXFF"];
+i2c1.useInterrupts         = false;
+i2c1.i2c.$assign           = "I2CA";
+i2c1.i2c.sdaPin.$assign    = "ball.67";
+i2c1.i2c.sclPin.$assign    = "ball.69";
+
+sci1.$name       = "mySCI0";
+sci1.sci.$assign = "SCIA";
+
+sci2.$name                 = "mySCI1";
+sci2.sci.$assign           = "SCIB";
+sci2.sci.scirxdPin.$assign = "ball.100";
+sci2.sci.scitxdPin.$assign = "ball.98";
+
+sci3.$name                 = "mySCI2";
+sci3.sci.$assign           = "SCIC";
+sci3.sci.scirxdPin.$assign = "ball.102";
+sci3.sci.scitxdPin.$assign = "ball.101";
+
+spi1.$name                  = "mySPI0";
+spi1.mode                   = "SPI_MODE_MASTER";
+spi1.useFifo                = false;
+spi1.useInterrupts          = false;
+spi1.spi.$assign            = "SPIA";
+spi1.spi.spisimoPin.$assign = "ball.8";
+spi1.spi.spisomiPin.$assign = "ball.9";
+spi1.spi.spiclkPin.$assign  = "ball.10";
+spi1.spi.spistePin.$assign  = "ball.12";
+
+spi2.$name                  = "mySPI1";
+spi2.useFifo                = false;
+spi2.useInterrupts          = false;
+spi2.mode                   = "SPI_MODE_MASTER";
+spi2.spi.$assign            = "SPIB";
+spi2.spi.spisimoPin.$assign = "ball.105";
+spi2.spi.spisomiPin.$assign = "ball.107";
+spi2.spi.spiclkPin.$assign  = "ball.103";
+spi2.spi.spistePin.$assign  = "ball.104";
+
+usb1.$name                = "myUSB0";
+usb1.usb.$assign          = "USB0";
+usb1.usb.usbdmPin.$assign = "ball.130";
+usb1.usb.usbdpPin.$assign = "ball.131";
+
+/**
+ * Pinmux solution for unlocked pins/peripherals. This ensures that minor changes to the automatic solver in a future
+ * version of the tool will not impact the pinmux you originally saw.  These lines can be completely deleted in order to
+ * re-solve from scratch.
+ */
+emif11.emif1.$suggestSolution             = "EMIF1";
+emif11.emif1.em1cs2nPin.$suggestSolution  = "ball.70";
+emif11.emif1.em1cs3nPin.$suggestSolution  = "ball.71";
+emif11.emif1.em1sdckePin.$suggestSolution = "ball.65";
+emif11.emif1.em1clkPin.$suggestSolution   = "ball.63";
+emif11.emif1.em1wenPin.$suggestSolution   = "ball.66";
+emif11.emif1.em1waitPin.$suggestSolution  = "ball.83";
+emif11.emif1.em1oenPin.$suggestSolution   = "ball.84";
+emif11.emif1.em1ba0Pin.$suggestSolution   = "ball.175";
+emif11.emif1.em1ba1Pin.$suggestSolution   = "ball.174";
+emif11.emif1.em1a0Pin.$suggestSolution    = "ball.85";
+emif11.emif1.em1a1Pin.$suggestSolution    = "ball.86";
+emif11.emif1.em1a2Pin.$suggestSolution    = "ball.87";
+emif11.emif1.em1a3Pin.$suggestSolution    = "ball.89";
+emif11.emif1.em1a4Pin.$suggestSolution    = "ball.113";
+emif11.emif1.em1a5Pin.$suggestSolution    = "ball.115";
+emif11.emif1.em1a6Pin.$suggestSolution    = "ball.128";
+emif11.emif1.em1a7Pin.$suggestSolution    = "ball.129";
+emif11.emif1.em1a8Pin.$suggestSolution    = "ball.90";
+emif11.emif1.em1a9Pin.$suggestSolution    = "ball.93";
+emif11.emif1.em1a10Pin.$suggestSolution   = "ball.94";
+emif11.emif1.em1a11Pin.$suggestSolution   = "ball.95";
+emif11.emif1.em1a12Pin.$suggestSolution   = "ball.96";
+emif11.emif1.em1a13Pin.$suggestSolution   = "ball.156";
+emif11.emif1.em1a14Pin.$suggestSolution   = "ball.157";
+emif11.emif1.em1a15Pin.$suggestSolution   = "ball.170";
+emif11.emif1.em1a16Pin.$suggestSolution   = "ball.171";
+emif11.emif1.em1a17Pin.$suggestSolution   = "ball.172";
+emif11.emif1.em1a18Pin.$suggestSolution   = "ball.173";
+emif11.emif1.em1d0Pin.$suggestSolution    = "ball.155";
+emif11.emif1.em1d1Pin.$suggestSolution    = "ball.151";
+emif11.emif1.em1d2Pin.$suggestSolution    = "ball.150";
+emif11.emif1.em1d3Pin.$suggestSolution    = "ball.149";
+emif11.emif1.em1d4Pin.$suggestSolution    = "ball.148";
+emif11.emif1.em1d5Pin.$suggestSolution    = "ball.146";
+emif11.emif1.em1d6Pin.$suggestSolution    = "ball.145";
+emif11.emif1.em1d7Pin.$suggestSolution    = "ball.144";
+emif11.emif1.em1d8Pin.$suggestSolution    = "ball.143";
+emif11.emif1.em1d9Pin.$suggestSolution    = "ball.142";
+emif11.emif1.em1d10Pin.$suggestSolution   = "ball.141";
+emif11.emif1.em1d11Pin.$suggestSolution   = "ball.140";
+emif11.emif1.em1d12Pin.$suggestSolution   = "ball.139";
+emif11.emif1.em1d13Pin.$suggestSolution   = "ball.136";
+emif11.emif1.em1d14Pin.$suggestSolution   = "ball.135";
+emif11.emif1.em1d15Pin.$suggestSolution   = "ball.134";
+sci1.sci.scirxdPin.$suggestSolution       = "ball.64";
+sci1.sci.scitxdPin.$suggestSolution       = "ball.111";
