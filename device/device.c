@@ -46,6 +46,7 @@
 #include "device.h"
 #include "driverlib.h"
 #include "inc/hw_ipc.h"
+#include <string.h>
 
 #ifdef __cplusplus
 using std::memcpy;
@@ -54,9 +55,17 @@ using std::memcpy;
 #define PASS 0
 #define FAIL 1
 
-
+struct pi_t currentLoopPI;
+struct pid_t pid_tArray[5];
+double posIntegralArray[5];
+double currIntegralArray[10];
 uint32_t rotorPosition[5];
 uint16_t coilCurrent[10];
+uint16_t pwmDuty[10];
+uint16_t forwardFirstPos[5];
+uint16_t refCurrent[10];
+uint16_t refPosition[5];
+uint16_t coilBiasCurrent[5];
 //*****************************************************************************
 //
 // Function to initialize the device. Primarily initializes system control to a
@@ -92,7 +101,7 @@ void Device_init(void)
     //
     // Configure Analog Trim in case of untrimmed or TMX sample
     //
-    if((SysCtl_getDeviceParametric(SYSCTL_DEVICE_QUAL) == 0x0U)       &&
+    if((SysCtl_getDeviceParametric(SYSCTL_DEVICE_QUAL) == 0x0U) &&
        (HWREGH(ANALOGSUBSYS_BASE + ASYSCTL_O_ANAREFTRIMA) == 0x0U))
     {
         Device_configureTMXAnalogTrim();
@@ -136,10 +145,7 @@ void Device_init(void)
     //
     Device_enableAllPeripherals();
 
-    //
-    // Initialize result parameter as FAIL
-    //
-    Example_Result = FAIL;
+
 }
 
 //*****************************************************************************
@@ -677,5 +683,18 @@ void __error__(char *filename, uint32_t line)
     // line parameters to determine what went wrong.
     //
     ESTOP0;
+}
+
+//*****************************************************************************
+//
+// initialize all variable and array
+//
+//*****************************************************************************
+void Variable_init(){
+
+	memset(rotorPosition, 0, sizeof(rotorPosition));
+	memset(coilCurrent, 0, sizeof(coilCurrent));
+	memset(posIntegralArray, 0, sizeof(posIntegralArray));
+
 }
 

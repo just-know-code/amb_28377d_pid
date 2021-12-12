@@ -39,6 +39,8 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // $
 //#############################################################################
+#ifndef DEVICE_H
+#define DEVICE_H
 
 //
 // Included Files
@@ -385,9 +387,43 @@ extern uint16_t Device_bootCPU2(uint32_t ulBootMode);
 //
 //*****************************************************************************
 extern void __error__(char *filename, uint32_t line);
-extern void Example_setResultPass(void);
-extern void Example_setResultFail(void);
-extern void Example_done(void);
+
+//*****************************************************************************
+//!
+//! @brief initialize all variable
+//!
+//! @return None
+//
+//*****************************************************************************
+
+void Variable_init();
+
+struct pid_t{
+
+	double P;
+	double I;
+	double D;
+};
+
+struct pi_t{
+
+	double P;
+	double I;
+};
+
+extern struct pi_t currentLoopPI;
+extern struct pid_t pid_tArray[5];
+extern double posIntegralArray[5];
+extern double currIntegralArray[10];
+extern uint32_t rotorPosition[5];
+extern uint16_t coilCurrent[10];
+extern uint16_t pwmDuty[10];
+extern uint16_t forwardFirstPos[5];
+extern uint16_t refCurrent[10];
+extern uint16_t refPosition[5];
+extern uint16_t coilBiasCurrent[5];
+
+#endif
 
 //
 // End of file

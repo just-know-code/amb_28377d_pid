@@ -53,15 +53,21 @@
 #include "device.h"
 #include "board.h"
 
+
+__interrupt void adcD1ISR(void);
+void ComputeUpdateDuty();
+void CalculPID(uint16_t index);
+void CalculPD(uint16_t index);
+void UpdatePWMDuty();
 //
 // Main
 //
 void main(void)
 {
-    //
-    // Initialize device clock and peripherals.
-    //
-    Device_init();
+	//
+	// Initialize device clock and peripherals.
+	//
+	Device_init();
 
 	//
 	// Setup GPIO by disabling pin locks and enabling pullups.
@@ -81,18 +87,26 @@ void main(void)
 
 	Board_init();
 
-    Interrupt_register(INT_ADCD1, &adcD1ISR);
+	Interrupt_register(INT_ADCD1, &adcD1ISR);
 
-    //
-    // Enable ADC interrupt
-    //
-    Interrupt_enable(INT_ADCD1);
+	//
+	// Enable ADC interrupt
+	//
+	Interrupt_enable(INT_ADCD1);
 
-    //
-    // Enable Global Interrupt (INTM) and realtime interrupt (DBGM)
-    //
-    EINT;
-    ERTM;
+	//
+	// Enable Global Interrupt (INTM) and realtime interrupt (DBGM)
+	//
+	EINT;
+	ERTM;
+
+	currentLoopPI.P = 10;
+	currentLoopPI.I = 100;
+
+
+	for (;;){
+
+	}
 
 }
 
@@ -102,46 +116,163 @@ void main(void)
 //
 __interrupt void adcD1ISR(void)
 {
-    //
-    // Get rotor position
-    //
+	//
+	// Get rotor position
+	//
 	uint16_t index = 0;
 	for(; index < 3; index++)
 		rotorPosition[index] = (ADC_readResult(ADCARESULT_BASE, index) +
-								ADC_readResult(ADCARESULT_BASE, index+3))/2;
+				ADC_readResult(ADCARESULT_BASE, index+3))/2;
 	for(; index < 5; index++)
 		rotorPosition[index] = (ADC_readResult(ADCBRESULT_BASE, index) +
-							  ADC_readResult(ADCBRESULT_BASE, index+2))/2;
-    //
-    // Get coil current
-    //
+				ADC_readResult(ADCBRESULT_BASE, index+2))/2;
+	//
+	// Get coil current
+	//
 	index = 0;
 	for(; index < 3; index++)
 		coilCurrent[index] = (ADC_readResult(ADCCRESULT_BASE, index) +
-								ADC_readResult(ADCCRESULT_BASE, index+3))/2;
+				ADC_readResult(ADCCRESULT_BASE, index+3))/2;
 	for(; index < 10; index++)
 		coilCurrent[index] = (ADC_readResult(ADCDRESULT_BASE, index) +
-							  ADC_readResult(ADCDRESULT_BASE, index+7))/2;
-    //
-    // Clear the interrupt flag
-    //
-    ADC_clearInterruptStatus(ADCD_BASE, ADC_INT_NUMBER1);
+				ADC_readResult(ADCDRESULT_BASE, index+7))/2;
+	//
+	// Clear the interrupt flag
+	//
+	ADC_clearInterruptStatus(ADCD_BASE, ADC_INT_NUMBER1);
 
-    //
-    // Check if overflow has occurred
-    //
-    if(true == ADC_getInterruptOverflowStatus(ADCD_BASE, ADC_INT_NUMBER1))
-    {
-        ADC_clearInterruptOverflowStatus(ADCD_BASE, ADC_INT_NUMBER1);
-        ADC_clearInterruptStatus(ADCD_BASE, ADC_INT_NUMBER1);
-    }
+	//
+	// Check if overflow has occurred
+	//
+	if(true == ADC_getInterruptOverflowStatus(ADCD_BASE, ADC_INT_NUMBER1))
+	{
+		ADC_clearInterruptOverflowStatus(ADCD_BASE, ADC_INT_NUMBER1);
+		ADC_clearInterruptStatus(ADCD_BASE, ADC_INT_NUMBER1);
+	}
 
-    //
-    // Acknowledge the interrupt
-    //
-    Interrupt_clearACKGroup(INTERRUPT_ACK_GROUP1);
+	//
+	// Acknowledge the interrupt
+	//
+	Interrupt_clearACKGroup(INTERRUPT_ACK_GROUP1);
+
+
+
+
+
 }
 
+void ComputeUpdateDuty(){
+
+	//compute displacement loop pid
+	uint16_t i;
+	for(i = 0; i < 5; i++){
+
+		CalculPID(i);
+	}
+	//compute current loop pd
+	for(i = 0; i < 10; i++){
+
+			CalculPD(i);
+		}
+	// update pwm duty
+	UpdatePWMDuty();
+}
+
+#define CONTROL_PERIOD 0.00005
+#define MAX_POS_INTEGRAL 500
+#define MIN_POS_INTEGRAL -500
+#define MAX_CONTROL_CURRENT 1000
+#define MIN_CONTROL_CURRENT -1000
+
+void CalculPID(uint16_t index){
+
+	double error, firstOrderDiff, propotion, differential;
+	uint16_t outcome;
+	error = refPosition[index] - rotorPosition[index]; /* 平衡位置与设定点的差值 */
+	firstOrderDiff = rotorPosition[index] - forwardFirstPos[index]; /* 相邻两点之间的差值 */
+	forwardFirstPos[index] = rotorPosition[index];
+
+	propotion = pid_tArray[index].P * error;
+	posIntegralArray[index] += pid_tArray[index].I * firstOrderDiff * CONTROL_PERIOD;
+	differential = pid_tArray[index].D * firstOrderDiff / CONTROL_PERIOD;
+
+	if (posIntegralArray[index] > MAX_POS_INTEGRAL)
+		posIntegralArray[index] = MAX_POS_INTEGRAL;
+	if (posIntegralArray[index] < MIN_POS_INTEGRAL)
+		posIntegralArray[index] = MIN_POS_INTEGRAL;
+
+	outcome = propotion + posIntegralArray[index] + differential;
+	if (outcome > MAX_CONTROL_CURRENT)
+		outcome = MAX_CONTROL_CURRENT;
+	if (outcome < MIN_CONTROL_CURRENT)
+		outcome = MIN_CONTROL_CURRENT;
+	refCurrent[index * 2] = coilBiasCurrent[index] - outcome;
+	refCurrent[index * 2 + 1] = coilBiasCurrent[index] + outcome;
+	/*				       【传感器】
+	 * 					0 号线圈
+	 *
+	 * 	【传感器】2 号线圈			3号线圈
+	 *
+	 * 					1 号线圈
+	 *
+	 *
+	 *				        【传感器】
+	 * 					4 号线圈
+	 *
+	 * 	【传感器】6 号线圈			7号线圈
+	 *
+	 * 					5 号线圈
+	 *
+	 *
+	 *
+	 * */
+}
+
+
+#define MAX_PWM_DUTY 1000
+#define MIN_PWM_DUTY 1000
+#define MAX_CURR_INTEGRAL 500
+#define MIN_CURR_INTEGRAL -500
+void CalculPD(uint16_t index){
+
+	double error, firstOrderDiff, propotion;
+	uint16_t outcome;
+	error = refCurrent[index] - coilCurrent[index]; /* 平衡位置与设定点的差值 */
+	posIntegralArray[index] += currentLoopPI.I * firstOrderDiff * CONTROL_PERIOD;
+	currIntegralArray[index] = coilCurrent[index];
+	propotion = currentLoopPI.P * error;
+
+	if (posIntegralArray[index] > MAX_CURR_INTEGRAL)
+		posIntegralArray[index] = MAX_CURR_INTEGRAL;
+	if (posIntegralArray[index] < MIN_CURR_INTEGRAL)
+		posIntegralArray[index] = MIN_CURR_INTEGRAL;
+
+	outcome = propotion + posIntegralArray[index];
+	if (outcome > MAX_PWM_DUTY)
+		outcome = MAX_PWM_DUTY;
+	if (outcome < MIN_PWM_DUTY)
+		outcome = MIN_PWM_DUTY;
+	pwmDuty[index] = outcome;
+}
+
+
+void UpdatePWMDuty(){
+
+	EPWM_setCounterCompareValue(EPWM1_BASE, EPWM_COUNTER_COMPARE_A, pwmDuty[0]);
+	EPWM_setCounterCompareValue(EPWM1_BASE, EPWM_COUNTER_COMPARE_B, pwmDuty[1]);
+
+	EPWM_setCounterCompareValue(EPWM2_BASE, EPWM_COUNTER_COMPARE_A, pwmDuty[2]);
+	EPWM_setCounterCompareValue(EPWM2_BASE, EPWM_COUNTER_COMPARE_B, pwmDuty[3]);
+
+	EPWM_setCounterCompareValue(EPWM3_BASE, EPWM_COUNTER_COMPARE_A, pwmDuty[4]);
+	EPWM_setCounterCompareValue(EPWM3_BASE, EPWM_COUNTER_COMPARE_B, pwmDuty[5]);
+
+	EPWM_setCounterCompareValue(EPWM4_BASE, EPWM_COUNTER_COMPARE_A, pwmDuty[6]);
+	EPWM_setCounterCompareValue(EPWM4_BASE, EPWM_COUNTER_COMPARE_B, pwmDuty[7]);
+
+	EPWM_setCounterCompareValue(EPWM5_BASE, EPWM_COUNTER_COMPARE_A, pwmDuty[8]);
+	EPWM_setCounterCompareValue(EPWM5_BASE, EPWM_COUNTER_COMPARE_B, pwmDuty[9]);
+}
 
 //
 // End of File
