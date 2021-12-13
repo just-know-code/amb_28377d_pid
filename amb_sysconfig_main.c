@@ -53,7 +53,7 @@
 #include "device.h"
 #include "board.h"
 
-
+#define CURRENT_OPEN_LOOP 0
 __interrupt void adcD1ISR(void);
 void ComputeUpdateDuty();
 void CalculPID(uint16_t index);
@@ -94,16 +94,38 @@ void main(void)
 	//
 	Interrupt_enable(INT_ADCD1);
 
+
+
+	Variable_init();
+	currentLoopPI.P = 10;
+	currentLoopPI.I = 100;
+
+	coilBiasCurrent[0] = 4000;
+	coilBiasCurrent[1] = 4000;
+	coilBiasCurrent[2] = 4000;
+	coilBiasCurrent[3] = 4000;
+	coilBiasCurrent[4] = 4000;
+	pid_tArray[0].P = 1;
+	pid_tArray[0].I = 0.0001;
+	pid_tArray[0].D = 0.0001;
+	pid_tArray[1].P = 1;
+	pid_tArray[1].I = 0.0001;
+	pid_tArray[1].D = 0.0001;
+	pid_tArray[2].P = 1;
+	pid_tArray[2].I = 0.0001;
+	pid_tArray[2].D = 0.0001;
+	pid_tArray[3].P = 1;
+	pid_tArray[3].I = 0.0001;
+	pid_tArray[3].D = 0.0001;
+	pid_tArray[4].P = 1;
+	pid_tArray[4].I = 0.0001;
+	pid_tArray[4].D = 0.0001;
+
 	//
 	// Enable Global Interrupt (INTM) and realtime interrupt (DBGM)
 	//
 	EINT;
 	ERTM;
-
-	currentLoopPI.P = 10;
-	currentLoopPI.I = 100;
-
-
 	for (;;){
 
 	}
@@ -155,9 +177,7 @@ __interrupt void adcD1ISR(void)
 	//
 	Interrupt_clearACKGroup(INTERRUPT_ACK_GROUP1);
 
-
-
-
+	ComputeUpdateDuty();
 
 }
 
@@ -170,10 +190,12 @@ void ComputeUpdateDuty(){
 		CalculPID(i);
 	}
 	//compute current loop pd
+#if CURRENT_OPEN_LOOP
 	for(i = 0; i < 10; i++){
 
 			CalculPD(i);
 		}
+#endif
 	// update pwm duty
 	UpdatePWMDuty();
 }
@@ -186,8 +208,8 @@ void ComputeUpdateDuty(){
 
 void CalculPID(uint16_t index){
 
-	double error, firstOrderDiff, propotion, differential;
-	uint16_t outcome;
+	float error, firstOrderDiff, propotion, differential;
+	int16_t outcome;
 	error = refPosition[index] - rotorPosition[index]; /* 平衡位置与设定点的差值 */
 	firstOrderDiff = rotorPosition[index] - forwardFirstPos[index]; /* 相邻两点之间的差值 */
 	forwardFirstPos[index] = rotorPosition[index];
@@ -229,15 +251,16 @@ void CalculPID(uint16_t index){
 }
 
 
-#define MAX_PWM_DUTY 1000
-#define MIN_PWM_DUTY 1000
-#define MAX_CURR_INTEGRAL 500
-#define MIN_CURR_INTEGRAL -500
+#define MAX_PWM_DUTY 4500
+#define MIN_PWM_DUTY 500
+#define MAX_CURR_INTEGRAL 30000
+#define MIN_CURR_INTEGRAL -30000
 void CalculPD(uint16_t index){
 
-	double error, firstOrderDiff, propotion;
+	float error, firstOrderDiff, propotion;
 	uint16_t outcome;
-	error = refCurrent[index] - coilCurrent[index]; /* 平衡位置与设定点的差值 */
+	error = refCurrent[index] - coilCurrent[index]; 	// 平衡位置与设定点的差值
+	firstOrderDiff = rotorPosition[index] - forwardFirstCurr[index]; // 相邻两点之间的差值
 	posIntegralArray[index] += currentLoopPI.I * firstOrderDiff * CONTROL_PERIOD;
 	currIntegralArray[index] = coilCurrent[index];
 	propotion = currentLoopPI.P * error;
@@ -247,7 +270,7 @@ void CalculPD(uint16_t index){
 	if (posIntegralArray[index] < MIN_CURR_INTEGRAL)
 		posIntegralArray[index] = MIN_CURR_INTEGRAL;
 
-	outcome = propotion + posIntegralArray[index];
+	outcome = propotion + posIntegralArray[index] + EPWM_TIMER_TBPRD/2;
 	if (outcome > MAX_PWM_DUTY)
 		outcome = MAX_PWM_DUTY;
 	if (outcome < MIN_PWM_DUTY)

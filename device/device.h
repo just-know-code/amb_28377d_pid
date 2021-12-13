@@ -400,28 +400,29 @@ void Variable_init();
 
 struct pid_t{
 
-	double P;
-	double I;
-	double D;
+	float P;
+	float I;
+	float D;
 };
 
 struct pi_t{
 
-	double P;
-	double I;
+	float P;
+	float I;
 };
 
-extern struct pi_t currentLoopPI;
-extern struct pid_t pid_tArray[5];
-extern double posIntegralArray[5];
-extern double currIntegralArray[10];
-extern uint32_t rotorPosition[5];
-extern uint16_t coilCurrent[10];
-extern uint16_t pwmDuty[10];
-extern uint16_t forwardFirstPos[5];
-extern uint16_t refCurrent[10];
-extern uint16_t refPosition[5];
-extern uint16_t coilBiasCurrent[5];
+extern struct pi_t currentLoopPI;		//do not initialize; configure
+extern struct pid_t pid_tArray[5];  	//do not initialize; configure
+extern float posIntegralArray[5];		//need initialize to 0
+extern float currIntegralArray[10];    //need initialize to 0
+extern uint32_t rotorPosition[5];		//need initialize to 0
+extern uint16_t coilCurrent[10];		//need initialize to 0
+extern uint16_t pwmDuty[10];			//need initialize to 2500
+extern uint16_t forwardFirstPos[5];		//need initialize to 0
+extern uint16_t forwardFirstCurr[10];	//need initialize to 0
+extern uint16_t refPosition[5];			//need configure
+extern uint16_t refCurrent[10];			//need initialize to 3750
+extern uint16_t coilBiasCurrent[5];		//do not initialize; configure
 
 #endif
 

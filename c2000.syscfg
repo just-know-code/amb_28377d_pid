@@ -313,8 +313,10 @@ i2c1.i2c.$assign           = "I2CA";
 i2c1.i2c.sdaPin.$assign    = "ball.67";
 i2c1.i2c.sclPin.$assign    = "ball.69";
 
-sci1.$name       = "mySCI0";
-sci1.sci.$assign = "SCIA";
+sci1.$name                 = "mySCI0";
+sci1.sci.$assign           = "SCIA";
+sci1.sci.scirxdPin.$assign = "ball.110";
+sci1.sci.scitxdPin.$assign = "ball.111";
 
 sci2.$name                 = "mySCI1";
 sci2.sci.$assign           = "SCIB";
@@ -401,5 +403,3 @@ emif11.emif1.em1d12Pin.$suggestSolution   = "ball.139";
 emif11.emif1.em1d13Pin.$suggestSolution   = "ball.136";
 emif11.emif1.em1d14Pin.$suggestSolution   = "ball.135";
 emif11.emif1.em1d15Pin.$suggestSolution   = "ball.134";
-sci1.sci.scirxdPin.$suggestSolution       = "ball.64";
-sci1.sci.scitxdPin.$suggestSolution       = "ball.111";

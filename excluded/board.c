@@ -32,7 +32,7 @@
  */
 
 #include "board.h"
-#define EPWM_TIMER_TBPRD    5000
+
 
 void Board_init()
 {
@@ -221,6 +221,7 @@ void PinMux_init()
 	GPIO_setAnalogMode(43, GPIO_ANALOG_ENABLED);
 
 }
+
 
 void ADC_init(){
 	//myADC0 initialization
@@ -590,16 +591,17 @@ void ADC_init(){
 	//		Interrupt Trigger: ADC_INT_SOC_TRIGGER_NONE
 	ADC_setupSOC(myADC3_BASE, ADC_SOC_NUMBER13, ADC_TRIGGER_EPWM6_SOCA, ADC_CH_ADCIN15, 20U);
 	ADC_setInterruptSOCTrigger(myADC3_BASE, ADC_SOC_NUMBER13, ADC_INT_SOC_TRIGGER_NONE);
-	// ADC Interrupt 4 Configuration
+	// ADC Interrupt 1 Configuration
 	// 		SOC/EOC number	: 13
 	// 		Interrupt Source: enabled
-	//		Continuous Mode	: enabled
-	ADC_setInterruptSource(myADC3_BASE, ADC_INT_NUMBER4, ADC_SOC_NUMBER13);
-	ADC_enableInterrupt(myADC3_BASE, ADC_INT_NUMBER4);
-	ADC_clearInterruptStatus(myADC3_BASE, ADC_INT_NUMBER4);
-	ADC_enableContinuousMode(myADC3_BASE, ADC_INT_NUMBER4);
+	// 		Continuous Mode	: disabled
+	ADC_setInterruptSource(myADC3_BASE, ADC_INT_NUMBER1, ADC_SOC_NUMBER13);
+	ADC_enableInterrupt(myADC3_BASE, ADC_INT_NUMBER1);
+	ADC_clearInterruptStatus(myADC3_BASE, ADC_INT_NUMBER1);
+	ADC_disableContinuousMode(myADC3_BASE, ADC_INT_NUMBER1);
 
 }
+
 void CAN_init(){
 
 	//myCAN0 initialization
@@ -700,7 +702,7 @@ static void initEPWM(uint32_t base)
                                 EPWM_TIMER_TBPRD/2);
     EPWM_setCounterCompareValue(base,
                                 EPWM_COUNTER_COMPARE_B,
-                                EPWM_TIMER_TBPRD/4);
+                                EPWM_TIMER_TBPRD/2);
 
     //
     // Set up counter mode
@@ -1007,3 +1009,4 @@ void USB_init(){
 	
 	//myUSB0 initialization 
 }
+

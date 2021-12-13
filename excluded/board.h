@@ -34,6 +34,7 @@
 #ifndef BOARD_H
 #define BOARD_H
 
+#define EPWM_TIMER_TBPRD 5000
 //
 // Included Files
 //
@@ -105,7 +106,7 @@
 #define GPIO_PIN_EPWM8B 15
 #define GPIO_PIN_SDAA 32
 #define GPIO_PIN_SCLA 33
-#define GPIO_PIN_SCIRXDA 28
+#define GPIO_PIN_SCIRXDA 64
 #define GPIO_PIN_SCITXDA 65
 #define GPIO_PIN_SCIRXDB 55
 #define GPIO_PIN_SCITXDB 54

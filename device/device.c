@@ -57,12 +57,13 @@ using std::memcpy;
 
 struct pi_t currentLoopPI;
 struct pid_t pid_tArray[5];
-double posIntegralArray[5];
-double currIntegralArray[10];
+float posIntegralArray[5];
+float currIntegralArray[10];
 uint32_t rotorPosition[5];
 uint16_t coilCurrent[10];
 uint16_t pwmDuty[10];
 uint16_t forwardFirstPos[5];
+uint16_t forwardFirstCurr[10];
 uint16_t refCurrent[10];
 uint16_t refPosition[5];
 uint16_t coilBiasCurrent[5];
@@ -692,9 +693,20 @@ void __error__(char *filename, uint32_t line)
 //*****************************************************************************
 void Variable_init(){
 
-	memset(rotorPosition, 0, sizeof(rotorPosition));
-	memset(coilCurrent, 0, sizeof(coilCurrent));
-	memset(posIntegralArray, 0, sizeof(posIntegralArray));
+	uint16_t i;
+
+	for(i = 0; i < 5; i++){
+		rotorPosition[i] = 0;
+		posIntegralArray[i] = 0;
+		forwardFirstPos[i] = 0;
+	}
+	for(i = 0; i < 10; i++){
+		currIntegralArray[i] = 0;
+		coilCurrent[i] = 0;
+		pwmDuty[i] = 0;
+		refCurrent[i] = 3750;
+		forwardFirstCurr[i] = 0;
+	}
 
 }
 
