@@ -46,7 +46,7 @@ void Board_init()
 	GPIO_init();
 	I2C_init();
 	SCI_init();
-	SPI_init();
+//	SPI_init();
 	USB_init();
 
 	EDIS;
@@ -710,7 +710,7 @@ static void initEPWM(uint32_t base)
     EPWM_setTimeBaseCounterMode(base, EPWM_COUNTER_MODE_UP);
     EPWM_disablePhaseShiftLoad(base);
     EPWM_setClockPrescaler(base,
-                           EPWM_CLOCK_DIVIDER_8,
+                           EPWM_CLOCK_DIVIDER_1,
                            EPWM_HSCLOCK_DIVIDER_1);
 
     //
@@ -759,35 +759,35 @@ void EPWM_init(){
     initEPWM(myEPWM0_BASE);
 
     //
-    // Initialize PWM2 with phase shift of 300 TBCLKs
+    // Initialize PWM2
     //
     initEPWM(myEPWM1_BASE);
-    EPWM_selectPeriodLoadEvent(myEPWM1_BASE, EPWM_SHADOW_LOAD_MODE_SYNC);
+    EPWM_selectPeriodLoadEvent(myEPWM1_BASE, EPWM_SHADOW_LOAD_MODE_COUNTER_ZERO);
 
 
     //
-    // Initialize PWM3 with phase shift of 600 TBCLKs
+    // Initialize PWM3
     //
     initEPWM(myEPWM2_BASE);
-    EPWM_selectPeriodLoadEvent(myEPWM3_BASE, EPWM_SHADOW_LOAD_MODE_SYNC);
+    EPWM_selectPeriodLoadEvent(myEPWM3_BASE, EPWM_SHADOW_LOAD_MODE_COUNTER_ZERO);
 
     //
-    // Initialize PWM4 with phase shift of 900 TBCLKs
+    // Initialize PWM4
     //
     initEPWM(myEPWM3_BASE);
-    EPWM_selectPeriodLoadEvent(myEPWM4_BASE, EPWM_SHADOW_LOAD_MODE_SYNC);
+    EPWM_selectPeriodLoadEvent(myEPWM4_BASE, EPWM_SHADOW_LOAD_MODE_COUNTER_ZERO);
 
     //
-    // Initialize PWM5 with phase shift of 900 TBCLKs
+    // Initialize PWM5
     //
     initEPWM(myEPWM4_BASE);
-    EPWM_selectPeriodLoadEvent(myEPWM4_BASE, EPWM_SHADOW_LOAD_MODE_SYNC);
+    EPWM_selectPeriodLoadEvent(myEPWM4_BASE, EPWM_SHADOW_LOAD_MODE_COUNTER_ZERO);
 
     //
-    // Initialize PWM6 with phase shift of 900 TBCLKs
+    // Initialize PWM6
     //
-    initEPWM(myEPWM4_BASE);
-    EPWM_selectPeriodLoadEvent(myEPWM6_BASE, EPWM_SHADOW_LOAD_MODE_SYNC);
+    initEPWM(myEPWM5_BASE);
+    EPWM_selectPeriodLoadEvent(myEPWM5_BASE, EPWM_SHADOW_LOAD_MODE_COUNTER_ZERO);
 
     //
     // Disable SOCA
@@ -797,30 +797,11 @@ void EPWM_init(){
     //
     // Configure the SOC to occur on the first up-count event
     //
-    EPWM_setADCTriggerSource(EPWM1_BASE, EPWM_SOC_A, EPWM_SOC_TBCTR_U_CMPA);
-    EPWM_setADCTriggerEventPrescale(EPWM1_BASE, EPWM_SOC_A, 1);
+    EPWM_setADCTriggerSource(EPWM6_BASE, EPWM_SOC_A, EPWM_SOC_TBCTR_U_CMPA);
+    EPWM_setADCTriggerEventPrescale(EPWM6_BASE, EPWM_SOC_A, 1);
 
-
-    //
-    // ePWM1 SYNCO is generated on CTR=0
-    //
-    EPWM_setSyncOutPulseMode(EPWM1_BASE, EPWM_SYNC_OUT_PULSE_ON_COUNTER_ZERO);
-
-    //
-    // ePWM2 uses the ePWM 1 SYNCO as its SYNCIN.
-    // ePWM2 SYNCO is generated from its SYNCIN, which is ePWM1 SYNCO
-    //
-    EPWM_setSyncOutPulseMode(myEPWM2_BASE, EPWM_SYNC_OUT_PULSE_ON_EPWMxSYNCIN);
-
-    //
-    // ePWM4 uses the ePWM 1 SYNCO as its SYNCIN.
-    //
-    SysCtl_setSyncInputConfig(SYSCTL_SYNC_IN_EPWM4, SYSCTL_SYNC_IN_SRC_EPWM1SYNCOUT);
-
-    //
-    // Enable sync and clock to PWM
-    //
     SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_TBCLKSYNC);
+
 
 }
 void GPIO_init(){

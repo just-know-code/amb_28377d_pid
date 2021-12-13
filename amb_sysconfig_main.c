@@ -94,8 +94,6 @@ void main(void)
 	//
 	Interrupt_enable(INT_ADCD1);
 
-
-
 	Variable_init();
 	currentLoopPI.P = 10;
 	currentLoopPI.I = 100;
@@ -126,6 +124,12 @@ void main(void)
 	//
 	EINT;
 	ERTM;
+
+    //
+    // Enable SOCA
+    //
+    EPWM_enableADCTrigger(EPWM6_BASE, EPWM_SOC_A);
+
 	for (;;){
 
 	}
