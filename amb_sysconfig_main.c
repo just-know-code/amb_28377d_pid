@@ -145,23 +145,58 @@ __interrupt void adcD1ISR(void)
 	//
 	// Get rotor position
 	//
-	uint16_t index = 0;
-	for(; index < 3; index++)
-		rotorPosition[index] = (ADC_readResult(ADCARESULT_BASE, index) +
-				ADC_readResult(ADCARESULT_BASE, index+3))/2;
-	for(; index < 5; index++)
-		rotorPosition[index] = (ADC_readResult(ADCBRESULT_BASE, index) +
-				ADC_readResult(ADCBRESULT_BASE, index+2))/2;
+
+	//GET ADC A
+	rawPosData_1[0] = ADC_readResult(ADCARESULT_BASE, ADC_SOC_NUMBER0);
+	rawPosData_1[1] = ADC_readResult(ADCARESULT_BASE, ADC_SOC_NUMBER1);
+	rawPosData_1[2] = ADC_readResult(ADCARESULT_BASE, ADC_SOC_NUMBER2);
+
+	rawPosData_2[0] = ADC_readResult(ADCARESULT_BASE, ADC_SOC_NUMBER3);
+	rawPosData_2[1] = ADC_readResult(ADCARESULT_BASE, ADC_SOC_NUMBER4);
+	rawPosData_2[2] = ADC_readResult(ADCARESULT_BASE, ADC_SOC_NUMBER5);
+
+	//GET ADC B
+	rawPosData_1[3] = ADC_readResult(ADCBRESULT_BASE, ADC_SOC_NUMBER0);
+	rawPosData_1[4] = ADC_readResult(ADCBRESULT_BASE, ADC_SOC_NUMBER1);
+	rawPosData_2[3] = ADC_readResult(ADCBRESULT_BASE, ADC_SOC_NUMBER2);
+	rawPosData_2[4] = ADC_readResult(ADCBRESULT_BASE, ADC_SOC_NUMBER3);
+
 	//
 	// Get coil current
 	//
-	index = 0;
-	for(; index < 3; index++)
-		coilCurrent[index] = (ADC_readResult(ADCCRESULT_BASE, index) +
-				ADC_readResult(ADCCRESULT_BASE, index+3))/2;
-	for(; index < 10; index++)
-		coilCurrent[index] = (ADC_readResult(ADCDRESULT_BASE, index) +
-				ADC_readResult(ADCDRESULT_BASE, index+7))/2;
+	//GET ADC D
+	rawCurrData_1[0] = ADC_readResult(ADCCRESULT_BASE, ADC_SOC_NUMBER0);
+	rawCurrData_1[1] = ADC_readResult(ADCCRESULT_BASE, ADC_SOC_NUMBER1);
+	rawCurrData_1[2] = ADC_readResult(ADCCRESULT_BASE, ADC_SOC_NUMBER2);
+
+	rawCurrData_2[0] = ADC_readResult(ADCCRESULT_BASE, ADC_SOC_NUMBER3);
+	rawCurrData_2[1] = ADC_readResult(ADCCRESULT_BASE, ADC_SOC_NUMBER4);
+	rawCurrData_2[2] = ADC_readResult(ADCCRESULT_BASE, ADC_SOC_NUMBER5);
+
+	//GET ADC D
+	rawCurrData_1[3] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER3);
+	rawCurrData_1[4] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER4);
+	rawCurrData_1[5] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER5);
+	rawCurrData_1[6] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER6);
+	rawCurrData_1[7] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER7);
+	rawCurrData_1[8] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER8);
+	rawCurrData_1[9] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER9);
+
+	rawCurrData_2[3] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER3);
+	rawCurrData_2[4] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER4);
+	rawCurrData_2[5] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER5);
+	rawCurrData_2[6] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER6);
+	rawCurrData_2[7] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER7);
+	rawCurrData_2[8] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER8);
+	rawCurrData_2[9] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER9);
+
+
+	uint16_t index;
+	for(index = 0; index < 3; index++)
+		rotorPosition[index] = (rawPosData_1[index] + rawPosData_2[index]) / 2;
+
+	for(index = 0; index < 3; index++)
+		coilCurrent[index] = (rawCurrData_1[index] + rawCurrData_2[index]) / 2;
 	//
 	// Clear the interrupt flag
 	//

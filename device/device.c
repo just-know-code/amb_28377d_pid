@@ -67,6 +67,10 @@ uint16_t forwardFirstCurr[10];
 uint16_t refCurrent[10];
 uint16_t refPosition[5];
 uint16_t coilBiasCurrent[5];
+uint16_t rawPosData_1[5];
+uint16_t rawPosData_2[5];
+uint16_t rawCurrData_1[10];
+uint16_t rawCurrData_2[10];
 //*****************************************************************************
 //
 // Function to initialize the device. Primarily initializes system control to a
