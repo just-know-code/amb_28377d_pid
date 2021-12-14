@@ -413,6 +413,11 @@ struct pi_t{
 	float I;
 };
 
+#define EPWM_TIMER_TBPRD 5000
+
+extern __interrupt void INT_myADC3_1_ISR(void);
+extern void ComputeUpdateDuty();
+
 extern struct pi_t currentLoopPI;		//do not initialize; configure
 extern struct pid_t pid_tArray[5];  	//do not initialize; configure
 extern float posIntegralArray[5];		//need initialize to 0
@@ -429,7 +434,9 @@ extern uint16_t rawPosData_1[5];
 extern uint16_t rawPosData_2[5];
 extern uint16_t rawCurrData_1[10];
 extern uint16_t rawCurrData_2[10];
-
+extern void CalculPID(uint16_t index);
+extern void CalculPD(uint16_t index);
+extern void UpdatePWMDuty();
 #endif
 
 //

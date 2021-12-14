@@ -138,8 +138,6 @@ adc2.soc3Channel                    = "ADC_CH_ADCIN2_ADCIN3";
 
 adc3.$name               = "myADC2";
 adc3.adcBase             = "ADCC_BASE";
-adc3.soc1Channel         = "ADC_CH_ADCIN1";
-adc3.soc2Channel         = "ADC_CH_ADCIN2";
 adc3.interruptPulseMode  = "ADC_PULSE_END_OF_CONV";
 adc3.interrupt3SOCSource = "ADC_SOC_NUMBER2";
 adc3.soc0Trigger         = "ADC_TRIGGER_EPWM6_SOCA";
@@ -151,12 +149,16 @@ adc3.soc2Trigger         = "ADC_TRIGGER_EPWM6_SOCA";
 adc3.enabledSOCs         = ["ADC_SOC_NUMBER0","ADC_SOC_NUMBER1","ADC_SOC_NUMBER2","ADC_SOC_NUMBER3","ADC_SOC_NUMBER4","ADC_SOC_NUMBER5"];
 adc3.soc3Trigger         = "ADC_TRIGGER_EPWM6_SOCA";
 adc3.soc3SampleWindow    = 20;
-adc3.soc4Channel         = "ADC_CH_ADCIN1";
 adc3.soc4Trigger         = "ADC_TRIGGER_EPWM6_SOCA";
 adc3.soc4SampleWindow    = 20;
-adc3.soc5Channel         = "ADC_CH_ADCIN2";
 adc3.soc5Trigger         = "ADC_TRIGGER_EPWM6_SOCA";
 adc3.soc5SampleWindow    = 20;
+adc3.soc0Channel         = "ADC_CH_ADCIN2";
+adc3.soc1Channel         = "ADC_CH_ADCIN3";
+adc3.soc2Channel         = "ADC_CH_ADCIN4";
+adc3.soc3Channel         = "ADC_CH_ADCIN2";
+adc3.soc4Channel         = "ADC_CH_ADCIN3";
+adc3.soc5Channel         = "ADC_CH_ADCIN4";
 
 adc4.$name                          = "myADC3";
 adc4.adcBase                        = "ADCD_BASE";
@@ -208,15 +210,19 @@ adc4.interrupt4SOCSource            = "ADC_SOC_NUMBER13";
 adc4.enabledInts                    = ["ADC_INT_NUMBER1"];
 adc4.interrupt1SOCSource            = "ADC_SOC_NUMBER13";
 adc4.enableInterrupt1               = true;
+adc4.registerInterrupts             = ["1"];
+adc4.adcInt1.enableInterrupt        = true;
 
 can1.$name                = "myCAN0";
 can1.can.$assign          = "CANA";
 can1.can.canrxPin.$assign = "ball.108";
 can1.can.cantxPin.$assign = "ball.109";
 
-emif11.$name            = "myEMIF10";
-emif11.useCase          = "CUSTOM";
-emif11.useInterfacePins = ["EM1A0","EM1A1","EM1A10","EM1A11","EM1A12","EM1A13","EM1A14","EM1A15","EM1A16","EM1A17","EM1A18","EM1A2","EM1A3","EM1A4","EM1A5","EM1A6","EM1A7","EM1A8","EM1A9","EM1BA0","EM1BA1","EM1CLK","EM1CS2n","EM1CS3n","EM1D0","EM1D1","EM1D10","EM1D11","EM1D12","EM1D13","EM1D14","EM1D15","EM1D2","EM1D3","EM1D4","EM1D5","EM1D6","EM1D7","EM1D8","EM1D9","EM1OEn","EM1SDCKE","EM1WAIT","EM1WEn"];
+emif11.$name                    = "myEMIF10";
+emif11.useCase                  = "CUSTOM";
+emif11.useInterfacePins         = ["EM1A0","EM1A1","EM1A10","EM1A11","EM1A12","EM1A13","EM1A14","EM1A15","EM1A16","EM1A17","EM1A18","EM1A2","EM1A3","EM1A4","EM1A5","EM1A6","EM1A7","EM1A8","EM1A9","EM1BA0","EM1BA1","EM1CLK","EM1CS2n","EM1CS3n","EM1D0","EM1D1","EM1D10","EM1D11","EM1D12","EM1D13","EM1D14","EM1D15","EM1D2","EM1D3","EM1D4","EM1D5","EM1D6","EM1D7","EM1D8","EM1D9","EM1OEn","EM1SDCKE","EM1WAIT","EM1WEn"];
+emif11.emif1.$assign            = "EMIF1";
+emif11.emif1.em1cs2nPin.$assign = "ball.70";
 
 epwm1.$name                 = "myEPWM0";
 epwm1.epwm.$assign          = "EPWM1";
@@ -358,8 +364,6 @@ usb1.usb.usbdpPin.$assign = "ball.131";
  * version of the tool will not impact the pinmux you originally saw.  These lines can be completely deleted in order to
  * re-solve from scratch.
  */
-emif11.emif1.$suggestSolution             = "EMIF1";
-emif11.emif1.em1cs2nPin.$suggestSolution  = "ball.70";
 emif11.emif1.em1cs3nPin.$suggestSolution  = "ball.71";
 emif11.emif1.em1sdckePin.$suggestSolution = "ball.65";
 emif11.emif1.em1clkPin.$suggestSolution   = "ball.63";

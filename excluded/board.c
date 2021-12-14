@@ -40,14 +40,15 @@ void Board_init()
 
 	PinMux_init();
 	ADC_init();
-	CAN_init();
+//	CAN_init();
 	EMIF1_init();
 	EPWM_init();
 	GPIO_init();
 	I2C_init();
 	SCI_init();
 //	SPI_init();
-	USB_init();
+//	USB_init();
+	INTERRUPT_init();
 
 	EDIS;
 }
@@ -377,55 +378,55 @@ void ADC_init(){
 	// Configures a start-of-conversion (SOC) in the ADC and its interrupt SOC trigger.
 	// 	  	SOC number		: 0
 	//	  	Trigger			: ADC_TRIGGER_EPWM6_SOCA
-	//	  	Channel			: ADC_CH_ADCIN0
+	//	  	Channel			: ADC_CH_ADCIN2
 	//	 	Sample Window	: 20 SYSCLK cycles
 	//		Interrupt Trigger: ADC_INT_SOC_TRIGGER_NONE
-	ADC_setupSOC(myADC2_BASE, ADC_SOC_NUMBER0, ADC_TRIGGER_EPWM6_SOCA, ADC_CH_ADCIN0, 20U);
+	ADC_setupSOC(myADC2_BASE, ADC_SOC_NUMBER0, ADC_TRIGGER_EPWM6_SOCA, ADC_CH_ADCIN2, 20U);
 	ADC_setInterruptSOCTrigger(myADC2_BASE, ADC_SOC_NUMBER0, ADC_INT_SOC_TRIGGER_NONE);
 	// Start of Conversion 1 Configuration
 	// Configures a start-of-conversion (SOC) in the ADC and its interrupt SOC trigger.
 	// 	  	SOC number		: 1
 	//	  	Trigger			: ADC_TRIGGER_EPWM6_SOCA
-	//	  	Channel			: ADC_CH_ADCIN1
+	//	  	Channel			: ADC_CH_ADCIN3
 	//	 	Sample Window	: 20 SYSCLK cycles
 	//		Interrupt Trigger: ADC_INT_SOC_TRIGGER_NONE
-	ADC_setupSOC(myADC2_BASE, ADC_SOC_NUMBER1, ADC_TRIGGER_EPWM6_SOCA, ADC_CH_ADCIN1, 20U);
+	ADC_setupSOC(myADC2_BASE, ADC_SOC_NUMBER1, ADC_TRIGGER_EPWM6_SOCA, ADC_CH_ADCIN3, 20U);
 	ADC_setInterruptSOCTrigger(myADC2_BASE, ADC_SOC_NUMBER1, ADC_INT_SOC_TRIGGER_NONE);
 	// Start of Conversion 2 Configuration
 	// Configures a start-of-conversion (SOC) in the ADC and its interrupt SOC trigger.
 	// 	  	SOC number		: 2
 	//	  	Trigger			: ADC_TRIGGER_EPWM6_SOCA
-	//	  	Channel			: ADC_CH_ADCIN2
+	//	  	Channel			: ADC_CH_ADCIN4
 	//	 	Sample Window	: 20 SYSCLK cycles
 	//		Interrupt Trigger: ADC_INT_SOC_TRIGGER_NONE
-	ADC_setupSOC(myADC2_BASE, ADC_SOC_NUMBER2, ADC_TRIGGER_EPWM6_SOCA, ADC_CH_ADCIN2, 20U);
+	ADC_setupSOC(myADC2_BASE, ADC_SOC_NUMBER2, ADC_TRIGGER_EPWM6_SOCA, ADC_CH_ADCIN4, 20U);
 	ADC_setInterruptSOCTrigger(myADC2_BASE, ADC_SOC_NUMBER2, ADC_INT_SOC_TRIGGER_NONE);
 	// Start of Conversion 3 Configuration
 	// Configures a start-of-conversion (SOC) in the ADC and its interrupt SOC trigger.
 	// 	  	SOC number		: 3
 	//	  	Trigger			: ADC_TRIGGER_EPWM6_SOCA
-	//	  	Channel			: ADC_CH_ADCIN0
+	//	  	Channel			: ADC_CH_ADCIN2
 	//	 	Sample Window	: 20 SYSCLK cycles
 	//		Interrupt Trigger: ADC_INT_SOC_TRIGGER_NONE
-	ADC_setupSOC(myADC2_BASE, ADC_SOC_NUMBER3, ADC_TRIGGER_EPWM6_SOCA, ADC_CH_ADCIN0, 20U);
+	ADC_setupSOC(myADC2_BASE, ADC_SOC_NUMBER3, ADC_TRIGGER_EPWM6_SOCA, ADC_CH_ADCIN2, 20U);
 	ADC_setInterruptSOCTrigger(myADC2_BASE, ADC_SOC_NUMBER3, ADC_INT_SOC_TRIGGER_NONE);
 	// Start of Conversion 4 Configuration
 	// Configures a start-of-conversion (SOC) in the ADC and its interrupt SOC trigger.
 	// 	  	SOC number		: 4
 	//	  	Trigger			: ADC_TRIGGER_EPWM6_SOCA
-	//	  	Channel			: ADC_CH_ADCIN1
+	//	  	Channel			: ADC_CH_ADCIN3
 	//	 	Sample Window	: 20 SYSCLK cycles
 	//		Interrupt Trigger: ADC_INT_SOC_TRIGGER_NONE
-	ADC_setupSOC(myADC2_BASE, ADC_SOC_NUMBER4, ADC_TRIGGER_EPWM6_SOCA, ADC_CH_ADCIN1, 20U);
+	ADC_setupSOC(myADC2_BASE, ADC_SOC_NUMBER4, ADC_TRIGGER_EPWM6_SOCA, ADC_CH_ADCIN3, 20U);
 	ADC_setInterruptSOCTrigger(myADC2_BASE, ADC_SOC_NUMBER4, ADC_INT_SOC_TRIGGER_NONE);
 	// Start of Conversion 5 Configuration
 	// Configures a start-of-conversion (SOC) in the ADC and its interrupt SOC trigger.
 	// 	  	SOC number		: 5
 	//	  	Trigger			: ADC_TRIGGER_EPWM6_SOCA
-	//	  	Channel			: ADC_CH_ADCIN2
+	//	  	Channel			: ADC_CH_ADCIN4
 	//	 	Sample Window	: 20 SYSCLK cycles
 	//		Interrupt Trigger: ADC_INT_SOC_TRIGGER_NONE
-	ADC_setupSOC(myADC2_BASE, ADC_SOC_NUMBER5, ADC_TRIGGER_EPWM6_SOCA, ADC_CH_ADCIN2, 20U);
+	ADC_setupSOC(myADC2_BASE, ADC_SOC_NUMBER5, ADC_TRIGGER_EPWM6_SOCA, ADC_CH_ADCIN4, 20U);
 	ADC_setInterruptSOCTrigger(myADC2_BASE, ADC_SOC_NUMBER5, ADC_INT_SOC_TRIGGER_NONE);
 
 	//myADC3 initialization
@@ -898,6 +899,13 @@ void I2C_init(){
 	I2C_setEmulationMode(myI2C0_BASE, I2C_EMULATION_STOP_SCL_LOW);
 	I2C_enableModule(myI2C0_BASE);
 
+}
+
+void INTERRUPT_init(){
+
+	// Interrupt Setings for INT_myADC3_1
+	Interrupt_register(INT_myADC3_1, &INT_myADC3_1_ISR);
+	Interrupt_enable(INT_myADC3_1);
 }
 void SCI_init(){
 	

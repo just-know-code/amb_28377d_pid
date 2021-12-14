@@ -34,7 +34,6 @@
 #ifndef BOARD_H
 #define BOARD_H
 
-#define EPWM_TIMER_TBPRD 5000
 //
 // Included Files
 //
@@ -167,6 +166,13 @@
 #define myI2C0_SLAVE_ADDRESS 0
 #define myI2C0_OWN_SLAVE_ADDRESS 0
 
+
+// Interrupt Setings for INT_myADC3_1
+#define INT_myADC3_1 INT_ADCD1
+#define INT_myADC3_1_INTERRUPT_ACK_GROUP INTERRUPT_ACK_GROUP1
+extern __interrupt void INT_myADC3_1_ISR(void);
+
+
 #define mySCI0_BASE SCIA_BASE
 #define mySCI0_BAUDRATE 115200
 #define mySCI0_CONFIG_WLEN SCI_CONFIG_WLEN_8
@@ -197,6 +203,7 @@ void	EMIF1_init();
 void	EPWM_init();
 void	GPIO_init();
 void	I2C_init();
+void	INTERRUPT_init();
 void	SCI_init();
 void	SPI_init();
 void	USB_init();
