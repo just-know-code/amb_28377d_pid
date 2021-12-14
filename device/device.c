@@ -714,7 +714,7 @@ void Variable_init(){
 
 }
 
-__interrupt void INT_myADC3_1_ISR(void)
+__interrupt void INT_ADCA_1_ISR(void)
 {
 	//
 	// Get rotor position
@@ -725,18 +725,18 @@ __interrupt void INT_myADC3_1_ISR(void)
 	rawPosData_1[1] = ADC_readResult(ADCARESULT_BASE, ADC_SOC_NUMBER1);
 	rawPosData_1[2] = ADC_readResult(ADCARESULT_BASE, ADC_SOC_NUMBER2);
 
-	rawPosData_2[0] = ADC_readResult(ADCARESULT_BASE, ADC_SOC_NUMBER3);
-	rawPosData_2[1] = ADC_readResult(ADCARESULT_BASE, ADC_SOC_NUMBER4);
-	rawPosData_2[2] = ADC_readResult(ADCARESULT_BASE, ADC_SOC_NUMBER5);
+//	rawPosData_2[0] = ADC_readResult(ADCARESULT_BASE, ADC_SOC_NUMBER3);
+//	rawPosData_2[1] = ADC_readResult(ADCARESULT_BASE, ADC_SOC_NUMBER4);
+//	rawPosData_2[2] = ADC_readResult(ADCARESULT_BASE, ADC_SOC_NUMBER5);
 
 
 	//GET ADC B
 	rawPosData_1[3] = ADC_readResult(ADCBRESULT_BASE, ADC_SOC_NUMBER0);
 	rawPosData_1[4] = ADC_readResult(ADCBRESULT_BASE, ADC_SOC_NUMBER1);
 
-	rawPosData_2[3] = ADC_readResult(ADCBRESULT_BASE, ADC_SOC_NUMBER2);
-	rawPosData_2[4] = ADC_readResult(ADCBRESULT_BASE, ADC_SOC_NUMBER3);
-
+//	rawPosData_2[3] = ADC_readResult(ADCBRESULT_BASE, ADC_SOC_NUMBER2);
+//	rawPosData_2[4] = ADC_readResult(ADCBRESULT_BASE, ADC_SOC_NUMBER3);
+//
 
 
 
@@ -748,9 +748,9 @@ __interrupt void INT_myADC3_1_ISR(void)
 	rawCurrData_1[1] = ADC_readResult(ADCCRESULT_BASE, ADC_SOC_NUMBER1);
 	rawCurrData_1[2] = ADC_readResult(ADCCRESULT_BASE, ADC_SOC_NUMBER2);
 
-	rawCurrData_2[0] = ADC_readResult(ADCCRESULT_BASE, ADC_SOC_NUMBER3);
-	rawCurrData_2[1] = ADC_readResult(ADCCRESULT_BASE, ADC_SOC_NUMBER4);
-	rawCurrData_2[2] = ADC_readResult(ADCCRESULT_BASE, ADC_SOC_NUMBER5);
+//	rawCurrData_2[0] = ADC_readResult(ADCCRESULT_BASE, ADC_SOC_NUMBER3);
+//	rawCurrData_2[1] = ADC_readResult(ADCCRESULT_BASE, ADC_SOC_NUMBER4);
+//	rawCurrData_2[2] = ADC_readResult(ADCCRESULT_BASE, ADC_SOC_NUMBER5);
 
 
 	//GET ADC D
@@ -762,33 +762,33 @@ __interrupt void INT_myADC3_1_ISR(void)
 	rawCurrData_1[8] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER5);
 	rawCurrData_1[9] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER6);
 
-	rawCurrData_2[3] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER7);
-	rawCurrData_2[4] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER8);
-	rawCurrData_2[5] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER9);
-	rawCurrData_2[6] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER10);
-	rawCurrData_2[7] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER11);
-	rawCurrData_2[8] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER12);
-	rawCurrData_2[9] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER13);
+//	rawCurrData_2[3] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER7);
+//	rawCurrData_2[4] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER8);
+//	rawCurrData_2[5] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER9);
+//	rawCurrData_2[6] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER10);
+//	rawCurrData_2[7] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER11);
+//	rawCurrData_2[8] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER12);
+//	rawCurrData_2[9] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER13);
 
-
-	uint16_t index;
-	for(index = 0; index < 3; index++)
-		rotorPosition[index] = (rawPosData_1[index] + rawPosData_2[index]) / 2;
-
-	for(index = 0; index < 3; index++)
-		coilCurrent[index] = (rawCurrData_1[index] + rawCurrData_2[index]) / 2;
+//
+//	uint16_t index;
+//	for(index = 0; index < 3; index++)
+//		rotorPosition[index] = (rawPosData_1[index] + rawPosData_2[index]) / 2;
+//
+//	for(index = 0; index < 3; index++)
+//		coilCurrent[index] = (rawCurrData_1[index] + rawCurrData_2[index]) / 2;
 	//
 	// Clear the interrupt flag
 	//
-	ADC_clearInterruptStatus(ADCD_BASE, ADC_INT_NUMBER1);
+	ADC_clearInterruptStatus(ADCA_BASE, ADC_INT_NUMBER1);
 
 	//
 	// Check if overflow has occurred
 	//
-	if(true == ADC_getInterruptOverflowStatus(ADCD_BASE, ADC_INT_NUMBER1))
+	if(true == ADC_getInterruptOverflowStatus(ADCA_BASE, ADC_INT_NUMBER1))
 	{
-		ADC_clearInterruptOverflowStatus(ADCD_BASE, ADC_INT_NUMBER1);
-		ADC_clearInterruptStatus(ADCD_BASE, ADC_INT_NUMBER1);
+		ADC_clearInterruptOverflowStatus(ADCA_BASE, ADC_INT_NUMBER1);
+		ADC_clearInterruptStatus(ADCA_BASE, ADC_INT_NUMBER1);
 	}
 
 	//

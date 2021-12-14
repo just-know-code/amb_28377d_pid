@@ -119,7 +119,7 @@ void main(void)
     //
     // Enable SOCA
     //
-    EPWM_enableADCTrigger(EPWM6_BASE, EPWM_SOC_A);
+    EPWM_enableADCTrigger(EPWM1_BASE, EPWM_SOC_A);
 
 	for (;;){
 

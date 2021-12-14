@@ -168,9 +168,7 @@
 
 
 // Interrupt Setings for INT_myADC3_1
-#define INT_myADC3_1 INT_ADCD1
-#define INT_myADC3_1_INTERRUPT_ACK_GROUP INTERRUPT_ACK_GROUP1
-extern __interrupt void INT_myADC3_1_ISR(void);
+extern __interrupt void INT_ADCA_1_ISR(void);
 
 
 #define mySCI0_BASE SCIA_BASE
