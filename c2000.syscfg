@@ -96,12 +96,12 @@ adc1.soc0Channel          = "ADC_CH_ADCIN0_ADCIN1";
 adc1.soc1Channel          = "ADC_CH_ADCIN2_ADCIN3";
 adc1.soc2Channel          = "ADC_CH_ADCIN4_ADCIN5";
 adc1.soc8Channel          = "ADC_CH_ADCIN6_ADCIN7";
-adc1.enabledSOCs          = ["ADC_SOC_NUMBER0","ADC_SOC_NUMBER1","ADC_SOC_NUMBER2","ADC_SOC_NUMBER3","ADC_SOC_NUMBER4","ADC_SOC_NUMBER5","ADC_SOC_NUMBER6","ADC_SOC_NUMBER7"];
-adc1.soc3Channel          = "ADC_CH_ADCIN6_ADCIN7";
-adc1.soc4Channel          = "ADC_CH_ADCIN0_ADCIN1";
-adc1.soc5Channel          = "ADC_CH_ADCIN2_ADCIN3";
 adc1.soc6Channel          = "ADC_CH_ADCIN4_ADCIN5";
 adc1.soc7Channel          = "ADC_CH_ADCIN6_ADCIN7";
+adc1.soc3Channel          = "ADC_CH_ADCIN0_ADCIN1";
+adc1.soc4Channel          = "ADC_CH_ADCIN2_ADCIN3";
+adc1.soc5Channel          = "ADC_CH_ADCIN4_ADCIN5";
+adc1.enabledSOCs          = ["ADC_SOC_NUMBER0","ADC_SOC_NUMBER1","ADC_SOC_NUMBER2","ADC_SOC_NUMBER3","ADC_SOC_NUMBER4","ADC_SOC_NUMBER5"];
 
 adc2.$name                          = "myADC1";
 adc2.adcBase                        = "ADCB_BASE";

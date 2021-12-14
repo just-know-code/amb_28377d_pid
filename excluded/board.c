@@ -274,47 +274,29 @@ void ADC_init(){
 	// Configures a start-of-conversion (SOC) in the ADC and its interrupt SOC trigger.
 	// 	  	SOC number		: 3
 	//	  	Trigger			: ADC_TRIGGER_EPWM6_SOCA
-	//	  	Channel			: ADC_CH_ADCIN6_ADCIN7
+	//	  	Channel			: ADC_CH_ADCIN0_ADCIN1
 	//	 	Sample Window	: 20 SYSCLK cycles
 	//		Interrupt Trigger: ADC_INT_SOC_TRIGGER_NONE
-	ADC_setupSOC(myADC0_BASE, ADC_SOC_NUMBER3, ADC_TRIGGER_EPWM6_SOCA, ADC_CH_ADCIN6_ADCIN7, 20U);
+	ADC_setupSOC(myADC0_BASE, ADC_SOC_NUMBER3, ADC_TRIGGER_EPWM6_SOCA, ADC_CH_ADCIN0_ADCIN1, 20U);
 	ADC_setInterruptSOCTrigger(myADC0_BASE, ADC_SOC_NUMBER3, ADC_INT_SOC_TRIGGER_NONE);
 	// Start of Conversion 4 Configuration
 	// Configures a start-of-conversion (SOC) in the ADC and its interrupt SOC trigger.
 	// 	  	SOC number		: 4
 	//	  	Trigger			: ADC_TRIGGER_EPWM6_SOCA
-	//	  	Channel			: ADC_CH_ADCIN0_ADCIN1
+	//	  	Channel			: ADC_CH_ADCIN2_ADCIN3
 	//	 	Sample Window	: 20 SYSCLK cycles
 	//		Interrupt Trigger: ADC_INT_SOC_TRIGGER_ADCINT1
-	ADC_setupSOC(myADC0_BASE, ADC_SOC_NUMBER4, ADC_TRIGGER_EPWM6_SOCA, ADC_CH_ADCIN0_ADCIN1, 20U);
+	ADC_setupSOC(myADC0_BASE, ADC_SOC_NUMBER4, ADC_TRIGGER_EPWM6_SOCA, ADC_CH_ADCIN2_ADCIN3, 20U);
 	ADC_setInterruptSOCTrigger(myADC0_BASE, ADC_SOC_NUMBER4, ADC_INT_SOC_TRIGGER_ADCINT1);
 	// Start of Conversion 5 Configuration
 	// Configures a start-of-conversion (SOC) in the ADC and its interrupt SOC trigger.
 	// 	  	SOC number		: 5
 	//	  	Trigger			: ADC_TRIGGER_EPWM6_SOCA
-	//	  	Channel			: ADC_CH_ADCIN2_ADCIN3
-	//	 	Sample Window	: 20 SYSCLK cycles
-	//		Interrupt Trigger: ADC_INT_SOC_TRIGGER_NONE
-	ADC_setupSOC(myADC0_BASE, ADC_SOC_NUMBER5, ADC_TRIGGER_EPWM6_SOCA, ADC_CH_ADCIN2_ADCIN3, 20U);
-	ADC_setInterruptSOCTrigger(myADC0_BASE, ADC_SOC_NUMBER5, ADC_INT_SOC_TRIGGER_NONE);
-	// Start of Conversion 6 Configuration
-	// Configures a start-of-conversion (SOC) in the ADC and its interrupt SOC trigger.
-	// 	  	SOC number		: 6
-	//	  	Trigger			: ADC_TRIGGER_EPWM6_SOCA
 	//	  	Channel			: ADC_CH_ADCIN4_ADCIN5
 	//	 	Sample Window	: 20 SYSCLK cycles
 	//		Interrupt Trigger: ADC_INT_SOC_TRIGGER_NONE
-	ADC_setupSOC(myADC0_BASE, ADC_SOC_NUMBER6, ADC_TRIGGER_EPWM6_SOCA, ADC_CH_ADCIN4_ADCIN5, 20U);
-	ADC_setInterruptSOCTrigger(myADC0_BASE, ADC_SOC_NUMBER6, ADC_INT_SOC_TRIGGER_NONE);
-	// Start of Conversion 7 Configuration
-	// Configures a start-of-conversion (SOC) in the ADC and its interrupt SOC trigger.
-	// 	  	SOC number		: 7
-	//	  	Trigger			: ADC_TRIGGER_EPWM6_SOCA
-	//	  	Channel			: ADC_CH_ADCIN6_ADCIN7
-	//	 	Sample Window	: 20 SYSCLK cycles
-	//		Interrupt Trigger: ADC_INT_SOC_TRIGGER_NONE
-	ADC_setupSOC(myADC0_BASE, ADC_SOC_NUMBER7, ADC_TRIGGER_EPWM6_SOCA, ADC_CH_ADCIN6_ADCIN7, 20U);
-	ADC_setInterruptSOCTrigger(myADC0_BASE, ADC_SOC_NUMBER7, ADC_INT_SOC_TRIGGER_NONE);
+	ADC_setupSOC(myADC0_BASE, ADC_SOC_NUMBER5, ADC_TRIGGER_EPWM6_SOCA, ADC_CH_ADCIN4_ADCIN5, 20U);
+	ADC_setInterruptSOCTrigger(myADC0_BASE, ADC_SOC_NUMBER5, ADC_INT_SOC_TRIGGER_NONE);
 
 	//myADC1 initialization
 
@@ -681,7 +663,6 @@ void EMIF1_init(){
     EMIF_setAsyncTimingParams(EMIF1_BASE, EMIF_ASYNC_CS2_OFFSET, &tparam);
     EMIF_setAsyncTimingParams(EMIF1_BASE, EMIF_ASYNC_CS3_OFFSET, &tparam);
 
-		
 }
 
 

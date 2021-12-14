@@ -158,13 +158,14 @@ __interrupt void adcD1ISR(void)
 	//GET ADC B
 	rawPosData_1[3] = ADC_readResult(ADCBRESULT_BASE, ADC_SOC_NUMBER0);
 	rawPosData_1[4] = ADC_readResult(ADCBRESULT_BASE, ADC_SOC_NUMBER1);
+
 	rawPosData_2[3] = ADC_readResult(ADCBRESULT_BASE, ADC_SOC_NUMBER2);
 	rawPosData_2[4] = ADC_readResult(ADCBRESULT_BASE, ADC_SOC_NUMBER3);
 
 	//
 	// Get coil current
 	//
-	//GET ADC D
+	//GET ADC C
 	rawCurrData_1[0] = ADC_readResult(ADCCRESULT_BASE, ADC_SOC_NUMBER0);
 	rawCurrData_1[1] = ADC_readResult(ADCCRESULT_BASE, ADC_SOC_NUMBER1);
 	rawCurrData_1[2] = ADC_readResult(ADCCRESULT_BASE, ADC_SOC_NUMBER2);
@@ -174,21 +175,21 @@ __interrupt void adcD1ISR(void)
 	rawCurrData_2[2] = ADC_readResult(ADCCRESULT_BASE, ADC_SOC_NUMBER5);
 
 	//GET ADC D
-	rawCurrData_1[3] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER3);
-	rawCurrData_1[4] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER4);
-	rawCurrData_1[5] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER5);
-	rawCurrData_1[6] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER6);
-	rawCurrData_1[7] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER7);
-	rawCurrData_1[8] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER8);
-	rawCurrData_1[9] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER9);
+	rawCurrData_1[3] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER0);
+	rawCurrData_1[4] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER1);
+	rawCurrData_1[5] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER2);
+	rawCurrData_1[6] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER3);
+	rawCurrData_1[7] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER4);
+	rawCurrData_1[8] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER5);
+	rawCurrData_1[9] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER6);
 
-	rawCurrData_2[3] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER3);
-	rawCurrData_2[4] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER4);
-	rawCurrData_2[5] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER5);
-	rawCurrData_2[6] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER6);
-	rawCurrData_2[7] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER7);
-	rawCurrData_2[8] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER8);
-	rawCurrData_2[9] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER9);
+	rawCurrData_2[3] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER7);
+	rawCurrData_2[4] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER8);
+	rawCurrData_2[5] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER9);
+	rawCurrData_2[6] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER10);
+	rawCurrData_2[7] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER11);
+	rawCurrData_2[8] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER12);
+	rawCurrData_2[9] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER13);
 
 
 	uint16_t index;
