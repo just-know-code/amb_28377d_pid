@@ -437,6 +437,9 @@ extern uint16_t rawCurrData_2[10];
 extern void CalculPID(uint16_t index);
 extern void CalculPD(uint16_t index);
 extern void UpdatePWMDuty();
+
+extern uint16_t buffer[40];
+
 #endif
 
 //

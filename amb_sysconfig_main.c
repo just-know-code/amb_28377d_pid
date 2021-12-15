@@ -86,8 +86,8 @@ void main(void)
 
 
 	Variable_init();
-	currentLoopPI.P = 10;
-	currentLoopPI.I = 100;
+	currentLoopPI.P = 20;
+	currentLoopPI.I = 0.038;
 
 	coilBiasCurrent[0] = 4000;
 	coilBiasCurrent[1] = 4000;

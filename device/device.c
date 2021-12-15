@@ -71,6 +71,9 @@ uint16_t rawPosData_1[5];
 uint16_t rawPosData_2[5];
 uint16_t rawCurrData_1[10];
 uint16_t rawCurrData_2[10];
+uint16_t buffer[40];
+
+
 //*****************************************************************************
 //
 // Function to initialize the device. Primarily initializes system control to a
@@ -716,6 +719,7 @@ void Variable_init(){
 
 __interrupt void INT_ADCA_1_ISR(void)
 {
+	static uint16_t i_index = 0;
 	//
 	// Get rotor position
 	//
@@ -761,6 +765,11 @@ __interrupt void INT_ADCA_1_ISR(void)
 	rawCurrData_1[7] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER4);
 	rawCurrData_1[8] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER5);
 	rawCurrData_1[9] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER6);
+
+	buffer[i_index++] = rawCurrData_1[7];
+
+	if (i_index == 40)
+		i_index =0;
 
 //	rawCurrData_2[3] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER7);
 //	rawCurrData_2[4] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER8);
@@ -872,8 +881,8 @@ void CalculPID(uint16_t index){
 }
 
 
-#define MAX_PWM_DUTY 4500
-#define MIN_PWM_DUTY 500
+#define MAX_PWM_DUTY 3500
+#define MIN_PWM_DUTY 1500
 #define MAX_CURR_INTEGRAL 30000
 #define MIN_CURR_INTEGRAL -30000
 void CalculPD(uint16_t index){

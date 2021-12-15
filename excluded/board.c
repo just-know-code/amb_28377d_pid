@@ -417,7 +417,7 @@ static void initEPWM(uint32_t base)
     // Set-up TBCLK
     //
     EPWM_setTimeBasePeriod(base, EPWM_TIMER_TBPRD);
-    EPWM_setPhaseShift(base, 0U);
+//    EPWM_setPhaseShift(base, 0U);
     EPWM_setTimeBaseCounter(base, 0U);
 
     //
