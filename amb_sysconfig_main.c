@@ -53,7 +53,7 @@
 #include "device.h"
 #include "board.h"
 
-#define CURRENT_OPEN_LOOP 0
+
 
 
 //

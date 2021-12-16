@@ -435,8 +435,7 @@ extern uint16_t rawPosData_2[5];
 extern uint16_t rawCurrData_1[10];
 extern uint16_t rawCurrData_2[10];
 extern void CalculPID(uint16_t index);
-extern void CalculPD(uint16_t index);
-extern void UpdatePWMDuty();
+extern void CalculPI(uint16_t index);
 
 extern uint16_t buffer[40];
 
