@@ -422,7 +422,7 @@ extern struct pi_t currentLoopPI;		//do not initialize; configure
 extern struct pid_t pid_tArray[5];  	//do not initialize; configure
 extern float posIntegralArray[5];		//need initialize to 0
 extern float currIntegralArray[10];    //need initialize to 0
-extern uint32_t rotorPosition[5];		//need initialize to 0
+extern uint16_t rotorPosition[5];		//need initialize to 0
 extern uint16_t coilCurrent[10];		//need initialize to 0
 extern uint16_t pwmDuty[10];			//need initialize to 2500
 extern uint16_t forwardFirstPos[5];		//need initialize to 0
@@ -430,14 +430,12 @@ extern uint16_t forwardFirstCurr[10];	//need initialize to 0
 extern uint16_t refPosition[5];			//need configure
 extern uint16_t refCurrent[10];			//need initialize to 3750
 extern uint16_t coilBiasCurrent[5];		//do not initialize; configure
-extern uint16_t rawPosData_1[5];
-extern uint16_t rawPosData_2[5];
-extern uint16_t rawCurrData_1[10];
-extern uint16_t rawCurrData_2[10];
+extern uint32_t rawPosData[5];
+extern uint32_t rawCurrData[10];
+
 extern void CalculPID(uint16_t index);
 extern void CalculPI(uint16_t index);
 
-extern uint16_t buffer[40];
 
 #endif
 

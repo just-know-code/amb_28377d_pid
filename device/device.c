@@ -55,11 +55,26 @@ using std::memcpy;
 #define PASS 0
 #define FAIL 1
 
+#define OVERSAMPLING_TIMES 4
+uint16_t sampling_times;
+uint16_t loop_sel;
+/*
+* 0b0000 two loops are open loop, 0b11 two loops are closed loop
+* 0b01 only current is closed loop, 0b10 only position loop is closed loop
+*/
+uint16_t pos_pid_sel;
+/*
+* 0b00000 all PID operations do not work
+* 0b00001 only the first PID works
+* 0b00110 front radial directions PID work, 6
+* 0b11000 trailing radial directions PID work, 24
+* 0b11110 all radial directions PID work, 30(2 4 8 16)
+*/
 struct pi_t currentLoopPI;
 struct pid_t pid_tArray[5];
 float posIntegralArray[5];
 float currIntegralArray[10];
-uint32_t rotorPosition[5];
+uint16_t rotorPosition[5];
 uint16_t coilCurrent[10];
 uint16_t pwmDuty[10];
 uint16_t forwardFirstPos[5];
@@ -67,11 +82,9 @@ uint16_t forwardFirstCurr[10];
 uint16_t refCurrent[10];
 uint16_t refPosition[5];
 uint16_t coilBiasCurrent[5];
-uint16_t rawPosData_1[5];
-uint16_t rawPosData_2[5];
-uint16_t rawCurrData_1[10];
-uint16_t rawCurrData_2[10];
-uint16_t buffer[40];
+uint32_t rawPosData[5];
+uint32_t rawCurrData[10];
+
 
 
 //*****************************************************************************
@@ -712,76 +725,64 @@ static void UpdatePWMDuty(){
 	EPWM_setCounterCompareValue(EPWM5_BASE, EPWM_COUNTER_COMPARE_B, pwmDuty[9]);
 }
 
-//#define POSITION_CLOSED_LOOP
+#define POSITION_CLOSED_LOOP
 #define CURRENT_CLOSED_LOOP
 
-__interrupt void INT_ADCA_1_ISR(void)
-{
-	static uint16_t i_index = 0;
-	//
-	// Get rotor position
-	//
-	//GET ADC A
-	rawPosData_1[0] = ADC_readResult(ADCARESULT_BASE, ADC_SOC_NUMBER0);
-	rawPosData_1[1] = ADC_readResult(ADCARESULT_BASE, ADC_SOC_NUMBER1);
-	rawPosData_1[2] = ADC_readResult(ADCARESULT_BASE, ADC_SOC_NUMBER2);
+__interrupt void INT_ADCA_1_ISR(void){
 
-	//	rawPosData_2[0] = ADC_readResult(ADCARESULT_BASE, ADC_SOC_NUMBER3);
-	//	rawPosData_2[1] = ADC_readResult(ADCARESULT_BASE, ADC_SOC_NUMBER4);
-	//	rawPosData_2[2] = ADC_readResult(ADCARESULT_BASE, ADC_SOC_NUMBER5);
+	if (sampling_times == 0){
+		//
+		// Get rotor position
+		//
+		//GET ADC A
+		rawPosData[0] = ADC_readResult(ADCARESULT_BASE, ADC_SOC_NUMBER0);
+		rawPosData[1] = ADC_readResult(ADCARESULT_BASE, ADC_SOC_NUMBER1);
+		rawPosData[2] = ADC_readResult(ADCARESULT_BASE, ADC_SOC_NUMBER2);
 
-	//GET ADC B
-	rawPosData_1[3] = ADC_readResult(ADCBRESULT_BASE, ADC_SOC_NUMBER0);
-	rawPosData_1[4] = ADC_readResult(ADCBRESULT_BASE, ADC_SOC_NUMBER1);
+		//GET ADC B
+		rawPosData[3] = ADC_readResult(ADCBRESULT_BASE, ADC_SOC_NUMBER0);
+		rawPosData[4] = ADC_readResult(ADCBRESULT_BASE, ADC_SOC_NUMBER1);
 
-	//	rawPosData_2[3] = ADC_readResult(ADCBRESULT_BASE, ADC_SOC_NUMBER2);
-	//	rawPosData_2[4] = ADC_readResult(ADCBRESULT_BASE, ADC_SOC_NUMBER3);
-	//
+		//
+		// Get coil current
+		//
+		//GET ADC C
+		rawCurrData[2] = ADC_readResult(ADCCRESULT_BASE, ADC_SOC_NUMBER0);
+		rawCurrData[3] = ADC_readResult(ADCCRESULT_BASE, ADC_SOC_NUMBER1);
+		rawCurrData[4] = ADC_readResult(ADCCRESULT_BASE, ADC_SOC_NUMBER2);
 
-	//
-	// Get coil current
-	//
-	//GET ADC C
-	rawCurrData_1[0] = ADC_readResult(ADCCRESULT_BASE, ADC_SOC_NUMBER0);
-	rawCurrData_1[1] = ADC_readResult(ADCCRESULT_BASE, ADC_SOC_NUMBER1);
-	rawCurrData_1[2] = ADC_readResult(ADCCRESULT_BASE, ADC_SOC_NUMBER2);
+		//GET ADC D
+		rawCurrData[5] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER0);
+		rawCurrData[6] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER1);
+		rawCurrData[7] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER2);
+		rawCurrData[8] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER3);
+		rawCurrData[9] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER4);
+		rawCurrData[0] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER5);
+		rawCurrData[1] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER6);
+	} else {
+		rawPosData[0] += ADC_readResult(ADCARESULT_BASE, ADC_SOC_NUMBER0);
+		rawPosData[1] += ADC_readResult(ADCARESULT_BASE, ADC_SOC_NUMBER1);
+		rawPosData[2] += ADC_readResult(ADCARESULT_BASE, ADC_SOC_NUMBER2);
 
-	//	rawCurrData_2[0] = ADC_readResult(ADCCRESULT_BASE, ADC_SOC_NUMBER3);
-	//	rawCurrData_2[1] = ADC_readResult(ADCCRESULT_BASE, ADC_SOC_NUMBER4);
-	//	rawCurrData_2[2] = ADC_readResult(ADCCRESULT_BASE, ADC_SOC_NUMBER5);
-	//GET ADC D
-	rawCurrData_1[3] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER0);
-	rawCurrData_1[4] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER1);
-	rawCurrData_1[5] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER2);
-	rawCurrData_1[6] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER3);
-	rawCurrData_1[7] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER4);
-	rawCurrData_1[8] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER5);
-	rawCurrData_1[9] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER6);
+		rawPosData[3] += ADC_readResult(ADCBRESULT_BASE, ADC_SOC_NUMBER0);
+		rawPosData[4] += ADC_readResult(ADCBRESULT_BASE, ADC_SOC_NUMBER1);
 
-	buffer[i_index++] = rawCurrData_1[7];
+		rawCurrData[2] += ADC_readResult(ADCCRESULT_BASE, ADC_SOC_NUMBER0);
+		rawCurrData[3] += ADC_readResult(ADCCRESULT_BASE, ADC_SOC_NUMBER1);
+		rawCurrData[4] += ADC_readResult(ADCCRESULT_BASE, ADC_SOC_NUMBER2);
 
-	if (i_index == 40)
-		i_index =0;
-
-	//	rawCurrData_2[3] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER7);
-	//	rawCurrData_2[4] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER8);
-	//	rawCurrData_2[5] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER9);
-	//	rawCurrData_2[6] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER10);
-	//	rawCurrData_2[7] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER11);
-	//	rawCurrData_2[8] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER12);
-	//	rawCurrData_2[9] = ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER13);
-
-	uint16_t index;
-	//	for(index = 0; index < 3; index++)
-	//		rotorPosition[index] = (rawPosData_1[index] + rawPosData_2[index]) / 2;
-
-	for(index = 0; index < 10; index++)
-		coilCurrent[index] = rawCurrData_1[index];
+		rawCurrData[5] += ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER0);
+		rawCurrData[6] += ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER1);
+		rawCurrData[7] += ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER2);
+		rawCurrData[8] += ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER3);
+		rawCurrData[9] += ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER4);
+		rawCurrData[0] += ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER5);
+		rawCurrData[1] += ADC_readResult(ADCDRESULT_BASE, ADC_SOC_NUMBER6);
+	}
 	//
 	// Clear the interrupt flag
 	//
 	ADC_clearInterruptStatus(ADCA_BASE, ADC_INT_NUMBER1);
-
 	//
 	// Check if overflow has occurred
 	//
@@ -789,47 +790,71 @@ __interrupt void INT_ADCA_1_ISR(void)
 		ADC_clearInterruptOverflowStatus(ADCA_BASE, ADC_INT_NUMBER1);
 		ADC_clearInterruptStatus(ADCA_BASE, ADC_INT_NUMBER1);
 	}
+	sampling_times++;
+	if (sampling_times == OVERSAMPLING_TIMES){
 
-	//compute displacement loop pid
-	uint16_t i;
+
+		uint16_t index;
+		for(index = 0; index < 5; index++)
+			rotorPosition[index] = rawPosData[index] / OVERSAMPLING_TIMES;
+
+		for(index = 0; index < 10; index++)
+			coilCurrent[index] = rawCurrData[index] / OVERSAMPLING_TIMES;
+
+		//compute displacement loop pid
 #ifdef POSITION_CLOSED_LOOP
-	for(i = 0; i < 5; i++){
-
-		CalculPID(i);
-	}
+		if (loop_sel & 0b10 == 0b10){
+			if (pos_pid_sel & 0b00001 == 0b00001)
+				CalculPID(0);
+			if (pos_pid_sel & 0b00010 == 0b00010)
+				CalculPID(1);
+			if (pos_pid_sel & 0b00100 == 0b00100)
+				CalculPID(2);
+			if (pos_pid_sel & 0b01000 == 0b01000)
+				CalculPID(3);
+			if (pos_pid_sel & 0b10000 == 0b10000)
+				CalculPID(4);
+		}
 #endif
-	//compute current loop pd
+		//compute current loop pi
 #ifdef CURRENT_CLOSED_LOOP
-	for(i = 0; i < 10; i++){
-		CalculPI(i);
-	}
-#endif
-	// update pwm duty
-	UpdatePWMDuty();
+		if (loop_sel & 0b01 == 0b01){
 
+			uint16_t i;
+			for(i = 0; i < 10; i++){
+				CalculPI(i);
+			}
+		}
+#endif
+		// update pwm duty
+		UpdatePWMDuty();
+
+		sampling_times = 0;
+	}
 	//
 	// Acknowledge the interrupt
 	//
 	Interrupt_clearACKGroup(INTERRUPT_ACK_GROUP1);
+
 }
 
 
-#define CONTROL_PERIOD 0.00005
+#define CONTROL_PERIOD 0.00005f
 #define MAX_POS_INTEGRAL 500
 #define MIN_POS_INTEGRAL -500
-#define MAX_CONTROL_CURRENT 1000
-#define MIN_CONTROL_CURRENT -1000
+#define MAX_CONTROL_CURRENT 500
+#define MIN_CONTROL_CURRENT -500
 
 void CalculPID(uint16_t index){
 
 	float firstOrderDiff, propotion, differential;
 	int16_t outcome;
 	int16_t error;
-	error = refPosition[index] - rotorPosition[index]; /* 平衡位置与设定点的差值 */
-	firstOrderDiff = rotorPosition[index] - forwardFirstPos[index]; /* 相邻两点之间的差值 */
+	error = (float)refPosition[index] - rotorPosition[index]; /* 平衡位置与设定点的差值 */
+	firstOrderDiff = (float)rotorPosition[index] - forwardFirstPos[index]; /* 相邻两点之间的差值 */
 	forwardFirstPos[index] = rotorPosition[index];
 
-	propotion = pid_tArray[index].P * error;
+	propotion = (float)pid_tArray[index].P * error;
 	posIntegralArray[index] += pid_tArray[index].I * error * CONTROL_PERIOD;
 	differential = pid_tArray[index].D * firstOrderDiff / CONTROL_PERIOD;
 
@@ -838,33 +863,36 @@ void CalculPID(uint16_t index){
 	if (posIntegralArray[index] < MIN_POS_INTEGRAL)
 		posIntegralArray[index] = MIN_POS_INTEGRAL;
 
-	outcome = propotion + posIntegralArray[index] + differential;
+	outcome = (int16_t)(propotion + posIntegralArray[index] + differential);
 	if (outcome > MAX_CONTROL_CURRENT)
 		outcome = MAX_CONTROL_CURRENT;
 	if (outcome < MIN_CONTROL_CURRENT)
 		outcome = MIN_CONTROL_CURRENT;
 	refCurrent[index * 2] = coilBiasCurrent[index] - outcome;
 	refCurrent[index * 2 + 1] = coilBiasCurrent[index] + outcome;
-	/*				       【传感器】
-	 * 					0 号线圈
+
+	/*
+	 * %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	 *轴向：
+	 *		【传感器0】0 号线圈			1号线圈
+	 * %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	 *径向A：			       【传感器1】
+	 * 					2 号线圈
 	 *
-	 * 	【传感器】2 号线圈			3号线圈
+	 * 	      【传感器2】4号线圈			5号线圈
 	 *
-	 * 					1 号线圈
+	 * 					3 号线圈
+	 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	 *径向B:
+	 *				        【传感器3】
+	 * 					6 号线圈
 	 *
+	 * 	       【传感器4】8 号线圈			9号线圈
 	 *
-	 *				        【传感器】
-	 * 					4 号线圈
-	 *
-	 * 	【传感器】6 号线圈			7号线圈
-	 *
-	 * 					5 号线圈
-	 *
-	 *
-	 *
+	 * 					7 号线圈
+	 * %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	 * */
 }
-
 
 #define MAX_PWM_DUTY 4500
 #define MIN_PWM_DUTY 500
@@ -902,24 +930,62 @@ void Variable_init(){
 	uint16_t i;
 
 	for(i = 0; i < 5; i++){
-		rotorPosition[i] = 0;
 		posIntegralArray[i] = 0;
 		forwardFirstPos[i] = 0;
+		refPosition[i] = 49385;
 	}
 	for(i = 0; i < 10; i++){
 		currIntegralArray[i] = 0;
-		coilCurrent[i] = 0;
 		pwmDuty[i] = 2500;
-		refCurrent[i] = 3750;
 		forwardFirstCurr[i] = 0;
+		refCurrent[i] = 2048;
 	}
+
+	currentLoopPI.P = 10;
+	currentLoopPI.I = 0.038;
+
+	coilBiasCurrent[0] = 2548;
+	coilBiasCurrent[1] = 2548;
+	coilBiasCurrent[2] = 2548;
+	coilBiasCurrent[3] = 2548;
+	coilBiasCurrent[4] = 2548;
+
+	refPosition[0] = 49385;
+	refPosition[1] = 49385;
+	refPosition[2] = 49385;
+	refPosition[3] = 49385;
+	refPosition[4] = 49385;
+
+	pid_tArray[0].P = 2;
+	pid_tArray[0].I = 0.0001;
+	pid_tArray[0].D = 0.0001;
+
+	pid_tArray[1].P = 2;
+	pid_tArray[1].I = 0.0001;
+	pid_tArray[1].D = 0.0001;
+
+	pid_tArray[2].P = 0.5;
+	pid_tArray[2].I = 0.0001;
+	pid_tArray[2].D = 0.0001;
+
+	pid_tArray[3].P = 0.5;
+	pid_tArray[3].I = 0.0001;
+	pid_tArray[3].D = 0.0001;
+
+	pid_tArray[4].P = 0.5;
+	pid_tArray[4].I = 0.0001;
+	pid_tArray[4].D = 0.0001;
+
+	sampling_times = 0;
+	loop_sel = 0b11;
+	pos_pid_sel = 0b00000;
 
 #ifndef POSITION_CLOSED_LOOP
 	for(i = 0; i < 10; i++){
 		refCurrent[i] = 2048;
 	}
 #endif
-	//compute current loop pd
+	//compute current loop pi
 #ifndef CURRENT_CLOSED_LOOP
 	for(i = 0; i < 10; i++){
 

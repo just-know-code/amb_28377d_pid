@@ -45,16 +45,12 @@
 // $
 //#############################################################################
 
-
 //
 // Included Files
 //
 #include "driverlib.h"
 #include "device.h"
 #include "board.h"
-
-
-
 
 //
 // Main
@@ -83,32 +79,7 @@ void main(void)
 	Interrupt_initVectorTable();
 
 	Board_init();
-
-
 	Variable_init();
-	currentLoopPI.P = 20;
-	currentLoopPI.I = 0.038;
-
-	coilBiasCurrent[0] = 4000;
-	coilBiasCurrent[1] = 4000;
-	coilBiasCurrent[2] = 4000;
-	coilBiasCurrent[3] = 4000;
-	coilBiasCurrent[4] = 4000;
-	pid_tArray[0].P = 1;
-	pid_tArray[0].I = 0.0001;
-	pid_tArray[0].D = 0.0001;
-	pid_tArray[1].P = 1;
-	pid_tArray[1].I = 0.0001;
-	pid_tArray[1].D = 0.0001;
-	pid_tArray[2].P = 1;
-	pid_tArray[2].I = 0.0001;
-	pid_tArray[2].D = 0.0001;
-	pid_tArray[3].P = 1;
-	pid_tArray[3].I = 0.0001;
-	pid_tArray[3].D = 0.0001;
-	pid_tArray[4].P = 1;
-	pid_tArray[4].I = 0.0001;
-	pid_tArray[4].D = 0.0001;
 
 	//
 	// Enable Global Interrupt (INTM) and realtime interrupt (DBGM)
@@ -122,8 +93,8 @@ void main(void)
     EPWM_enableADCTrigger(EPWM1_BASE, EPWM_SOC_A);
 
 	for (;;){
-
 	}
+
 }
 
 
