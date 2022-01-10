@@ -52,17 +52,14 @@
 using std::memcpy;
 #endif
 
-#define PASS 0
-#define FAIL 1
-
 #define OVERSAMPLING_TIMES 4
-uint16_t sampling_times;
-uint16_t loop_sel;
+volatile uint16_t sampling_times;
+volatile uint16_t loop_sel;
 /*
 * 0b0000 two loops are open loop, 0b11 two loops are closed loop
 * 0b01 only current is closed loop, 0b10 only position loop is closed loop
 */
-uint16_t pos_pid_sel;
+volatile uint16_t pos_pid_sel;
 /*
 * 0b00000 all PID operations do not work
 * 0b00001 only the first PID works
@@ -70,20 +67,20 @@ uint16_t pos_pid_sel;
 * 0b11000 trailing radial directions PID work, 24
 * 0b11110 all radial directions PID work, 30(2 4 8 16)
 */
-struct pi_t currentLoopPI;
-struct pid_t pid_tArray[5];
-float posIntegralArray[5];
-float currIntegralArray[10];
-uint16_t rotorPosition[5];
-uint16_t coilCurrent[10];
-uint16_t pwmDuty[10];
-uint16_t forwardFirstPos[5];
-uint16_t forwardFirstCurr[10];
-uint16_t refCurrent[10];
-uint16_t refPosition[5];
-uint16_t coilBiasCurrent[5];
-uint32_t rawPosData[5];
-uint32_t rawCurrData[10];
+volatile struct pi_t currentLoopPI;
+volatile struct pid_t pid_tArray[5];
+volatile float posIntegralArray[5];
+volatile float currIntegralArray[10];
+volatile uint16_t rotorPosition[5];
+volatile uint16_t coilCurrent[10];
+volatile uint16_t pwmDuty[10];
+volatile uint16_t forwardFirstPos[5];
+volatile uint16_t forwardFirstCurr[10];
+volatile uint16_t refCurrent[10];
+volatile uint16_t refPosition[5];
+volatile uint16_t coilBiasCurrent[5];
+volatile uint32_t rawPosData[5];
+volatile uint32_t rawCurrData[10];
 
 
 
@@ -796,29 +793,29 @@ __interrupt void INT_ADCA_1_ISR(void){
 
 		uint16_t index;
 		for(index = 0; index < 5; index++)
-			rotorPosition[index] = rawPosData[index] / OVERSAMPLING_TIMES;
+			rotorPosition[index] = rawPosData[index] / OVERSAMPLING_TIMES / 8;
 
 		for(index = 0; index < 10; index++)
 			coilCurrent[index] = rawCurrData[index] / OVERSAMPLING_TIMES;
 
 		//compute displacement loop pid
 #ifdef POSITION_CLOSED_LOOP
-		if (loop_sel & 0b10 == 0b10){
-			if (pos_pid_sel & 0b00001 == 0b00001)
+		if (loop_sel & 0b10){
+			if (pos_pid_sel & 0b00001)
 				CalculPID(0);
-			if (pos_pid_sel & 0b00010 == 0b00010)
+			if (pos_pid_sel & 0b00010)
 				CalculPID(1);
-			if (pos_pid_sel & 0b00100 == 0b00100)
+			if (pos_pid_sel & 0b00100)
 				CalculPID(2);
-			if (pos_pid_sel & 0b01000 == 0b01000)
+			if (pos_pid_sel & 0b01000)
 				CalculPID(3);
-			if (pos_pid_sel & 0b10000 == 0b10000)
+			if (pos_pid_sel & 0b10000)
 				CalculPID(4);
 		}
 #endif
 		//compute current loop pi
 #ifdef CURRENT_CLOSED_LOOP
-		if (loop_sel & 0b01 == 0b01){
+		if (loop_sel & 0b01){
 
 			uint16_t i;
 			for(i = 0; i < 10; i++){
@@ -830,6 +827,22 @@ __interrupt void INT_ADCA_1_ISR(void){
 		UpdatePWMDuty();
 
 		sampling_times = 0;
+	} else {
+		ADC_forceMultipleSOC(ADCA_BASE, ADC_FORCE_SOC0 |
+										ADC_FORCE_SOC1 |
+										ADC_FORCE_SOC2);
+		ADC_forceMultipleSOC(ADCB_BASE, ADC_FORCE_SOC0 |
+										ADC_FORCE_SOC1);
+		ADC_forceMultipleSOC(ADCC_BASE, ADC_FORCE_SOC0 |
+										ADC_FORCE_SOC1 |
+										ADC_FORCE_SOC2);
+		ADC_forceMultipleSOC(ADCD_BASE, ADC_FORCE_SOC0 |
+										ADC_FORCE_SOC1 |
+										ADC_FORCE_SOC2 |
+										ADC_FORCE_SOC3 |
+										ADC_FORCE_SOC4 |
+										ADC_FORCE_SOC5 |
+										ADC_FORCE_SOC6);
 	}
 	//
 	// Acknowledge the interrupt
@@ -840,22 +853,23 @@ __interrupt void INT_ADCA_1_ISR(void){
 
 
 #define CONTROL_PERIOD 0.00005f
-#define MAX_POS_INTEGRAL 500
-#define MIN_POS_INTEGRAL -500
-#define MAX_CONTROL_CURRENT 500
-#define MIN_CONTROL_CURRENT -500
+#define MAX_POS_INTEGRAL 240
+#define MIN_POS_INTEGRAL -240
+#define MAX_CONTROL_CURRENT 240
+#define MIN_CONTROL_CURRENT -240
 
 void CalculPID(uint16_t index){
 
 	float firstOrderDiff, propotion, differential;
 	int16_t outcome;
 	int16_t error;
+
 	error = (float)refPosition[index] - rotorPosition[index]; /* 平衡位置与设定点的差值 */
 	firstOrderDiff = (float)rotorPosition[index] - forwardFirstPos[index]; /* 相邻两点之间的差值 */
 	forwardFirstPos[index] = rotorPosition[index];
 
 	propotion = (float)pid_tArray[index].P * error;
-	posIntegralArray[index] += pid_tArray[index].I * error * CONTROL_PERIOD;
+	posIntegralArray[index] += (float)pid_tArray[index].I * error * CONTROL_PERIOD;
 	differential = pid_tArray[index].D * firstOrderDiff / CONTROL_PERIOD;
 
 	if (posIntegralArray[index] > MAX_POS_INTEGRAL)
@@ -864,6 +878,7 @@ void CalculPID(uint16_t index){
 		posIntegralArray[index] = MIN_POS_INTEGRAL;
 
 	outcome = (int16_t)(propotion + posIntegralArray[index] + differential);
+//	outcome /= 64;
 	if (outcome > MAX_CONTROL_CURRENT)
 		outcome = MAX_CONTROL_CURRENT;
 	if (outcome < MIN_CONTROL_CURRENT)

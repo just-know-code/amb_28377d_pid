@@ -62,6 +62,20 @@ void main(void)
 	//
 	Device_init();
 
+#ifdef _STANDALONE
+#ifdef _FLASH
+	//
+	// Send boot command to allow the CPU2 application to begin execution
+	//
+	Device_bootCPU2(C1C2_BROM_BOOTMODE_BOOT_FROM_FLASH);
+#else
+	//
+	// Send boot command to allow the CPU2 application to begin execution
+	//
+	Device_bootCPU2(C1C2_BROM_BOOTMODE_BOOT_FROM_RAM);
+#endif // _FLASH
+#endif // _STANDALONE
+
 	//
 	// Setup GPIO by disabling pin locks and enabling pullups.
 	//
