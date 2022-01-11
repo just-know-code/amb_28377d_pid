@@ -725,7 +725,7 @@ static void UpdatePWMDuty(){
 #define POSITION_CLOSED_LOOP
 #define CURRENT_CLOSED_LOOP
 
-__interrupt void INT_ADCA_1_ISR(void){
+__interrupt void INT_curADCD_1_ISR(void){
 
 	if (sampling_times == 0){
 		//
@@ -779,14 +779,14 @@ __interrupt void INT_ADCA_1_ISR(void){
 	//
 	// Clear the interrupt flag
 	//
-	ADC_clearInterruptStatus(ADCA_BASE, ADC_INT_NUMBER1);
+	ADC_clearInterruptStatus(ADCD_BASE, ADC_INT_NUMBER1);
 	//
 	// Check if overflow has occurred
 	//
-	if(true == ADC_getInterruptOverflowStatus(ADCA_BASE, ADC_INT_NUMBER1)){
-		ADC_clearInterruptOverflowStatus(ADCA_BASE, ADC_INT_NUMBER1);
-		ADC_clearInterruptStatus(ADCA_BASE, ADC_INT_NUMBER1);
-	}
+//	if(true == ADC_getInterruptOverflowStatus(ADCA_BASE, ADC_INT_NUMBER1)){
+//		ADC_clearInterruptOverflowStatus(ADCA_BASE, ADC_INT_NUMBER1);
+//		ADC_clearInterruptStatus(ADCA_BASE, ADC_INT_NUMBER1);
+//	}
 	sampling_times++;
 	if (sampling_times == OVERSAMPLING_TIMES){
 
@@ -848,7 +848,6 @@ __interrupt void INT_ADCA_1_ISR(void){
 	// Acknowledge the interrupt
 	//
 	Interrupt_clearACKGroup(INTERRUPT_ACK_GROUP1);
-
 }
 
 

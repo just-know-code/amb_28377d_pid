@@ -44,8 +44,8 @@ void Board_init()
 	EMIF1_init();
 	EPWM_init();
 	GPIO_init();
-	I2C_init();
-	SCI_init();
+//	I2C_init();
+//	SCI_init();
 //	SPI_init();
 //	USB_init();
 	INTERRUPT_init();
@@ -191,7 +191,7 @@ void PinMux_init()
 	//
 	// SCIA -> mySCI0 Pinmux
 	//
-	GPIO_setPinConfig(GPIO_28_SCIRXDA);
+	GPIO_setPinConfig(GPIO_64_SCIRXDA);
 	GPIO_setPinConfig(GPIO_65_SCITXDA);
 	//
 	// SCIB -> mySCI1 Pinmux
@@ -223,109 +223,229 @@ void PinMux_init()
 
 }
 
-static void configureADC(uint32_t adcBase, uint16_t mode)
-{
-	//
-	// Set ADCDLK divider to /4
-	//
-	ADC_setPrescaler(adcBase, ADC_CLK_DIV_4_0);
-
-	//
-	// Set resolution and signal mode (see #defines above) and load
-	// corresponding trims.
-	//
-	if(mode == 12)
-		ADC_setMode(adcBase, ADC_RESOLUTION_12BIT, ADC_MODE_SINGLE_ENDED);
-	else if(mode == 16)
-		ADC_setMode(adcBase, ADC_RESOLUTION_16BIT, ADC_MODE_DIFFERENTIAL);
-
-	//
-	// Set pulse positions to late
-	//
-	ADC_setInterruptPulseMode(adcBase, ADC_PULSE_END_OF_CONV);
-
-	//
-	// Power up the ADCs and then delay for 1 ms
-	//
-	ADC_enableConverter(adcBase);
-
-	//
-	// Delay for 1ms to allow ADC time to power up
-	//
-	DEVICE_DELAY_US(1000);
-}
-
-#define DIFF_ACQ_WIND 100
-#define SIG_ACQ_WIND 50
-static void initADCSOC(void)
-{
-
-	//
-	// - NOTE: A longer sampling window will be required if the ADC driving
-	//   source is less than ideal (an ideal source would be a high bandwidth
-	//   op-amp with a small series resistance). See TI application report
-	//   SPRACT6 for guidance on ADC driver design.
-	// - NOTE: SOCs need not use the same S+H window duration, but SOCs
-	//   occurring in parallel (in this example, SOC0 on both ADCs occur in
-	//   parallel, as do the SOC1s on both ADCs, etc.) should usually
-	//   use the same value to ensure simultaneous samples and synchronous
-	//   operation.
-
-	//
-	// Select the channels to convert and the configure the ePWM trigger
-	//
-	ADC_setupSOC(ADCA_BASE, ADC_SOC_NUMBER0, ADC_TRIGGER_EPWM1_SOCA,
-			ADC_CH_ADCIN0_ADCIN1, DIFF_ACQ_WIND);
-	ADC_setupSOC(ADCA_BASE, ADC_SOC_NUMBER1, ADC_TRIGGER_EPWM1_SOCA,
-			ADC_CH_ADCIN2_ADCIN3, DIFF_ACQ_WIND);
-	ADC_setupSOC(ADCA_BASE, ADC_SOC_NUMBER2, ADC_TRIGGER_EPWM1_SOCA,
-			ADC_CH_ADCIN4_ADCIN5, DIFF_ACQ_WIND);
-
-	ADC_setupSOC(ADCB_BASE, ADC_SOC_NUMBER0, ADC_TRIGGER_EPWM1_SOCA,
-			ADC_CH_ADCIN0_ADCIN1, DIFF_ACQ_WIND);
-	ADC_setupSOC(ADCB_BASE, ADC_SOC_NUMBER1, ADC_TRIGGER_EPWM1_SOCA,
-			ADC_CH_ADCIN2_ADCIN3, DIFF_ACQ_WIND);
-
-
-
-	ADC_setupSOC(ADCC_BASE, ADC_SOC_NUMBER0, ADC_TRIGGER_EPWM1_SOCA,
-			ADC_CH_ADCIN2, SIG_ACQ_WIND);
-	ADC_setupSOC(ADCC_BASE, ADC_SOC_NUMBER1, ADC_TRIGGER_EPWM1_SOCA,
-			ADC_CH_ADCIN3, SIG_ACQ_WIND);
-	ADC_setupSOC(ADCC_BASE, ADC_SOC_NUMBER2, ADC_TRIGGER_EPWM1_SOCA,
-			ADC_CH_ADCIN4, SIG_ACQ_WIND);
-
-
-	ADC_setupSOC(ADCD_BASE, ADC_SOC_NUMBER0, ADC_TRIGGER_EPWM1_SOCA,
-			ADC_CH_ADCIN0, SIG_ACQ_WIND);
-	ADC_setupSOC(ADCD_BASE, ADC_SOC_NUMBER1, ADC_TRIGGER_EPWM1_SOCA,
-			ADC_CH_ADCIN1, SIG_ACQ_WIND);
-	ADC_setupSOC(ADCD_BASE, ADC_SOC_NUMBER2, ADC_TRIGGER_EPWM1_SOCA,
-			ADC_CH_ADCIN2, SIG_ACQ_WIND);
-	ADC_setupSOC(ADCD_BASE, ADC_SOC_NUMBER3, ADC_TRIGGER_EPWM1_SOCA,
-			ADC_CH_ADCIN3, SIG_ACQ_WIND);
-	ADC_setupSOC(ADCD_BASE, ADC_SOC_NUMBER4, ADC_TRIGGER_EPWM1_SOCA,
-			ADC_CH_ADCIN4, SIG_ACQ_WIND);
-	ADC_setupSOC(ADCD_BASE, ADC_SOC_NUMBER5, ADC_TRIGGER_EPWM1_SOCA,
-			ADC_CH_ADCIN14, SIG_ACQ_WIND);
-	ADC_setupSOC(ADCD_BASE, ADC_SOC_NUMBER6, ADC_TRIGGER_EPWM1_SOCA,
-			ADC_CH_ADCIN15, SIG_ACQ_WIND);
-
-}
-
 void ADC_init(){
+	//posADCA initialization
 
-	configureADC(ADCA_BASE, 16);
-	configureADC(ADCB_BASE, 16);
-	configureADC(ADCC_BASE, 12);
-	configureADC(ADCD_BASE, 12);
+	// ADC Initialization: Write ADC configurations and power up the ADC
+	// Configures the analog-to-digital converter module prescaler.
+	ADC_setPrescaler(posADCA_BASE, ADC_CLK_DIV_2_0);
+	// Configures the analog-to-digital converter resolution and signal mode.
+	ADC_setMode(posADCA_BASE, ADC_RESOLUTION_12BIT, ADC_MODE_SINGLE_ENDED);
+	// Sets the timing of the end-of-conversion pulse
+	ADC_setInterruptPulseMode(posADCA_BASE, ADC_PULSE_END_OF_CONV);
+	// Powers up the analog-to-digital converter core.
+	ADC_enableConverter(posADCA_BASE);
+	// Delay for 1ms to allow ADC time to power up
+	DEVICE_DELAY_US(500);
 
-	initADCSOC();
+	// SOC Configuration: Setup ADC EPWM channel and trigger settings
+	// Disables SOC burst mode.
+	ADC_disableBurstMode(posADCA_BASE);
+	// Sets the priority mode of the SOCs.
+	ADC_setSOCPriority(posADCA_BASE, ADC_PRI_ALL_ROUND_ROBIN);
+	// Start of Conversion 0 Configuration
+	// Configures a start-of-conversion (SOC) in the ADC and its interrupt SOC trigger.
+	// 	  	SOC number		: 0
+	//	  	Trigger			: ADC_TRIGGER_EPWM6_SOCA
+	//	  	Channel			: ADC_CH_ADCIN0
+	//	 	Sample Window	: 50 SYSCLK cycles
+	//		Interrupt Trigger: ADC_INT_SOC_TRIGGER_NONE
+	ADC_setupSOC(posADCA_BASE, ADC_SOC_NUMBER0, ADC_TRIGGER_EPWM6_SOCA, ADC_CH_ADCIN0, 50U);
+	ADC_setInterruptSOCTrigger(posADCA_BASE, ADC_SOC_NUMBER0, ADC_INT_SOC_TRIGGER_NONE);
+	// Start of Conversion 1 Configuration
+	// Configures a start-of-conversion (SOC) in the ADC and its interrupt SOC trigger.
+	// 	  	SOC number		: 1
+	//	  	Trigger			: ADC_TRIGGER_EPWM6_SOCA
+	//	  	Channel			: ADC_CH_ADCIN2
+	//	 	Sample Window	: 50 SYSCLK cycles
+	//		Interrupt Trigger: ADC_INT_SOC_TRIGGER_NONE
+	ADC_setupSOC(posADCA_BASE, ADC_SOC_NUMBER1, ADC_TRIGGER_EPWM6_SOCA, ADC_CH_ADCIN2, 50U);
+	ADC_setInterruptSOCTrigger(posADCA_BASE, ADC_SOC_NUMBER1, ADC_INT_SOC_TRIGGER_NONE);
+	// Start of Conversion 2 Configuration
+	// Configures a start-of-conversion (SOC) in the ADC and its interrupt SOC trigger.
+	// 	  	SOC number		: 2
+	//	  	Trigger			: ADC_TRIGGER_EPWM6_SOCA
+	//	  	Channel			: ADC_CH_ADCIN4
+	//	 	Sample Window	: 50 SYSCLK cycles
+	//		Interrupt Trigger: ADC_INT_SOC_TRIGGER_NONE
+	ADC_setupSOC(posADCA_BASE, ADC_SOC_NUMBER2, ADC_TRIGGER_EPWM6_SOCA, ADC_CH_ADCIN4, 50U);
+	ADC_setInterruptSOCTrigger(posADCA_BASE, ADC_SOC_NUMBER2, ADC_INT_SOC_TRIGGER_NONE);
 
-	ADC_setInterruptSource(ADCA_BASE, ADC_INT_NUMBER1, ADC_SOC_NUMBER2);
-	ADC_enableInterrupt(ADCA_BASE, ADC_INT_NUMBER1);
-	ADC_clearInterruptStatus(ADCA_BASE, ADC_INT_NUMBER1);
-	ADC_disableContinuousMode(ADCA_BASE, ADC_INT_NUMBER1);
+	//posADCB initialization
+
+	// ADC Initialization: Write ADC configurations and power up the ADC
+	// Configures the analog-to-digital converter module prescaler.
+	ADC_setPrescaler(posADCB_BASE, ADC_CLK_DIV_2_0);
+	// Configures the analog-to-digital converter resolution and signal mode.
+	ADC_setMode(posADCB_BASE, ADC_RESOLUTION_12BIT, ADC_MODE_SINGLE_ENDED);
+	// Sets the timing of the end-of-conversion pulse
+	ADC_setInterruptPulseMode(posADCB_BASE, ADC_PULSE_END_OF_CONV);
+	// Powers up the analog-to-digital converter core.
+	ADC_enableConverter(posADCB_BASE);
+	// Delay for 1ms to allow ADC time to power up
+	DEVICE_DELAY_US(500);
+
+	// SOC Configuration: Setup ADC EPWM channel and trigger settings
+	// Disables SOC burst mode.
+	ADC_disableBurstMode(posADCB_BASE);
+	// Sets the priority mode of the SOCs.
+	ADC_setSOCPriority(posADCB_BASE, ADC_PRI_ALL_ROUND_ROBIN);
+	// Start of Conversion 0 Configuration
+	// Configures a start-of-conversion (SOC) in the ADC and its interrupt SOC trigger.
+	// 	  	SOC number		: 0
+	//	  	Trigger			: ADC_TRIGGER_EPWM6_SOCA
+	//	  	Channel			: ADC_CH_ADCIN0
+	//	 	Sample Window	: 50 SYSCLK cycles
+	//		Interrupt Trigger: ADC_INT_SOC_TRIGGER_NONE
+	ADC_setupSOC(posADCB_BASE, ADC_SOC_NUMBER0, ADC_TRIGGER_EPWM6_SOCA, ADC_CH_ADCIN0, 50U);
+	ADC_setInterruptSOCTrigger(posADCB_BASE, ADC_SOC_NUMBER0, ADC_INT_SOC_TRIGGER_NONE);
+	// Start of Conversion 1 Configuration
+	// Configures a start-of-conversion (SOC) in the ADC and its interrupt SOC trigger.
+	// 	  	SOC number		: 1
+	//	  	Trigger			: ADC_TRIGGER_EPWM6_SOCA
+	//	  	Channel			: ADC_CH_ADCIN2
+	//	 	Sample Window	: 50 SYSCLK cycles
+	//		Interrupt Trigger: ADC_INT_SOC_TRIGGER_NONE
+	ADC_setupSOC(posADCB_BASE, ADC_SOC_NUMBER1, ADC_TRIGGER_EPWM6_SOCA, ADC_CH_ADCIN2, 50U);
+	ADC_setInterruptSOCTrigger(posADCB_BASE, ADC_SOC_NUMBER1, ADC_INT_SOC_TRIGGER_NONE);
+
+	//curADCC initialization
+
+	// ADC Initialization: Write ADC configurations and power up the ADC
+	// Configures the analog-to-digital converter module prescaler.
+	ADC_setPrescaler(curADCC_BASE, ADC_CLK_DIV_2_0);
+	// Configures the analog-to-digital converter resolution and signal mode.
+	ADC_setMode(curADCC_BASE, ADC_RESOLUTION_12BIT, ADC_MODE_SINGLE_ENDED);
+	// Sets the timing of the end-of-conversion pulse
+	ADC_setInterruptPulseMode(curADCC_BASE, ADC_PULSE_END_OF_CONV);
+	// Powers up the analog-to-digital converter core.
+	ADC_enableConverter(curADCC_BASE);
+	// Delay for 1ms to allow ADC time to power up
+	DEVICE_DELAY_US(500);
+
+	// SOC Configuration: Setup ADC EPWM channel and trigger settings
+	// Disables SOC burst mode.
+	ADC_disableBurstMode(curADCC_BASE);
+	// Sets the priority mode of the SOCs.
+	ADC_setSOCPriority(curADCC_BASE, ADC_PRI_ALL_ROUND_ROBIN);
+	// Start of Conversion 0 Configuration
+	// Configures a start-of-conversion (SOC) in the ADC and its interrupt SOC trigger.
+	// 	  	SOC number		: 0
+	//	  	Trigger			: ADC_TRIGGER_EPWM6_SOCA
+	//	  	Channel			: ADC_CH_ADCIN2
+	//	 	Sample Window	: 50 SYSCLK cycles
+	//		Interrupt Trigger: ADC_INT_SOC_TRIGGER_NONE
+	ADC_setupSOC(curADCC_BASE, ADC_SOC_NUMBER0, ADC_TRIGGER_EPWM6_SOCA, ADC_CH_ADCIN2, 50U);
+	ADC_setInterruptSOCTrigger(curADCC_BASE, ADC_SOC_NUMBER0, ADC_INT_SOC_TRIGGER_NONE);
+	// Start of Conversion 1 Configuration
+	// Configures a start-of-conversion (SOC) in the ADC and its interrupt SOC trigger.
+	// 	  	SOC number		: 1
+	//	  	Trigger			: ADC_TRIGGER_EPWM6_SOCA
+	//	  	Channel			: ADC_CH_ADCIN3
+	//	 	Sample Window	: 50 SYSCLK cycles
+	//		Interrupt Trigger: ADC_INT_SOC_TRIGGER_NONE
+	ADC_setupSOC(curADCC_BASE, ADC_SOC_NUMBER1, ADC_TRIGGER_EPWM6_SOCA, ADC_CH_ADCIN3, 50U);
+	ADC_setInterruptSOCTrigger(curADCC_BASE, ADC_SOC_NUMBER1, ADC_INT_SOC_TRIGGER_NONE);
+	// Start of Conversion 2 Configuration
+	// Configures a start-of-conversion (SOC) in the ADC and its interrupt SOC trigger.
+	// 	  	SOC number		: 2
+	//	  	Trigger			: ADC_TRIGGER_EPWM6_SOCA
+	//	  	Channel			: ADC_CH_ADCIN4
+	//	 	Sample Window	: 50 SYSCLK cycles
+	//		Interrupt Trigger: ADC_INT_SOC_TRIGGER_NONE
+	ADC_setupSOC(curADCC_BASE, ADC_SOC_NUMBER2, ADC_TRIGGER_EPWM6_SOCA, ADC_CH_ADCIN4, 50U);
+	ADC_setInterruptSOCTrigger(curADCC_BASE, ADC_SOC_NUMBER2, ADC_INT_SOC_TRIGGER_NONE);
+
+	//curADCD initialization
+
+	// ADC Initialization: Write ADC configurations and power up the ADC
+	// Configures the analog-to-digital converter module prescaler.
+	ADC_setPrescaler(curADCD_BASE, ADC_CLK_DIV_2_0);
+	// Configures the analog-to-digital converter resolution and signal mode.
+	ADC_setMode(curADCD_BASE, ADC_RESOLUTION_12BIT, ADC_MODE_SINGLE_ENDED);
+	// Sets the timing of the end-of-conversion pulse
+	ADC_setInterruptPulseMode(curADCD_BASE, ADC_PULSE_END_OF_CONV);
+	// Powers up the analog-to-digital converter core.
+	ADC_enableConverter(curADCD_BASE);
+	// Delay for 1ms to allow ADC time to power up
+	DEVICE_DELAY_US(500);
+
+	// SOC Configuration: Setup ADC EPWM channel and trigger settings
+	// Disables SOC burst mode.
+	ADC_disableBurstMode(curADCD_BASE);
+	// Sets the priority mode of the SOCs.
+	ADC_setSOCPriority(curADCD_BASE, ADC_PRI_THRU_SOC5_HIPRI);
+	// Start of Conversion 0 Configuration
+	// Configures a start-of-conversion (SOC) in the ADC and its interrupt SOC trigger.
+	// 	  	SOC number		: 0
+	//	  	Trigger			: ADC_TRIGGER_EPWM6_SOCA
+	//	  	Channel			: ADC_CH_ADCIN0
+	//	 	Sample Window	: 50 SYSCLK cycles
+	//		Interrupt Trigger: ADC_INT_SOC_TRIGGER_NONE
+	ADC_setupSOC(curADCD_BASE, ADC_SOC_NUMBER0, ADC_TRIGGER_EPWM6_SOCA, ADC_CH_ADCIN0, 50U);
+	ADC_setInterruptSOCTrigger(curADCD_BASE, ADC_SOC_NUMBER0, ADC_INT_SOC_TRIGGER_NONE);
+	// Start of Conversion 1 Configuration
+	// Configures a start-of-conversion (SOC) in the ADC and its interrupt SOC trigger.
+	// 	  	SOC number		: 1
+	//	  	Trigger			: ADC_TRIGGER_EPWM6_SOCA
+	//	  	Channel			: ADC_CH_ADCIN1
+	//	 	Sample Window	: 50 SYSCLK cycles
+	//		Interrupt Trigger: ADC_INT_SOC_TRIGGER_NONE
+	ADC_setupSOC(curADCD_BASE, ADC_SOC_NUMBER1, ADC_TRIGGER_EPWM6_SOCA, ADC_CH_ADCIN1, 50U);
+	ADC_setInterruptSOCTrigger(curADCD_BASE, ADC_SOC_NUMBER1, ADC_INT_SOC_TRIGGER_NONE);
+	// Start of Conversion 2 Configuration
+	// Configures a start-of-conversion (SOC) in the ADC and its interrupt SOC trigger.
+	// 	  	SOC number		: 2
+	//	  	Trigger			: ADC_TRIGGER_EPWM6_SOCA
+	//	  	Channel			: ADC_CH_ADCIN2
+	//	 	Sample Window	: 50 SYSCLK cycles
+	//		Interrupt Trigger: ADC_INT_SOC_TRIGGER_NONE
+	ADC_setupSOC(curADCD_BASE, ADC_SOC_NUMBER2, ADC_TRIGGER_EPWM6_SOCA, ADC_CH_ADCIN2, 50U);
+	ADC_setInterruptSOCTrigger(curADCD_BASE, ADC_SOC_NUMBER2, ADC_INT_SOC_TRIGGER_NONE);
+	// Start of Conversion 3 Configuration
+	// Configures a start-of-conversion (SOC) in the ADC and its interrupt SOC trigger.
+	// 	  	SOC number		: 3
+	//	  	Trigger			: ADC_TRIGGER_EPWM6_SOCA
+	//	  	Channel			: ADC_CH_ADCIN3
+	//	 	Sample Window	: 50 SYSCLK cycles
+	//		Interrupt Trigger: ADC_INT_SOC_TRIGGER_NONE
+	ADC_setupSOC(curADCD_BASE, ADC_SOC_NUMBER3, ADC_TRIGGER_EPWM6_SOCA, ADC_CH_ADCIN3, 50U);
+	ADC_setInterruptSOCTrigger(curADCD_BASE, ADC_SOC_NUMBER3, ADC_INT_SOC_TRIGGER_NONE);
+	// Start of Conversion 4 Configuration
+	// Configures a start-of-conversion (SOC) in the ADC and its interrupt SOC trigger.
+	// 	  	SOC number		: 4
+	//	  	Trigger			: ADC_TRIGGER_EPWM6_SOCA
+	//	  	Channel			: ADC_CH_ADCIN4
+	//	 	Sample Window	: 50 SYSCLK cycles
+	//		Interrupt Trigger: ADC_INT_SOC_TRIGGER_NONE
+	ADC_setupSOC(curADCD_BASE, ADC_SOC_NUMBER4, ADC_TRIGGER_EPWM6_SOCA, ADC_CH_ADCIN4, 50U);
+	ADC_setInterruptSOCTrigger(curADCD_BASE, ADC_SOC_NUMBER4, ADC_INT_SOC_TRIGGER_NONE);
+	// Start of Conversion 5 Configuration
+	// Configures a start-of-conversion (SOC) in the ADC and its interrupt SOC trigger.
+	// 	  	SOC number		: 5
+	//	  	Trigger			: ADC_TRIGGER_EPWM6_SOCA
+	//	  	Channel			: ADC_CH_ADCIN14
+	//	 	Sample Window	: 50 SYSCLK cycles
+	//		Interrupt Trigger: ADC_INT_SOC_TRIGGER_NONE
+	ADC_setupSOC(curADCD_BASE, ADC_SOC_NUMBER5, ADC_TRIGGER_EPWM6_SOCA, ADC_CH_ADCIN14, 50U);
+	ADC_setInterruptSOCTrigger(curADCD_BASE, ADC_SOC_NUMBER5, ADC_INT_SOC_TRIGGER_NONE);
+	// Start of Conversion 6 Configuration
+	// Configures a start-of-conversion (SOC) in the ADC and its interrupt SOC trigger.
+	// 	  	SOC number		: 6
+	//	  	Trigger			: ADC_TRIGGER_EPWM6_SOCA
+	//	  	Channel			: ADC_CH_ADCIN15
+	//	 	Sample Window	: 50 SYSCLK cycles
+	//		Interrupt Trigger: ADC_INT_SOC_TRIGGER_NONE
+	ADC_setupSOC(curADCD_BASE, ADC_SOC_NUMBER6, ADC_TRIGGER_EPWM6_SOCA, ADC_CH_ADCIN15, 50U);
+	ADC_setInterruptSOCTrigger(curADCD_BASE, ADC_SOC_NUMBER6, ADC_INT_SOC_TRIGGER_NONE);
+	// ADC Interrupt 1 Configuration
+	// 		SOC/EOC number	: 6
+	// 		Interrupt Source: enabled
+	// 		Continuous Mode	: disabled
+	ADC_setInterruptSource(curADCD_BASE, ADC_INT_NUMBER1, ADC_SOC_NUMBER6);
+	ADC_enableInterrupt(curADCD_BASE, ADC_INT_NUMBER1);
+	ADC_clearInterruptStatus(curADCD_BASE, ADC_INT_NUMBER1);
+	ADC_disableContinuousMode(curADCD_BASE, ADC_INT_NUMBER1);
 
 }
 
@@ -347,7 +467,6 @@ void CAN_init(){
 }
 void EMIF1_init(){
 	
-	//myEMIF10 initialization 
 	EMIF_AsyncTimingParams tparam;
     SysCtl_setEMIF1ClockDivider(SYSCTL_EMIF1CLK_DIV_1);
     //
@@ -417,7 +536,7 @@ static void initEPWM(uint32_t base)
     // Set-up TBCLK
     //
     EPWM_setTimeBasePeriod(base, EPWM_TIMER_TBPRD);
-//    EPWM_setPhaseShift(base, 0U);
+    EPWM_setPhaseShift(base, 0U);
     EPWM_setTimeBaseCounter(base, 0U);
 
     //
@@ -483,6 +602,7 @@ void EPWM_init(){
     // Initialize PWM1 without phase shift as master
     //
     initEPWM(myEPWM0_BASE);
+    EPWM_selectPeriodLoadEvent(myEPWM0_BASE, EPWM_SHADOW_LOAD_MODE_COUNTER_ZERO);
 
     //
     // Initialize PWM2
@@ -495,13 +615,13 @@ void EPWM_init(){
     // Initialize PWM3
     //
     initEPWM(myEPWM2_BASE);
-    EPWM_selectPeriodLoadEvent(myEPWM3_BASE, EPWM_SHADOW_LOAD_MODE_COUNTER_ZERO);
+    EPWM_selectPeriodLoadEvent(myEPWM2_BASE, EPWM_SHADOW_LOAD_MODE_COUNTER_ZERO);
 
     //
     // Initialize PWM4
     //
     initEPWM(myEPWM3_BASE);
-    EPWM_selectPeriodLoadEvent(myEPWM4_BASE, EPWM_SHADOW_LOAD_MODE_COUNTER_ZERO);
+    EPWM_selectPeriodLoadEvent(myEPWM3_BASE, EPWM_SHADOW_LOAD_MODE_COUNTER_ZERO);
 
     //
     // Initialize PWM5
@@ -518,13 +638,13 @@ void EPWM_init(){
     //
     // Disable SOCA
     //
-    EPWM_disableADCTrigger(EPWM1_BASE, EPWM_SOC_A);
+    EPWM_disableADCTrigger(EPWM6_BASE, EPWM_SOC_A);
 
     //
     // Configure the SOC to occur on the first up-count event
     //
-    EPWM_setADCTriggerSource(EPWM1_BASE, EPWM_SOC_A, EPWM_SOC_TBCTR_U_CMPA);
-    EPWM_setADCTriggerEventPrescale(EPWM1_BASE, EPWM_SOC_A, 1);
+    EPWM_setADCTriggerSource(EPWM6_BASE, EPWM_SOC_A, EPWM_SOC_TBCTR_U_CMPA);
+    EPWM_setADCTriggerEventPrescale(EPWM6_BASE, EPWM_SOC_A, 1);
 
     SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_TBCLKSYNC);
 
@@ -646,11 +766,12 @@ void I2C_init(){
 }
 
 void INTERRUPT_init(){
-
+	
 	// Interrupt Setings for INT_myADC3_1
-	Interrupt_register(INT_ADCA1, &INT_ADCA_1_ISR);
-	Interrupt_enable(INT_ADCA1);
+	Interrupt_register(INT_curADCD_1, &INT_curADCD_1_ISR);
+	Interrupt_enable(INT_curADCD_1);
 }
+
 void SCI_init(){
 	
 	//mySCI0 initialization
@@ -723,4 +844,4 @@ void USB_init(){
 	
 	//myUSB0 initialization 
 }
-
+ 

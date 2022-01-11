@@ -415,7 +415,7 @@ struct pi_t{
 
 #define EPWM_TIMER_TBPRD 5000
 
-extern __interrupt void INT_myADC3_1_ISR(void);
+extern __interrupt void INT_curADCD_1_ISR(void);
 extern void ComputeUpdateDuty();
 
 extern volatile struct pi_t currentLoopPI;		//do not initialize; configure
