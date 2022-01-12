@@ -53,7 +53,7 @@ using std::memcpy;
 #endif
 
 #define OVERSAMPLING_TIMES 4
-volatile uint16_t sampling_times;
+uint16_t sampling_times;
 volatile uint16_t loop_sel;
 /*
 * 0b0000 two loops are open loop, 0b11 two loops are closed loop
@@ -67,20 +67,19 @@ volatile uint16_t pos_pid_sel;
 * 0b11000 trailing radial directions PID work, 24
 * 0b11110 all radial directions PID work, 30(2 4 8 16)
 */
-volatile struct pi_t currentLoopPI;
-volatile struct pid_t pid_tArray[5];
-volatile float posIntegralArray[5];
-volatile float currIntegralArray[10];
-volatile uint16_t rotorPosition[5];
-volatile uint16_t coilCurrent[10];
-volatile uint16_t pwmDuty[10];
-volatile uint16_t forwardFirstPos[5];
-volatile uint16_t forwardFirstCurr[10];
-volatile uint16_t refCurrent[10];
-volatile uint16_t refPosition[5];
-volatile uint16_t coilBiasCurrent[5];
-volatile uint32_t rawPosData[5];
-volatile uint32_t rawCurrData[10];
+struct pi_t currentLoopPI;
+struct pid_t pid_tArray[5];
+float posIntegralArray[5];
+float currIntegralArray[10];
+uint16_t rotorPosition[5];
+uint16_t coilCurrent[10];
+uint16_t pwmDuty[10];
+uint16_t forwardFirstPos[5];
+uint16_t refCurrent[10];
+uint16_t refPosition[5];
+uint16_t coilBiasCurrent[5];
+uint32_t rawPosData[5];
+uint32_t rawCurrData[10];
 
 
 
@@ -853,8 +852,8 @@ __interrupt void INT_curADCD_1_ISR(void){
 
 
 #define CONTROL_PERIOD 0.00005f
-#define MAX_POS_INTEGRAL 500
-#define MIN_POS_INTEGRAL -500
+#define MAX_POS_INTEGRAL 500.0f
+#define MIN_POS_INTEGRAL -500.0f
 #define MAX_CONTROL_CURRENT 1000
 #define MIN_CONTROL_CURRENT -1000
 
@@ -910,11 +909,11 @@ void CalculPID(uint16_t index){
 
 #define MAX_PWM_DUTY 4000
 #define MIN_PWM_DUTY 1000
-#define MAX_CURR_INTEGRAL 30000
-#define MIN_CURR_INTEGRAL -30000
+#define MAX_CURR_INTEGRAL 30000.0f
+#define MIN_CURR_INTEGRAL -30000.0f
 void CalculPI(uint16_t index){
 
-	float propotion;
+	float propotion, integral;
 	uint16_t outcome;
 	int16_t error;
 	error = (int16_t)(refCurrent[index] - coilCurrent[index]); 	// 平衡位置与设定点的差值
@@ -925,8 +924,8 @@ void CalculPI(uint16_t index){
 		currIntegralArray[index] = MAX_CURR_INTEGRAL;
 	if (currIntegralArray[index] < MIN_CURR_INTEGRAL)
 		currIntegralArray[index] = MIN_CURR_INTEGRAL;
-
-	outcome = (uint16_t)(propotion + currentLoopPI.I * currIntegralArray[index] + EPWM_TIMER_TBPRD / 2);
+	integral = currentLoopPI.I * currIntegralArray[index];
+	outcome = (uint16_t)((int16_t)(propotion + integral) + EPWM_TIMER_TBPRD / 2);
 	if (outcome > MAX_PWM_DUTY)
 		outcome = MAX_PWM_DUTY;
 	if (outcome < MIN_PWM_DUTY)
@@ -951,7 +950,6 @@ void Variable_init(){
 	for(i = 0; i < 10; i++){
 		currIntegralArray[i] = 0;
 		pwmDuty[i] = 2500;
-		forwardFirstCurr[i] = 0;
 		refCurrent[i] = 2048;
 	}
 
@@ -968,26 +966,26 @@ void Variable_init(){
 	refPosition[1] = 1765;
 	refPosition[2] = 1765;
 	refPosition[3] = 1765;
-	refPosition[4] = 1765;
+	refPosition[4] = 2121;
 
 	pid_tArray[0].P = 2;
-	pid_tArray[0].I = 0.0001;
+	pid_tArray[0].I = 10;
 	pid_tArray[0].D = 0.0001;
 
 	pid_tArray[1].P = 2;
-	pid_tArray[1].I = 0.0001;
+	pid_tArray[1].I = 10;
 	pid_tArray[1].D = 0.0001;
 
 	pid_tArray[2].P = 0.5;
-	pid_tArray[2].I = 0.0001;
+	pid_tArray[2].I = 10;
 	pid_tArray[2].D = 0.0001;
 
-	pid_tArray[3].P = 0.5;
-	pid_tArray[3].I = 0.0001;
+	pid_tArray[3].P = 1.1;
+	pid_tArray[3].I = 10;
 	pid_tArray[3].D = 0.0001;
 
-	pid_tArray[4].P = 0.5;
-	pid_tArray[4].I = 0.0001;
+	pid_tArray[4].P = 0.9;
+	pid_tArray[4].I = 10;
 	pid_tArray[4].D = 0.0001;
 
 	sampling_times = 0;

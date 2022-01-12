@@ -413,25 +413,24 @@ struct pi_t{
 	float I;
 };
 
-#define EPWM_TIMER_TBPRD 5000
+#define EPWM_TIMER_TBPRD 5000U
 
 extern __interrupt void INT_curADCD_1_ISR(void);
-extern void ComputeUpdateDuty();
 
-extern volatile struct pi_t currentLoopPI;		//do not initialize; configure
-extern volatile struct pid_t pid_tArray[5];  	//do not initialize; configure
-extern volatile float posIntegralArray[5];		//need initialize to 0
-extern volatile float currIntegralArray[10];    //need initialize to 0
-extern volatile uint16_t rotorPosition[5];		//need initialize to 0
-extern volatile uint16_t coilCurrent[10];		//need initialize to 0
-extern volatile uint16_t pwmDuty[10];			//need initialize to 2500
-extern volatile uint16_t forwardFirstPos[5];		//need initialize to 0
-extern volatile uint16_t forwardFirstCurr[10];	//need initialize to 0
-extern volatile uint16_t refPosition[5];			//need configure
-extern volatile uint16_t refCurrent[10];			//need initialize to 3750
-extern volatile uint16_t coilBiasCurrent[5];		//do not initialize; configure
-extern volatile uint32_t rawPosData[5];
-extern volatile uint32_t rawCurrData[10];
+
+extern struct pi_t currentLoopPI;		//do not initialize; configure
+extern struct pid_t pid_tArray[5];  	//do not initialize; configure
+extern float posIntegralArray[5];		//need initialize to 0
+extern float currIntegralArray[10];    //need initialize to 0
+extern uint16_t rotorPosition[5];		//need initialize to 0
+extern uint16_t coilCurrent[10];		//need initialize to 0
+extern uint16_t pwmDuty[10];			//need initialize to 2500
+extern uint16_t forwardFirstPos[5];		//need initialize to 0
+extern uint16_t refPosition[5];			//need configure
+extern uint16_t refCurrent[10];			//need initialize to 3750
+extern uint16_t coilBiasCurrent[5];		//do not initialize; configure
+extern uint32_t rawPosData[5];
+extern uint32_t rawCurrData[10];
 
 extern void CalculPID(uint16_t index);
 extern void CalculPI(uint16_t index);
