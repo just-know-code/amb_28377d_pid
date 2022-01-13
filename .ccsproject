@@ -10,7 +10,7 @@
 	<rts value="libc.a"/>
 	<createSlaveProjects value=""/>
 	<templateProperties value="id=empty_sysconfig_176ptp.projectspec.empty_sysconfig_176ptp"/>
-	<origin value="E:/CCS/28377d_work_space/amb_sysconfig_176ptp"/>
+	<origin value="E:/CCS/2837xD_WORK_SPACE/amb_pid_cpu1_ram"/>
 	<filesToOpen value=""/>
 	<connection value="common/targetdb/connections/TIXDS100v3_Dot7_Connection.xml"/>
 	<isTargetManual value="true"/>
