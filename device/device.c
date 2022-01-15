@@ -909,23 +909,21 @@ void CalculPID(uint16_t index){
 
 #define MAX_PWM_DUTY 4000
 #define MIN_PWM_DUTY 1000
-#define MAX_CURR_INTEGRAL 30000.0f
-#define MIN_CURR_INTEGRAL -30000.0f
+#define MAX_CURR_INTEGRAL 1000.0f
+#define MIN_CURR_INTEGRAL -1000.0f
 void CalculPI(uint16_t index){
 
-	float propotion, integral;
-	uint16_t outcome;
-	int16_t error;
-	error = (int16_t)(refCurrent[index] - coilCurrent[index]); 	// 平衡位置与设定点的差值
+    int16_t propotion, integral, outcome, error;
+	error = (refCurrent[index] - coilCurrent[index]); 	// 平衡位置与设定点的差值
 	currIntegralArray[index] +=  error * CONTROL_PERIOD;
-	propotion = currentLoopPI.P * error;
+	propotion = (int16_t)(currentLoopPI.P * error);
 
 	if (currIntegralArray[index] > MAX_CURR_INTEGRAL)
 		currIntegralArray[index] = MAX_CURR_INTEGRAL;
 	if (currIntegralArray[index] < MIN_CURR_INTEGRAL)
 		currIntegralArray[index] = MIN_CURR_INTEGRAL;
-	integral = currentLoopPI.I * currIntegralArray[index];
-	outcome = (uint16_t)((int16_t)(propotion + integral) + EPWM_TIMER_TBPRD / 2);
+	integral = (int16_t)(currentLoopPI.I * currIntegralArray[index]);
+	outcome = (propotion + integral) + EPWM_TIMER_TBPRD / 2;
 	if (outcome > MAX_PWM_DUTY)
 		outcome = MAX_PWM_DUTY;
 	if (outcome < MIN_PWM_DUTY)
