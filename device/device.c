@@ -81,8 +81,9 @@ uint16_t coilBiasCurrent[5];
 uint32_t rawPosData[5];
 uint32_t rawCurrData[10];
 
-
-
+float propotion[5];
+float differential[5];
+//float integration[5];
 //*****************************************************************************
 //
 // Function to initialize the device. Primarily initializes system control to a
@@ -810,6 +811,10 @@ __interrupt void INT_curADCD_1_ISR(void){
 				CalculPID(3);
 			if (pos_pid_sel & 0b10000)
 				CalculPID(4);
+			if (pos_pid_sel == 0){
+			    for (index = 0; index < 10; index++)
+			        refCurrent[index] = 2048;
+			}
 		}
 #endif
 		//compute current loop pi
@@ -859,27 +864,32 @@ __interrupt void INT_curADCD_1_ISR(void){
 
 void CalculPID(uint16_t index){
 
-	float propotion, differential;
-	int16_t pos_loop_outcome, error, firstOrderDiff;
-	error = (int16_t)(refPosition[index] - rotorPosition[index]); /* 平衡位置与设定点的差值 */
-	firstOrderDiff = (int16_t)(rotorPosition[index] - forwardFirstPos[index]); /* 相邻两点之间的差值 */
-	posIntegralArray[index] += error * CONTROL_PERIOD;
-
+//	float propotion, differential;
+	int16_t pos_loop_outcome;
+	float error, firstOrderDiff;
+	error = (refPosition[index] - rotorPosition[index]); /* 平衡位置与设定点的差值 */
+	firstOrderDiff = rotorPosition[index] - forwardFirstPos[index]; /* 相邻两点之间的差值 */
 	forwardFirstPos[index] = rotorPosition[index];
-	propotion = pid_tArray[index].P * error;
-	differential = pid_tArray[index].D * firstOrderDiff / CONTROL_PERIOD;
+
+	propotion[index] = pid_tArray[index].P * error;
+    posIntegralArray[index] += pid_tArray[index].I * error * CONTROL_PERIOD;
+//	integration[index] = pid_tArray[index].I * posIntegralArray[index];
+	differential[index] = pid_tArray[index].D * firstOrderDiff / CONTROL_PERIOD;
 
 	if (posIntegralArray[index] > MAX_POS_INTEGRAL)
 		posIntegralArray[index] = MAX_POS_INTEGRAL;
 	if (posIntegralArray[index] < MIN_POS_INTEGRAL)
 		posIntegralArray[index] = MIN_POS_INTEGRAL;
+
 	// outcome * 1200 / 2000
-	pos_loop_outcome = (int16_t)(propotion + pid_tArray[index].I * posIntegralArray[index] + differential);
+	pos_loop_outcome = (int16_t)(propotion[index] + posIntegralArray[index] + differential[index]);
+
 	if (pos_loop_outcome > MAX_CONTROL_CURRENT)
 		pos_loop_outcome = MAX_CONTROL_CURRENT;
 	if (pos_loop_outcome < MIN_CONTROL_CURRENT)
 		pos_loop_outcome = MIN_CONTROL_CURRENT;
-	pos_loop_outcome = (int16_t)(pos_loop_outcome * 0.6);
+
+	pos_loop_outcome = (int16_t)(pos_loop_outcome * 550 / 900);
 
 	refCurrent[index * 2] = coilBiasCurrent[index] - pos_loop_outcome;
 	refCurrent[index * 2 + 1] = coilBiasCurrent[index] + pos_loop_outcome;
@@ -907,10 +917,10 @@ void CalculPID(uint16_t index){
 	 * */
 }
 
-#define MAX_PWM_DUTY 4000
-#define MIN_PWM_DUTY 1000
-#define MAX_CURR_INTEGRAL 1000.0f
-#define MIN_CURR_INTEGRAL -1000.0f
+#define MAX_PWM_DUTY 4800
+#define MIN_PWM_DUTY 200
+#define MAX_CURR_INTEGRAL 1000
+#define MIN_CURR_INTEGRAL -1000
 void CalculPI(uint16_t index){
 
     int16_t propotion, integral, outcome, error;
@@ -987,8 +997,8 @@ void Variable_init(){
 	pid_tArray[4].D = 0.0001;
 
 	sampling_times = 0;
-	loop_sel = 0b11;
-	pos_pid_sel = 0b00000;
+	loop_sel = 1;
+	pos_pid_sel = 0;
 
 #ifndef POSITION_CLOSED_LOOP
 	for(i = 0; i < 10; i++){
