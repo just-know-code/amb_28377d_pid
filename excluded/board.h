@@ -103,22 +103,12 @@
 #define GPIO_PIN_EPWM7B 13
 #define GPIO_PIN_EPWM8A 14
 #define GPIO_PIN_EPWM8B 15
-#define GPIO_PIN_SDAA 32
-#define GPIO_PIN_SCLA 33
 #define GPIO_PIN_SCIRXDA 64
 #define GPIO_PIN_SCITXDA 65
 #define GPIO_PIN_SCIRXDB 55
 #define GPIO_PIN_SCITXDB 54
 #define GPIO_PIN_SCIRXDC 57
 #define GPIO_PIN_SCITXDC 56
-#define GPIO_PIN_SPISIMOA 16
-#define GPIO_PIN_SPISOMIA 17
-#define GPIO_PIN_SPICLKA 18
-#define GPIO_PIN_SPISTEA 19
-#define GPIO_PIN_SPISIMOB 60
-#define GPIO_PIN_SPISOMIB 61
-#define GPIO_PIN_SPICLKB 58
-#define GPIO_PIN_SPISTEB 59
 
 #define posADCA_BASE ADCA_BASE
 #define posADCA_RESULT_BASE ADCARESULT_BASE
@@ -161,11 +151,6 @@
 #define myGPIO14 26
 #define myGPIO15 27
 
-#define myI2C0_BASE I2CA_BASE
-#define myI2C0_BITRATE 400000
-#define myI2C0_SLAVE_ADDRESS 0
-#define myI2C0_OWN_SLAVE_ADDRESS 0
-
 
 // Interrupt Setings for INT_curADCD_1
 #define INT_curADCD_1 INT_ADCD1
@@ -189,24 +174,14 @@ extern __interrupt void INT_curADCD_1_ISR(void);
 #define mySCI2_CONFIG_STOP SCI_CONFIG_STOP_ONE
 #define mySCI2_CONFIG_PAR SCI_CONFIG_PAR_NONE
 
-#define mySPI0_BASE SPIA_BASE
-#define mySPI0_BITRATE 25000
-#define mySPI1_BASE SPIB_BASE
-#define mySPI1_BITRATE 25000
-
-#define myUSB0_BASE USB0_BASE
-
-void	Board_init();
-void	ADC_init();
-void	CAN_init();
-void	EMIF1_init();
-void	EPWM_init();
-void	GPIO_init();
-void	I2C_init();
-void	INTERRUPT_init();
-void	SCI_init();
-void	SPI_init();
-void	USB_init();
-void	PinMux_init();
+void    Board_init();
+void    ADC_init();
+void    CAN_init();
+void    EMIF1_init();
+void    EPWM_init();
+void    GPIO_init();
+void    INTERRUPT_init();
+void    SCI_init();
+void    PinMux_init();
 
 #endif  // end of BOARD_H definition

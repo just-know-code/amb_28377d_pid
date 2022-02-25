@@ -65,7 +65,7 @@ volatile uint16_t pos_pid_sel;
 * 0b00001 only the first PID works
 * 0b00110 front radial directions PID work, 6
 * 0b11000 trailing radial directions PID work, 24
-* 0b11110 all radial directions PID work, 30(2 4 8 16)
+* 0b11110 all radial directions PID work, 30(2 4 8 16)Äã
 */
 struct pi_t currentLoopPI;
 struct pid_t pid_tArray[5];
@@ -997,7 +997,7 @@ void Variable_init(){
 	pid_tArray[4].D = 0.0001;
 
 	sampling_times = 0;
-	loop_sel = 1;
+	loop_sel = 0;
 	pos_pid_sel = 0;
 
 #ifndef POSITION_CLOSED_LOOP

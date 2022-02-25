@@ -2,7 +2,7 @@
  * These arguments were used when this file was generated. They will be automatically applied on subsequent loads
  * via the GUI or CLI. Run CLI with '--help' for additional information on how to override these arguments.
  * @cliArgs --device "F2837xD" --package "F2837xD_176PTP" --part "F2837xD_176PTP" --product "C2000WARE@3.01.00.00"
- * @versions {"tool":"1.10.0+2163"}
+ * @versions {"tool":"1.11.0+2225"}
  */
 
 /**
@@ -43,17 +43,10 @@ const gpio13 = gpio.addInstance();
 const gpio14 = gpio.addInstance();
 const gpio15 = gpio.addInstance();
 const gpio16 = gpio.addInstance();
-const i2c    = scripting.addModule("/driverlib/i2c.js", {}, false);
-const i2c1   = i2c.addInstance();
 const sci    = scripting.addModule("/driverlib/sci.js", {}, false);
 const sci1   = sci.addInstance();
 const sci2   = sci.addInstance();
 const sci3   = sci.addInstance();
-const spi    = scripting.addModule("/driverlib/spi.js", {}, false);
-const spi1   = spi.addInstance();
-const spi2   = spi.addInstance();
-const usb    = scripting.addModule("/driverlib/usb.js", {}, false);
-const usb1   = usb.addInstance();
 
 /**
  * Write custom configuration values to the imported modules.
@@ -93,13 +86,16 @@ adc1.soc5Channel          = "ADC_CH_ADCIN4_ADCIN5";
 adc1.soc0SampleWindow     = 50;
 adc1.soc1SampleWindow     = 50;
 adc1.soc2SampleWindow     = 50;
-adc1.soc1Channel          = "ADC_CH_ADCIN2";
 adc1.soc4Channel          = "ADC_CH_ADCIN4";
 adc1.soc4SampleWindow     = 50;
 adc1.enabledSOCs          = ["ADC_SOC_NUMBER0","ADC_SOC_NUMBER1","ADC_SOC_NUMBER2"];
-adc1.soc2Channel          = "ADC_CH_ADCIN4";
 adc1.adcClockPrescaler    = "ADC_CLK_DIV_2_0";
 adc1.$name                = "posADCA";
+adc1.adcSignalMode        = "ADC_MODE_DIFFERENTIAL";
+adc1.soc0Channel          = "ADC_CH_ADCIN0_ADCIN1";
+adc1.soc1Channel          = "ADC_CH_ADCIN2_ADCIN3";
+adc1.soc2Channel          = "ADC_CH_ADCIN4_ADCIN5";
+adc1.adcResolutionMode    = "ADC_RESOLUTION_16BIT";
 
 adc2.adcBase                        = "ADCB_BASE";
 adc2.interruptPulseMode             = "ADC_PULSE_END_OF_CONV";
@@ -125,12 +121,15 @@ adc2.soc6Channel                    = "ADC_CH_ADCIN2";
 adc2.soc3Channel                    = "ADC_CH_ADCIN2_ADCIN3";
 adc2.soc0SampleWindow               = 50;
 adc2.soc1SampleWindow               = 50;
-adc2.soc1Channel                    = "ADC_CH_ADCIN2";
 adc2.soc2Channel                    = "ADC_CH_ADCIN2";
 adc2.soc2SampleWindow               = 50;
 adc2.enabledSOCs                    = ["ADC_SOC_NUMBER0","ADC_SOC_NUMBER1"];
 adc2.adcClockPrescaler              = "ADC_CLK_DIV_2_0";
 adc2.$name                          = "posADCB";
+adc2.adcResolutionMode              = "ADC_RESOLUTION_16BIT";
+adc2.adcSignalMode                  = "ADC_MODE_DIFFERENTIAL";
+adc2.soc0Channel                    = "ADC_CH_ADCIN0_ADCIN1";
+adc2.soc1Channel                    = "ADC_CH_ADCIN2_ADCIN3";
 
 adc3.adcBase             = "ADCC_BASE";
 adc3.interruptPulseMode  = "ADC_PULSE_END_OF_CONV";
@@ -311,13 +310,6 @@ gpio15.gpioPin.$assign = "ball.27";
 gpio16.$name           = "myGPIO15";
 gpio16.gpioPin.$assign = "ball.28";
 
-i2c1.$name                 = "myI2C0";
-i2c1.enabledFIFOInterrupts = ["I2C_INT_RXFF","I2C_INT_TXFF"];
-i2c1.useInterrupts         = false;
-i2c1.i2c.$assign           = "I2CA";
-i2c1.i2c.sdaPin.$assign    = "ball.67";
-i2c1.i2c.sclPin.$assign    = "ball.69";
-
 sci1.$name                 = "mySCI0";
 sci1.sci.$assign           = "SCIA";
 sci1.sci.scirxdPin.$assign = "ball.110";
@@ -332,31 +324,6 @@ sci3.$name                 = "mySCI2";
 sci3.sci.$assign           = "SCIC";
 sci3.sci.scirxdPin.$assign = "ball.102";
 sci3.sci.scitxdPin.$assign = "ball.101";
-
-spi1.$name                  = "mySPI0";
-spi1.mode                   = "SPI_MODE_MASTER";
-spi1.useFifo                = false;
-spi1.useInterrupts          = false;
-spi1.spi.$assign            = "SPIA";
-spi1.spi.spisimoPin.$assign = "ball.8";
-spi1.spi.spisomiPin.$assign = "ball.9";
-spi1.spi.spiclkPin.$assign  = "ball.10";
-spi1.spi.spistePin.$assign  = "ball.12";
-
-spi2.$name                  = "mySPI1";
-spi2.useFifo                = false;
-spi2.useInterrupts          = false;
-spi2.mode                   = "SPI_MODE_MASTER";
-spi2.spi.$assign            = "SPIB";
-spi2.spi.spisimoPin.$assign = "ball.105";
-spi2.spi.spisomiPin.$assign = "ball.107";
-spi2.spi.spiclkPin.$assign  = "ball.103";
-spi2.spi.spistePin.$assign  = "ball.104";
-
-usb1.$name                = "myUSB0";
-usb1.usb.$assign          = "USB0";
-usb1.usb.usbdmPin.$assign = "ball.130";
-usb1.usb.usbdpPin.$assign = "ball.131";
 
 /**
  * Pinmux solution for unlocked pins/peripherals. This ensures that minor changes to the automatic solver in a future
