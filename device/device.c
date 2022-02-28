@@ -65,25 +65,27 @@ volatile uint16_t pos_pid_sel;
 * 0b00001 only the first PID works
 * 0b00110 front radial directions PID work, 6
 * 0b11000 trailing radial directions PID work, 24
-* 0b11110 all radial directions PID work, 30(2 4 8 16)你
+* 0b11110 all radial directions PID work, 30(2 4 8 16)
 */
-struct pi_t currentLoopPI;
+
 struct pid_t pid_tArray[5];
 float posIntegralArray[5];
-float currIntegralArray[10];
-uint16_t rotorPosition[5];
-uint16_t coilCurrent[10];
-uint16_t pwmDuty[10];
-uint16_t forwardFirstPos[5];
-uint16_t refCurrent[10];
-uint16_t refPosition[5];
-uint16_t coilBiasCurrent[5];
-uint32_t rawPosData[5];
-uint32_t rawCurrData[10];
-
+float rotorPosition[5];
+float forwardFirstPos[5];
+float refPosition[5];
 float propotion[5];
 float differential[5];
-//float integration[5];
+
+float coilCurrent[10];
+float coilBiasCurrent[5];
+float refCurrent[10];
+float currIntegralArray[10];
+struct pi_t currentLoopPI;
+
+uint32_t rawPosData[5];
+uint32_t rawCurrData[10];
+uint16_t pwmDuty[10];
+
 //*****************************************************************************
 //
 // Function to initialize the device. Primarily initializes system control to a
@@ -780,26 +782,17 @@ __interrupt void INT_curADCD_1_ISR(void){
 	// Clear the interrupt flag
 	//
 	ADC_clearInterruptStatus(ADCD_BASE, ADC_INT_NUMBER1);
-	//
-	// Check if overflow has occurred
-	//
-	//	if(true == ADC_getInterruptOverflowStatus(ADCA_BASE, ADC_INT_NUMBER1)){
-	//		ADC_clearInterruptOverflowStatus(ADCA_BASE, ADC_INT_NUMBER1);
-	//		ADC_clearInterruptStatus(ADCA_BASE, ADC_INT_NUMBER1);
-	//	}
+
 	sampling_times++;
 	if (sampling_times == OVERSAMPLING_TIMES){
-	
-	
 		uint16_t index;
 		for(index = 0; index < 5; index++)
-			rotorPosition[index] = rawPosData[index] / OVERSAMPLING_TIMES;
+			rotorPosition[index] = (float)rawPosData[index] / OVERSAMPLING_TIMES / 0xffff * 500 + 300;
 
 		for(index = 0; index < 10; index++)
-			coilCurrent[index] = rawCurrData[index] / OVERSAMPLING_TIMES;
+			coilCurrent[index] = (float)rawCurrData[index] / OVERSAMPLING_TIMES / 0x1000 * 16 - 8;
 
 		//compute displacement loop pid
-#ifdef POSITION_CLOSED_LOOP
 		if (loop_sel & 0b10){
 			if (pos_pid_sel & 0b00001)
 				CalculPID(0);
@@ -813,23 +806,18 @@ __interrupt void INT_curADCD_1_ISR(void){
 				CalculPID(4);
 			if (pos_pid_sel == 0){
 			    for (index = 0; index < 10; index++)
-			        refCurrent[index] = 2048;
+			        refCurrent[index] = 2.0f;
 			}
 		}
-#endif
 		//compute current loop pi
-#ifdef CURRENT_CLOSED_LOOP
 		if (loop_sel & 0b01){
-
 			uint16_t i;
 			for(i = 0; i < 10; i++){
 				CalculPI(i);
 			}
 		}
-#endif
 		// update pwm duty
 		UpdatePWMDuty();
-		
 		sampling_times = 0;
 	} else {
 		ADC_forceMultipleSOC(ADCA_BASE, ADC_FORCE_SOC0 |
@@ -852,48 +840,41 @@ __interrupt void INT_curADCD_1_ISR(void){
 	// Acknowledge the interrupt
 	//
 	Interrupt_clearACKGroup(INTERRUPT_ACK_GROUP1);
-	
 }
 
 
 #define CONTROL_PERIOD 0.00005f
-#define MAX_POS_INTEGRAL 500.0f
-#define MIN_POS_INTEGRAL -500.0f
-#define MAX_CONTROL_CURRENT 1000
-#define MIN_CONTROL_CURRENT -1000
+#define MAX_POS_INTEGRAL 2.0f
+#define MIN_POS_INTEGRAL -2.0f
+#define MAX_CONTROL_CURRENT 8.0f
+#define MIN_CONTROL_CURRENT -8.0f
 
 void CalculPID(uint16_t index){
 
 //	float propotion, differential;
-	int16_t pos_loop_outcome;
-	float error, firstOrderDiff;
-	error = (refPosition[index] - rotorPosition[index]); /* 平衡位置与设定点的差值 */
+	float pos_loop_outcome, error, firstOrderDiff;
+	error = refPosition[index] - rotorPosition[index]; /* 平衡位置与设定点的差值 */
 	firstOrderDiff = rotorPosition[index] - forwardFirstPos[index]; /* 相邻两点之间的差值 */
 	forwardFirstPos[index] = rotorPosition[index];
 
 	propotion[index] = pid_tArray[index].P * error;
-    posIntegralArray[index] += pid_tArray[index].I * error * CONTROL_PERIOD;
-//	integration[index] = pid_tArray[index].I * posIntegralArray[index];
 	differential[index] = pid_tArray[index].D * firstOrderDiff / CONTROL_PERIOD;
 
+	posIntegralArray[index] += error * CONTROL_PERIOD;
 	if (posIntegralArray[index] > MAX_POS_INTEGRAL)
 		posIntegralArray[index] = MAX_POS_INTEGRAL;
 	if (posIntegralArray[index] < MIN_POS_INTEGRAL)
 		posIntegralArray[index] = MIN_POS_INTEGRAL;
 
-	// outcome * 1200 / 2000
-	pos_loop_outcome = (int16_t)(propotion[index] + posIntegralArray[index] + differential[index]);
+	pos_loop_outcome = propotion[index] + pid_tArray[index].I * posIntegralArray[index] + differential[index];
 
 	if (pos_loop_outcome > MAX_CONTROL_CURRENT)
 		pos_loop_outcome = MAX_CONTROL_CURRENT;
 	if (pos_loop_outcome < MIN_CONTROL_CURRENT)
 		pos_loop_outcome = MIN_CONTROL_CURRENT;
 
-	pos_loop_outcome = (int16_t)(pos_loop_outcome * 550 / 900);
-
 	refCurrent[index * 2] = coilBiasCurrent[index] - pos_loop_outcome;
 	refCurrent[index * 2 + 1] = coilBiasCurrent[index] + pos_loop_outcome;
-
 	/*
 	 * %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	 *轴向：
@@ -917,28 +898,28 @@ void CalculPID(uint16_t index){
 	 * */
 }
 
-#define MAX_PWM_DUTY 4800
-#define MIN_PWM_DUTY 200
+#define MAX_PWM_DUTY 0.95f
+#define MIN_PWM_DUTY 0.05f
 #define MAX_CURR_INTEGRAL 1000
 #define MIN_CURR_INTEGRAL -1000
 void CalculPI(uint16_t index){
 
-    int16_t propotion, integral, outcome, error;
-	error = (refCurrent[index] - coilCurrent[index]); 	// 平衡位置与设定点的差值
+    float propotion, integral, error, outcome;
+	error = refCurrent[index] - coilCurrent[index]; 	// 平衡位置与设定点的差值
 	currIntegralArray[index] +=  error * CONTROL_PERIOD;
-	propotion = (int16_t)(currentLoopPI.P * error);
-
+	propotion = currentLoopPI.P * error;
 	if (currIntegralArray[index] > MAX_CURR_INTEGRAL)
 		currIntegralArray[index] = MAX_CURR_INTEGRAL;
 	if (currIntegralArray[index] < MIN_CURR_INTEGRAL)
 		currIntegralArray[index] = MIN_CURR_INTEGRAL;
-	integral = (int16_t)(currentLoopPI.I * currIntegralArray[index]);
-	outcome = (propotion + integral) + EPWM_TIMER_TBPRD / 2;
+
+	integral = currentLoopPI.I * currIntegralArray[index];
+	outcome = propotion + integral;
 	if (outcome > MAX_PWM_DUTY)
 		outcome = MAX_PWM_DUTY;
 	if (outcome < MIN_PWM_DUTY)
 		outcome = MIN_PWM_DUTY;
-	pwmDuty[index] = outcome;
+	pwmDuty[index] = (uint16_t)(outcome * EPWM_TIMER_TBPRD);
 }
 
 //*****************************************************************************
@@ -958,17 +939,17 @@ void Variable_init(){
 	for(i = 0; i < 10; i++){
 		currIntegralArray[i] = 0;
 		pwmDuty[i] = 2500;
-		refCurrent[i] = 2048;
+		refCurrent[i] = 2.0f;
 	}
 
-	currentLoopPI.P = 10;
-	currentLoopPI.I = 0.038;
+	currentLoopPI.P = 0.38;
+	currentLoopPI.I = 0.1;
 
-	coilBiasCurrent[0] = 2648;
-	coilBiasCurrent[1] = 2648;
-	coilBiasCurrent[2] = 2648;
-	coilBiasCurrent[3] = 2648;
-	coilBiasCurrent[4] = 2648;
+	coilBiasCurrent[0] = 2.0f;
+	coilBiasCurrent[1] = 2.0f;
+	coilBiasCurrent[2] = 2.0f;
+	coilBiasCurrent[3] = 2.0f;
+	coilBiasCurrent[4] = 2.0f;
 
 	refPosition[0] = 1765;
 	refPosition[1] = 1765;
@@ -999,20 +980,6 @@ void Variable_init(){
 	sampling_times = 0;
 	loop_sel = 0;
 	pos_pid_sel = 0;
-
-#ifndef POSITION_CLOSED_LOOP
-	for(i = 0; i < 10; i++){
-		refCurrent[i] = 2048;
-	}
-#endif
-	//compute current loop pi
-#ifndef CURRENT_CLOSED_LOOP
-	for(i = 0; i < 10; i++){
-
-		pwmDuty[i] = 2500;
-	}
-#endif
-
 }
 
 
