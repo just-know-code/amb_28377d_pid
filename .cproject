@@ -44,6 +44,7 @@
 								<option id="com.ti.ccstudio.buildDefinitions.C2000_21.12.compilerID.FP_MODE.1153409457" name="Floating Point mode (--fp_mode)" superClass="com.ti.ccstudio.buildDefinitions.C2000_21.12.compilerID.FP_MODE" value="com.ti.ccstudio.buildDefinitions.C2000_21.12.compilerID.FP_MODE.relaxed" valueType="enumerated"/>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="com.ti.ccstudio.buildDefinitions.C2000_21.12.compilerID.INCLUDE_PATH.685183902" name="Add dir to #include search path (--include_path, -I)" superClass="com.ti.ccstudio.buildDefinitions.C2000_21.12.compilerID.INCLUDE_PATH" valueType="includePath">
 									<listOptionValue builtIn="false" value="${COM_TI_C2000WARE_SOFTWARE_PACKAGE_INCLUDE_PATH}"/>
+									<listOptionValue builtIn="false" value="${PROJECT_ROOT}/algorithm"/>
 									<listOptionValue builtIn="false" value="${SYSCONFIG_TOOL_INCLUDE_PATH}"/>
 									<listOptionValue builtIn="false" value="${PROJECT_ROOT}"/>
 									<listOptionValue builtIn="false" value="${PROJECT_ROOT}/excluded"/>
@@ -67,7 +68,7 @@
 								<option id="com.ti.ccstudio.buildDefinitions.C2000_21.12.compilerID.DIAG_WRAP.1830912032" name="Wrap diagnostic messages (--diag_wrap)" superClass="com.ti.ccstudio.buildDefinitions.C2000_21.12.compilerID.DIAG_WRAP" value="com.ti.ccstudio.buildDefinitions.C2000_21.12.compilerID.DIAG_WRAP.off" valueType="enumerated"/>
 								<option id="com.ti.ccstudio.buildDefinitions.C2000_21.12.compilerID.DISPLAY_ERROR_NUMBER.209618976" name="Emit diagnostic identifier numbers (--display_error_number, -pden)" superClass="com.ti.ccstudio.buildDefinitions.C2000_21.12.compilerID.DISPLAY_ERROR_NUMBER" value="true" valueType="boolean"/>
 								<option id="com.ti.ccstudio.buildDefinitions.C2000_21.12.compilerID.ABI.144111782" name="Application binary interface [See 'General' page to edit] (--abi)" superClass="com.ti.ccstudio.buildDefinitions.C2000_21.12.compilerID.ABI" value="com.ti.ccstudio.buildDefinitions.C2000_21.12.compilerID.ABI.eabi" valueType="enumerated"/>
-								<option id="com.ti.ccstudio.buildDefinitions.C2000_21.12.compilerID.OPT_FOR_SPEED.1856890402" superClass="com.ti.ccstudio.buildDefinitions.C2000_21.12.compilerID.OPT_FOR_SPEED" value="com.ti.ccstudio.buildDefinitions.C2000_21.12.compilerID.OPT_FOR_SPEED.2" valueType="enumerated"/>
+								<option id="com.ti.ccstudio.buildDefinitions.C2000_21.12.compilerID.OPT_FOR_SPEED.1856890402" name="Speed vs. size trade-offs (--opt_for_speed, -mf)" superClass="com.ti.ccstudio.buildDefinitions.C2000_21.12.compilerID.OPT_FOR_SPEED" value="com.ti.ccstudio.buildDefinitions.C2000_21.12.compilerID.OPT_FOR_SPEED.2" valueType="enumerated"/>
 								<inputType id="com.ti.ccstudio.buildDefinitions.C2000_21.12.compiler.inputType__C_SRCS.220324601" name="C Sources" superClass="com.ti.ccstudio.buildDefinitions.C2000_21.12.compiler.inputType__C_SRCS"/>
 								<inputType id="com.ti.ccstudio.buildDefinitions.C2000_21.12.compiler.inputType__CPP_SRCS.635850889" name="C++ Sources" superClass="com.ti.ccstudio.buildDefinitions.C2000_21.12.compiler.inputType__CPP_SRCS"/>
 								<inputType id="com.ti.ccstudio.buildDefinitions.C2000_21.12.compiler.inputType__ASM_SRCS.1126416589" name="Assembly Sources" superClass="com.ti.ccstudio.buildDefinitions.C2000_21.12.compiler.inputType__ASM_SRCS"/>

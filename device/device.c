@@ -47,44 +47,13 @@
 #include "driverlib.h"
 #include "inc/hw_ipc.h"
 #include <string.h>
+#include "control_algorithm.h"
 
 #ifdef __cplusplus
 using std::memcpy;
 #endif
 
-#define OVERSAMPLING_TIMES 4
-uint16_t sampling_times;
-volatile uint16_t loop_sel;
-/*
-* 0b0000 two loops are open loop, 0b11 two loops are closed loop
-* 0b01 only current is closed loop, 0b10 only position loop is closed loop
-*/
-volatile uint16_t pos_pid_sel;
-/*
-* 0b00000 all PID operations do not work
-* 0b00001 only the first PID works
-* 0b00110 front radial directions PID work, 6
-* 0b11000 trailing radial directions PID work, 24
-* 0b11110 all radial directions PID work, 30(2 4 8 16)
-*/
-
-struct pid_t pid_tArray[5];
-float posIntegralArray[5];
-float rotorPosition[5];
-float forwardFirstPos[5];
-float refPosition[5];
-float propotion[5];
-float differential[5];
-
-float coilCurrent[10];
-float coilBiasCurrent[5];
-float refCurrent[10];
-float currIntegralArray[10];
-struct pi_t currentLoopPI;
-
-uint32_t rawPosData[5];
-uint32_t rawCurrData[10];
-uint16_t pwmDuty[10];
+#define OVERSAMPLING_TIMES 4U
 
 //*****************************************************************************
 //
@@ -93,8 +62,7 @@ uint16_t pwmDuty[10];
 // and enabling the clocks to the peripherals.
 //
 //*****************************************************************************
-void Device_init(void)
-{
+void Device_init(void) {
 	//
 	// Disable the watchdog
 	//
@@ -121,9 +89,8 @@ void Device_init(void)
 	//
 	// Configure Analog Trim in case of untrimmed or TMX sample
 	//
-	if((SysCtl_getDeviceParametric(SYSCTL_DEVICE_QUAL) == 0x0U) &&
-			(HWREGH(ANALOGSUBSYS_BASE + ASYSCTL_O_ANAREFTRIMA) == 0x0U))
-	{
+	if ((SysCtl_getDeviceParametric(SYSCTL_DEVICE_QUAL) == 0x0U)
+			&& (HWREGH(ANALOGSUBSYS_BASE + ASYSCTL_O_ANAREFTRIMA) == 0x0U)) {
 		Device_configureTMXAnalogTrim();
 	}
 
@@ -165,7 +132,6 @@ void Device_init(void)
 	//
 	Device_enableAllPeripherals();
 
-
 }
 
 //*****************************************************************************
@@ -176,8 +142,7 @@ void Device_init(void)
 // Note that to reduce power, unused peripherals should be disabled.
 //
 //*****************************************************************************
-void Device_enableAllPeripherals(void)
-{
+void Device_enableAllPeripherals(void) {
 	SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_CLA1);
 	SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_DMA);
 	SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_TIMER0);
@@ -239,28 +204,28 @@ void Device_enableAllPeripherals(void)
 	SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_MCBSPB);
 
 #ifdef CPU1
-SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_USBA);
+	SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_USBA);
 
-SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_UPPA);
+	SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_UPPA);
 #endif
 
-SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_ADCA);
-SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_ADCB);
-SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_ADCC);
-SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_ADCD);
+	SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_ADCA);
+	SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_ADCB);
+	SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_ADCC);
+	SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_ADCD);
 
-SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_CMPSS1);
-SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_CMPSS2);
-SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_CMPSS3);
-SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_CMPSS4);
-SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_CMPSS5);
-SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_CMPSS6);
-SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_CMPSS7);
-SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_CMPSS8);
+	SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_CMPSS1);
+	SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_CMPSS2);
+	SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_CMPSS3);
+	SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_CMPSS4);
+	SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_CMPSS5);
+	SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_CMPSS6);
+	SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_CMPSS7);
+	SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_CMPSS8);
 
-SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_DACA);
-SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_DACB);
-SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_DACC);
+	SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_DACA);
+	SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_DACB);
+	SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_DACC);
 }
 
 //*****************************************************************************
@@ -268,8 +233,7 @@ SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_DACC);
 // Function to disable pin locks on GPIOs.
 //
 //*****************************************************************************
-void Device_initGPIO(void)
-{
+void Device_initGPIO(void) {
 	//
 	// Disable pin locks.
 	//
@@ -298,8 +262,7 @@ void Device_initGPIO(void)
 //
 //*****************************************************************************
 
-void Device_enableUnbondedGPIOPullupsFor176Pin(void)
-{
+void Device_enableUnbondedGPIOPullupsFor176Pin(void) {
 	EALLOW;
 	HWREG(GPIOCTRL_BASE + GPIO_O_GPCPUD) = ~0x80000000U;
 	HWREG(GPIOCTRL_BASE + GPIO_O_GPDPUD) = ~0xFFFFFFF7U;
@@ -326,8 +289,7 @@ void Device_enableUnbondedGPIOPullupsFor176Pin(void)
 //           F   8:0
 //
 //*****************************************************************************
-void Device_enableUnbondedGPIOPullupsFor100Pin(void)
-{
+void Device_enableUnbondedGPIOPullupsFor100Pin(void) {
 	EALLOW;
 	HWREG(GPIOCTRL_BASE + GPIO_O_GPAPUD) = ~0xFFC003E3U;
 	HWREG(GPIOCTRL_BASE + GPIO_O_GPBPUD) = ~0x03FFF1FFU;
@@ -344,30 +306,24 @@ void Device_enableUnbondedGPIOPullupsFor100Pin(void)
 // 176PTP package.
 //
 //*****************************************************************************
-void Device_enableUnbondedGPIOPullups(void)
-{
+void Device_enableUnbondedGPIOPullups(void) {
 	//
 	// bits 8-10 have pin count
 	//
-	uint16_t pinCount = ((HWREG(DEVCFG_BASE + SYSCTL_O_PARTIDL) &
-			(uint32_t)SYSCTL_PARTIDL_PIN_COUNT_M) >>
-			SYSCTL_PARTIDL_PIN_COUNT_S);
+	uint16_t pinCount = ((HWREG(DEVCFG_BASE + SYSCTL_O_PARTIDL)
+			& (uint32_t) SYSCTL_PARTIDL_PIN_COUNT_M) >>
+	SYSCTL_PARTIDL_PIN_COUNT_S);
 
 	/*
 	 * 5 = 100 pin
 	 * 6 = 176 pin
 	 * 7 = 337 pin
 	 */
-	if(pinCount == 5)
-	{
+	if (pinCount == 5) {
 		Device_enableUnbondedGPIOPullupsFor100Pin();
-	}
-	else if(pinCount == 6)
-	{
+	} else if (pinCount == 6) {
 		Device_enableUnbondedGPIOPullupsFor176Pin();
-	}
-	else
-	{
+	} else {
 		//
 		// Do nothing - this is 337 pin package
 		//
@@ -380,8 +336,7 @@ void Device_enableUnbondedGPIOPullups(void)
 // Function to implement Analog trim of TMX devices
 //
 //*****************************************************************************
-void Device_configureTMXAnalogTrim(void)
-{
+void Device_configureTMXAnalogTrim(void) {
 	//
 	// Enable ADC clock
 	//
@@ -463,9 +418,7 @@ void Device_configureTMXAnalogTrim(void)
 //! invalid and command was not sent.
 //
 //*****************************************************************************
-uint16_t
-Device_bootCPU2(uint32_t bootMode)
-{
+uint16_t Device_bootCPU2(uint32_t bootMode) {
 	uint32_t bootStatus;
 	uint16_t pin;
 	uint16_t returnStatus = STATUS_PASS;
@@ -476,16 +429,15 @@ Device_bootCPU2(uint32_t bootMode)
 	//
 	bootStatus = HWREG(IPC_BASE + IPC_O_BOOTSTS) & 0x0000000FU;
 
-	if(bootStatus == C2_BOOTROM_BOOTSTS_C2TOC1_BOOT_CMD_ACK)
-	{
+	if (bootStatus == C2_BOOTROM_BOOTSTS_C2TOC1_BOOT_CMD_ACK) {
 		//
 		// Check if MSB is set as well
 		//
-		bootStatus = ((uint32_t)(HWREG(IPC_BASE + IPC_O_BOOTSTS) &
-				0x80000000U)) >> 31U;
+		bootStatus =
+				((uint32_t) (HWREG(IPC_BASE + IPC_O_BOOTSTS) & 0x80000000U))
+						>> 31U;
 
-		if(bootStatus != 0)
-		{
+		if (bootStatus != 0) {
 			returnStatus = STATUS_FAIL;
 
 			return returnStatus;
@@ -496,33 +448,27 @@ Device_bootCPU2(uint32_t bootMode)
 	// Wait until CPU02 control system boot ROM is ready to receive
 	// CPU01 to CPU02 INT1 interrupts.
 	//
-	do
-	{
+	do {
 		bootStatus = HWREG(IPC_BASE + IPC_O_BOOTSTS) &
-				C2_BOOTROM_BOOTSTS_SYSTEM_READY;
+		C2_BOOTROM_BOOTSTS_SYSTEM_READY;
 	} while ((bootStatus != C2_BOOTROM_BOOTSTS_SYSTEM_READY));
 
 	//
 	// Loop until CPU02 control system IPC flags 1 and 32 are available
 	//
-	while (((HWREG(IPC_BASE + IPC_O_FLG) & IPC_FLG_IPC0)  != 0U) ||
-			((HWREG(IPC_BASE + IPC_O_FLG) & IPC_FLG_IPC31) != 0U))
-	{
+	while (((HWREG(IPC_BASE + IPC_O_FLG) & IPC_FLG_IPC0) != 0U)
+			|| ((HWREG(IPC_BASE + IPC_O_FLG) & IPC_FLG_IPC31) != 0U)) {
 
 	}
 
-	if (bootMode >= C1C2_BROM_BOOTMODE_BOOT_COMMAND_MAX_SUPPORT_VALUE)
-	{
+	if (bootMode >= C1C2_BROM_BOOTMODE_BOOT_COMMAND_MAX_SUPPORT_VALUE) {
 		returnStatus = STATUS_FAIL;
-	}
-	else
-	{
+	} else {
 		//
 		// Based on boot mode, enable pull-ups on peripheral pins and
 		// give GPIO pin control to CPU02 control system.
 		//
-		switch (bootMode)
-		{
+		switch (bootMode) {
 		case C1C2_BROM_BOOTMODE_BOOT_FROM_SCI:
 
 			//
@@ -621,8 +567,7 @@ Device_bootCPU2(uint32_t bootMode)
 
 		case C1C2_BROM_BOOTMODE_BOOT_FROM_PARALLEL:
 
-			for(pin=58;pin<=65;pin++)
-			{
+			for (pin = 58; pin <= 65; pin++) {
 				GPIO_setDirectionMode(pin, GPIO_DIR_MODE_IN);
 				GPIO_setQualificationMode(pin, GPIO_QUAL_ASYNC);
 				GPIO_setMasterCore(pin, GPIO_CORE_CPU2);
@@ -640,7 +585,6 @@ Device_bootCPU2(uint32_t bootMode)
 
 			break;
 
-
 		case C1C2_BROM_BOOTMODE_BOOT_FROM_CAN:
 			//
 			//Set up the GPIO mux to bring out CANATX on GPIO71
@@ -656,7 +600,6 @@ Device_bootCPU2(uint32_t bootMode)
 			GPIO_setPinConfig(GPIO_70_CANRXA);
 			GPIO_setQualificationMode(70, GPIO_QUAL_ASYNC);
 
-
 			GPIO_lockPortConfig(GPIO_PORT_C, 0xFFFFFFFFU);
 
 			//
@@ -664,7 +607,7 @@ Device_bootCPU2(uint32_t bootMode)
 			//
 			EALLOW;
 			HWREG(CLKCFG_BASE + SYSCTL_O_CLKSRCCTL2) &=
-					SYSCTL_CLKSRCCTL2_CANABCLKSEL_M;
+			SYSCTL_CLKSRCCTL2_CANABCLKSEL_M;
 			EDIS;
 			SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_CANA);
 
@@ -696,8 +639,7 @@ Device_bootCPU2(uint32_t bootMode)
 // Error handling function to be called when an ASSERT is violated
 //
 //*****************************************************************************
-void __error__(char *filename, uint32_t line)
-{
+void __error__(char *filename, uint32_t line) {
 	//
 	// An ASSERT condition was evaluated as false. You can use the filename and
 	// line parameters to determine what went wrong.
@@ -705,8 +647,7 @@ void __error__(char *filename, uint32_t line)
 	ESTOP0;
 }
 
-
-static void UpdatePWMDuty(){
+static void UpdatePWMDuty() {
 
 	EPWM_setCounterCompareValue(EPWM1_BASE, EPWM_COUNTER_COMPARE_A, pwmDuty[0]);
 	EPWM_setCounterCompareValue(EPWM1_BASE, EPWM_COUNTER_COMPARE_B, pwmDuty[1]);
@@ -724,12 +665,10 @@ static void UpdatePWMDuty(){
 	EPWM_setCounterCompareValue(EPWM5_BASE, EPWM_COUNTER_COMPARE_B, pwmDuty[9]);
 }
 
-#define POSITION_CLOSED_LOOP
-#define CURRENT_CLOSED_LOOP
 
-__interrupt void INT_curADCD_1_ISR(void){
+__interrupt void INT_curADCD_1_ISR(void) {
 
-	if (sampling_times == 0){
+	if (sampling_times == 0) {
 		//
 		// Get rotor position
 		//
@@ -784,16 +723,22 @@ __interrupt void INT_curADCD_1_ISR(void){
 	ADC_clearInterruptStatus(ADCD_BASE, ADC_INT_NUMBER1);
 
 	sampling_times++;
-	if (sampling_times == OVERSAMPLING_TIMES){
+	if (sampling_times == OVERSAMPLING_TIMES) {
 		uint16_t index;
-		for(index = 0; index < 5; index++)
-			rotorPosition[index] = (float)rawPosData[index] / OVERSAMPLING_TIMES / 0xffff * 500 + 300;
+		float tempPos;
+		for (index = 0; index < 5; index++){
+			tempPos = (float)rawPosData[index] / 65536.0f / OVERSAMPLING_TIMES;
+			rotorPosition[index] = 500.0f * tempPos;
+		}
 
-		for(index = 0; index < 10; index++)
-			coilCurrent[index] = (float)rawCurrData[index] / OVERSAMPLING_TIMES / 0x1000 * 16 - 8;
+		int32_t tempCur;
+		for (index = 0; index < 10; index++){
+			tempCur = rawCurrData[index] / OVERSAMPLING_TIMES - 2033;
+			coilCurrent[index] = (float)tempCur / 235.5;
+		}
 
 		//compute displacement loop pid
-		if (loop_sel & 0b10){
+		if (loop_sel & 0b10) {
 			if (pos_pid_sel & 0b00001)
 				CalculPID(0);
 			if (pos_pid_sel & 0b00010)
@@ -804,15 +749,15 @@ __interrupt void INT_curADCD_1_ISR(void){
 				CalculPID(3);
 			if (pos_pid_sel & 0b10000)
 				CalculPID(4);
-			if (pos_pid_sel == 0){
-			    for (index = 0; index < 10; index++)
-			        refCurrent[index] = 2.0f;
+			if (pos_pid_sel == 0) {
+				for (index = 0; index < 10; index++)
+					refCurrent[index] = 2.0f;
 			}
 		}
 		//compute current loop pi
-		if (loop_sel & 0b01){
+		if (loop_sel & 0b01) {
 			uint16_t i;
-			for(i = 0; i < 10; i++){
+			for (i = 0; i < 10; i++) {
 				CalculPI(i);
 			}
 		}
@@ -821,166 +766,24 @@ __interrupt void INT_curADCD_1_ISR(void){
 		sampling_times = 0;
 	} else {
 		ADC_forceMultipleSOC(ADCA_BASE, ADC_FORCE_SOC0 |
-										ADC_FORCE_SOC1 |
-										ADC_FORCE_SOC2);
+		ADC_FORCE_SOC1 |
+		ADC_FORCE_SOC2);
 		ADC_forceMultipleSOC(ADCB_BASE, ADC_FORCE_SOC0 |
-										ADC_FORCE_SOC1);
+		ADC_FORCE_SOC1);
 		ADC_forceMultipleSOC(ADCC_BASE, ADC_FORCE_SOC0 |
-										ADC_FORCE_SOC1 |
-										ADC_FORCE_SOC2);
+		ADC_FORCE_SOC1 |
+		ADC_FORCE_SOC2);
 		ADC_forceMultipleSOC(ADCD_BASE, ADC_FORCE_SOC0 |
-										ADC_FORCE_SOC1 |
-										ADC_FORCE_SOC2 |
-										ADC_FORCE_SOC3 |
-										ADC_FORCE_SOC4 |
-										ADC_FORCE_SOC5 |
-										ADC_FORCE_SOC6);
+		ADC_FORCE_SOC1 |
+		ADC_FORCE_SOC2 |
+		ADC_FORCE_SOC3 |
+		ADC_FORCE_SOC4 |
+		ADC_FORCE_SOC5 |
+		ADC_FORCE_SOC6);
 	}
 	//
 	// Acknowledge the interrupt
 	//
 	Interrupt_clearACKGroup(INTERRUPT_ACK_GROUP1);
 }
-
-
-#define CONTROL_PERIOD 0.00005f
-#define MAX_POS_INTEGRAL 2.0f
-#define MIN_POS_INTEGRAL -2.0f
-#define MAX_CONTROL_CURRENT 8.0f
-#define MIN_CONTROL_CURRENT -8.0f
-
-void CalculPID(uint16_t index){
-
-//	float propotion, differential;
-	float pos_loop_outcome, error, firstOrderDiff;
-	error = refPosition[index] - rotorPosition[index]; /* 平衡位置与设定点的差值 */
-	firstOrderDiff = rotorPosition[index] - forwardFirstPos[index]; /* 相邻两点之间的差值 */
-	forwardFirstPos[index] = rotorPosition[index];
-
-	propotion[index] = pid_tArray[index].P * error;
-	differential[index] = pid_tArray[index].D * firstOrderDiff / CONTROL_PERIOD;
-
-	posIntegralArray[index] += error * CONTROL_PERIOD;
-	if (posIntegralArray[index] > MAX_POS_INTEGRAL)
-		posIntegralArray[index] = MAX_POS_INTEGRAL;
-	if (posIntegralArray[index] < MIN_POS_INTEGRAL)
-		posIntegralArray[index] = MIN_POS_INTEGRAL;
-
-	pos_loop_outcome = propotion[index] + pid_tArray[index].I * posIntegralArray[index] + differential[index];
-
-	if (pos_loop_outcome > MAX_CONTROL_CURRENT)
-		pos_loop_outcome = MAX_CONTROL_CURRENT;
-	if (pos_loop_outcome < MIN_CONTROL_CURRENT)
-		pos_loop_outcome = MIN_CONTROL_CURRENT;
-
-	refCurrent[index * 2] = coilBiasCurrent[index] - pos_loop_outcome;
-	refCurrent[index * 2 + 1] = coilBiasCurrent[index] + pos_loop_outcome;
-	/*
-	 * %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	 *轴向：
-	 *		【传感器0】0 号线圈			1号线圈
-	 * %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	 *径向A：			       【传感器1】
-	 * 					2 号线圈
-	 *
-	 * 	      【传感器2】4号线圈			5号线圈
-	 *
-	 * 					3 号线圈
-	 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	 *径向B:
-	 *				        【传感器3】
-	 * 					6 号线圈
-	 *
-	 * 	       【传感器4】8 号线圈			9号线圈
-	 *
-	 * 					7 号线圈
-	 * %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	 * */
-}
-
-#define MAX_PWM_DUTY 0.95f
-#define MIN_PWM_DUTY 0.05f
-#define MAX_CURR_INTEGRAL 1000
-#define MIN_CURR_INTEGRAL -1000
-void CalculPI(uint16_t index){
-
-    float propotion, integral, error, outcome;
-	error = refCurrent[index] - coilCurrent[index]; 	// 平衡位置与设定点的差值
-	currIntegralArray[index] +=  error * CONTROL_PERIOD;
-	propotion = currentLoopPI.P * error;
-	if (currIntegralArray[index] > MAX_CURR_INTEGRAL)
-		currIntegralArray[index] = MAX_CURR_INTEGRAL;
-	if (currIntegralArray[index] < MIN_CURR_INTEGRAL)
-		currIntegralArray[index] = MIN_CURR_INTEGRAL;
-
-	integral = currentLoopPI.I * currIntegralArray[index];
-	outcome = propotion + integral;
-	if (outcome > MAX_PWM_DUTY)
-		outcome = MAX_PWM_DUTY;
-	if (outcome < MIN_PWM_DUTY)
-		outcome = MIN_PWM_DUTY;
-	pwmDuty[index] = (uint16_t)(outcome * EPWM_TIMER_TBPRD);
-}
-
-//*****************************************************************************
-//
-// initialize all variable and array
-//
-//*****************************************************************************
-void Variable_init(){
-
-	uint16_t i;
-
-	for(i = 0; i < 5; i++){
-		posIntegralArray[i] = 0;
-		forwardFirstPos[i] = 0;
-		refPosition[i] = 49385;
-	}
-	for(i = 0; i < 10; i++){
-		currIntegralArray[i] = 0;
-		pwmDuty[i] = 2500;
-		refCurrent[i] = 2.0f;
-	}
-
-	currentLoopPI.P = 0.38;
-	currentLoopPI.I = 0.1;
-
-	coilBiasCurrent[0] = 2.0f;
-	coilBiasCurrent[1] = 2.0f;
-	coilBiasCurrent[2] = 2.0f;
-	coilBiasCurrent[3] = 2.0f;
-	coilBiasCurrent[4] = 2.0f;
-
-	refPosition[0] = 1765;
-	refPosition[1] = 1765;
-	refPosition[2] = 1765;
-	refPosition[3] = 1765;
-	refPosition[4] = 2121;
-
-	pid_tArray[0].P = 2;
-	pid_tArray[0].I = 10;
-	pid_tArray[0].D = 0.0001;
-
-	pid_tArray[1].P = 2;
-	pid_tArray[1].I = 10;
-	pid_tArray[1].D = 0.0001;
-
-	pid_tArray[2].P = 0.5;
-	pid_tArray[2].I = 10;
-	pid_tArray[2].D = 0.0001;
-
-	pid_tArray[3].P = 1.1;
-	pid_tArray[3].I = 10;
-	pid_tArray[3].D = 0.0001;
-
-	pid_tArray[4].P = 0.9;
-	pid_tArray[4].I = 10;
-	pid_tArray[4].D = 0.0001;
-
-	sampling_times = 0;
-	loop_sel = 0;
-	pos_pid_sel = 0;
-}
-
-
 
