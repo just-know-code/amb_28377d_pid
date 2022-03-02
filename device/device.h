@@ -398,42 +398,7 @@ extern void __error__(char *filename, uint32_t line);
 //
 //*****************************************************************************
 
-void Variable_init();
-
-struct pid_t{
-
-	float P;
-	float I;
-	float D;
-};
-
-struct pi_t{
-
-	float P;
-	float I;
-};
-
-#define EPWM_TIMER_TBPRD 5000U
-
 extern __interrupt void INT_curADCD_1_ISR(void);
-
-
-extern struct pi_t currentLoopPI;		//do not initialize; configure
-extern struct pid_t pid_tArray[5];  	//do not initialize; configure
-extern float posIntegralArray[5];		//need initialize to 0
-extern float currIntegralArray[10];    //need initialize to 0
-extern float rotorPosition[5];		//need initialize to 0
-extern float coilCurrent[10];		//need initialize to 0
-extern uint16_t pwmDuty[10];			//need initialize to 2500
-extern float forwardFirstPos[5];		//need initialize to 0
-extern float refPosition[5];			//need configure
-extern float refCurrent[10];			//need initialize to 3750
-extern float coilBiasCurrent[5];		//do not initialize; configure
-extern uint32_t rawPosData[5];
-extern uint32_t rawCurrData[10];
-
-extern void CalculPID(uint16_t index);
-extern void CalculPI(uint16_t index);
 
 
 #endif

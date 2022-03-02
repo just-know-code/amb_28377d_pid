@@ -502,6 +502,7 @@ void EMIF1_init(){
 
 }
 
+#define EPWM_TIMER_TBPRD 5000U
 static void initEPWM(uint32_t base)
 {
     //
