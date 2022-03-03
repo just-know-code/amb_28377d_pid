@@ -246,8 +246,6 @@ extern uint16_t RamfuncsRunSize;
 
 #endif
 
-extern uint32_t Example_PassCount;
-extern uint32_t Example_Fail;
 
 //*****************************************************************************
 //

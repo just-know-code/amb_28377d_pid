@@ -647,8 +647,8 @@ void __error__(char *filename, uint32_t line) {
 	ESTOP0;
 }
 
-#pragma CODE_SECTION(UpdatePWMDuty, ".TI.ramfunc");
-static void UpdatePWMDuty() {
+
+static inline void UpdatePWMDuty() {
 
 	EPWM_setCounterCompareValue(EPWM1_BASE, EPWM_COUNTER_COMPARE_A, pwmDuty[0]);
 	EPWM_setCounterCompareValue(EPWM1_BASE, EPWM_COUNTER_COMPARE_B, pwmDuty[1]);
@@ -728,7 +728,7 @@ __interrupt void INT_curADCD_1_ISR(void) {
 		uint16_t index;
 		float tempPos;
 		for (index = 0; index < 5; index++){
-			tempPos = (float)rawPosData[index] / 65536.0f / OVERSAMPLING_TIMES;
+			tempPos = (float)rawPosData[index] / 65535.0f / OVERSAMPLING_TIMES;
 			rotorPosition[index] = 500.0f * tempPos;
 		}
 

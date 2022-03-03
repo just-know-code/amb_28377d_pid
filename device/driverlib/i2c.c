@@ -229,8 +229,6 @@ void
 I2C_configureModuleFrequency(uint32_t base, uint32_t sysclkHz)
 {
     uint32_t modPrescale;
-    uint32_t divider;
-    uint32_t dValue;
 
     //
     // Check the arguments.

@@ -113,14 +113,14 @@ SECTIONS
     #if __TI_COMPILER_VERSION__ >= 15009000
         #if defined(__TI_EABI__)
             .TI.ramfunc : {} LOAD = FLASHD,
-                                 RUN = RAMLS0,
-                                 LOAD_START(RamfuncsLoadStart),
-                                 LOAD_SIZE(RamfuncsLoadSize),
-                                 LOAD_END(RamfuncsLoadEnd),
-                                 RUN_START(RamfuncsRunStart),
-                                 RUN_SIZE(RamfuncsRunSize),
-                                 RUN_END(RamfuncsRunEnd),
-                                 PAGE = 0, ALIGN(8)
+                             RUN = RAMLS0,
+                             LOAD_START(RamfuncsLoadStart),
+                             LOAD_SIZE(RamfuncsLoadSize),
+                             LOAD_END(RamfuncsLoadEnd),
+                             RUN_START(RamfuncsRunStart),
+                             RUN_SIZE(RamfuncsRunSize),
+                             RUN_END(RamfuncsRunEnd),
+                             PAGE = 0, ALIGN(8)
         #else
             .TI.ramfunc : {} LOAD = FLASHD,
                              RUN = RAMLS0,
@@ -133,7 +133,7 @@ SECTIONS
                              PAGE = 0, ALIGN(8)
         #endif
     #else
-   ramfuncs            : LOAD = FLASHD,
+	ramfuncs           : LOAD = FLASHD,
                          RUN = RAMLS0,
                          LOAD_START(_RamfuncsLoadStart),
                          LOAD_SIZE(_RamfuncsLoadSize),
