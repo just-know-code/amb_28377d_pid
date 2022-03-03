@@ -1,7 +1,5 @@
 #include "control_algorithm.h"
 
-
-
 struct pid_t {
 	float P;
 	float I;
@@ -57,6 +55,7 @@ float MatrixC[] = { 0.181818f, 4.54545e-5f};
 #define MAX_CONTROL_CURRENT 6.0f
 #define MIN_CONTROL_CURRENT -6.0f
 
+#pragma CODE_SECTION(CalculPID, ".TI.ramfunc");
 void CalculPID(uint16_t index) {
 
 //	float propotion, differential;
@@ -112,6 +111,7 @@ void CalculPID(uint16_t index) {
 #define MIN_PWM_DUTY -0.45f
 #define MAX_CURR_INTEGRAL 10.0f
 #define MIN_CURR_INTEGRAL -10.0f
+#pragma CODE_SECTION(CalculPI, ".TI.ramfunc");
 void CalculPI(uint16_t index) {
 
 	float propotion, integral, error, outcome;

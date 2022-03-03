@@ -647,6 +647,7 @@ void __error__(char *filename, uint32_t line) {
 	ESTOP0;
 }
 
+#pragma CODE_SECTION(UpdatePWMDuty, ".TI.ramfunc");
 static void UpdatePWMDuty() {
 
 	EPWM_setCounterCompareValue(EPWM1_BASE, EPWM_COUNTER_COMPARE_A, pwmDuty[0]);
@@ -665,7 +666,7 @@ static void UpdatePWMDuty() {
 	EPWM_setCounterCompareValue(EPWM5_BASE, EPWM_COUNTER_COMPARE_B, pwmDuty[9]);
 }
 
-
+#pragma CODE_SECTION(INT_curADCD_1_ISR, ".TI.ramfunc");
 __interrupt void INT_curADCD_1_ISR(void) {
 
 	if (sampling_times == 0) {

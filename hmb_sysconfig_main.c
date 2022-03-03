@@ -51,6 +51,8 @@
 #include "driverlib.h"
 #include "device.h"
 #include "board.h"
+#include "control_algorithm.h"
+
 
 //
 // Main
