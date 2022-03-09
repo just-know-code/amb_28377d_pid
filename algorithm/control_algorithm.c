@@ -105,8 +105,8 @@ void CalculPID(uint16_t index) {
 
 #define MAX_PWM_DUTY 0.45f
 #define MIN_PWM_DUTY -0.45f
-#define MAX_CURR_INTEGRAL 10.0f
-#define MIN_CURR_INTEGRAL -10.0f
+#define MAX_CURR_INTEGRAL 1.0f
+#define MIN_CURR_INTEGRAL -1.0f
 void CalculPI(uint16_t index) {
 
 	float propotion, integral, error, outcome;
@@ -149,7 +149,7 @@ void Variable_init() {
 
 	}
 
-	currentLoopPI.P = 0.38;
+	currentLoopPI.P = 0.32;
 	currentLoopPI.I = 0.1;
 
 	coilBiasCurrent[0] = 2.0f;
