@@ -31,7 +31,7 @@ uint16_t pwmDuty[10];
 
 uint16_t sampling_times;
 
-volatile uint16_t loop_sel;
+uint16_t loop_sel;
 /*
  * 0b0000 two loops are open loop, 0b11 two loops are closed loop
  * 0b01 only current is closed loop, 0b10 only position loop is closed loop
@@ -189,3 +189,51 @@ void Variable_init() {
 	pos_pid_sel = 0;
 }
 
+#define MeasureCurrent 4.0f
+void AutoMeasurCenterPos(){
+	static uint16_t count = 0;
+	uint16_t index;
+	if (count < 30000){
+		if (count == 0){
+			for (index = 0; index < 5; index++){
+				refCurrent[index * 2] = MeasureCurrent;
+				refCurrent[index * 2 + 1] = 0.0f;
+			}
+			for (index = 0; index < 5; index++){
+				refPosition[index] = 0;
+			}
+		}
+		if (count >= 29995){
+			for (index = 0; index < 5; index++){
+				refPosition[index] += rotorPosition[index];
+			}
+		}
+	} else if (count < 60000){
+		if (count == 30000){
+			for (index = 0; index < 5; index++){
+				refCurrent[index * 2] = 0.0f;
+				refCurrent[index * 2 + 1] = MeasureCurrent;
+			}
+		}
+		if (count >= 59995){
+			for (index = 0; index < 5; index++){
+				refPosition[index] += rotorPosition[index];
+			}
+		}
+	} else {
+		for (index = 0; index < 5; index++){
+			refPosition[index] /= 10;
+		}
+		for (index = 0; index < 5; index++){
+			refCurrent[index * 2] = 0.0f;
+			refCurrent[index * 2 + 1] = 0.0f;
+		}
+		for (index = 0; index < 10; index++){
+			refCurrent[index] = 0.0f;
+			pwmDuty[index] = 2500;
+		}
+		loop_sel = 0;
+		count = 0;
+	}
+	count++;
+}

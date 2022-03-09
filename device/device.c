@@ -647,7 +647,7 @@ void __error__(char *filename, uint32_t line) {
 	ESTOP0;
 }
 
-static void UpdatePWMDuty() {
+static inline void UpdatePWMDuty() {
 
 	EPWM_setCounterCompareValue(EPWM1_BASE, EPWM_COUNTER_COMPARE_A, pwmDuty[0]);
 	EPWM_setCounterCompareValue(EPWM1_BASE, EPWM_COUNTER_COMPARE_B, pwmDuty[1]);
@@ -727,7 +727,8 @@ __interrupt void INT_curADCD_1_ISR(void) {
 		uint16_t index;
 		float tempPos;
 		for (index = 0; index < 5; index++){
-			tempPos = (float)rawPosData[index] / 65536.0f / OVERSAMPLING_TIMES;
+			tempPos = ((float)rawPosData[index] / OVERSAMPLING_TIMES - 32768.0f) / 32768.0f ; //µ¥¶Ë
+//			tempPos = (float)rawPosData[index] / 65535.0f / OVERSAMPLING_TIMES; //²î·Ö
 			rotorPosition[index] = 500.0f * tempPos;
 		}
 
@@ -753,6 +754,9 @@ __interrupt void INT_curADCD_1_ISR(void) {
 				for (index = 0; index < 10; index++)
 					refCurrent[index] = 2.0f;
 			}
+		}
+		if (loop_sel & 0b100){
+			AutoMeasurCenterPos();
 		}
 		//compute current loop pi
 		if (loop_sel & 0b01) {

@@ -29,11 +29,11 @@ extern uint32_t rawCurrData[10];
 extern uint16_t pwmDuty[10];
 
 extern uint16_t sampling_times;
-extern volatile uint16_t loop_sel;
+extern uint16_t loop_sel;
 extern uint16_t pos_pid_sel;
 extern void CalculPID(uint16_t index);
 extern void CalculPI(uint16_t index);
 extern void Variable_init();
-
+extern void AutoMeasurCenterPos();
 #define EPWM_TIMER_TBPRD 5000U
 #endif /* DEVICE_CONTROL_ALGORITHM_H_ */
