@@ -738,6 +738,10 @@ __interrupt void INT_curADCD_1_ISR(void) {
 			coilCurrent[index] = (float)tempCur / 235.5;
 		}
 
+		if (loop_sel == 0U){
+			for (index = 0; index < 10; index++)
+				pwmDuty[index] = 2500;
+		}
 		//compute displacement loop pid
 		if (loop_sel & 0b10) {
 			if (pos_pid_sel & 0b00001)
@@ -760,10 +764,46 @@ __interrupt void INT_curADCD_1_ISR(void) {
 		}
 		//compute current loop pi
 		if (loop_sel & 0b01) {
-			uint16_t i;
-			for (i = 0; i < 10; i++) {
-				CalculPI(i);
-			}
+			if (cur_pid_sel & 0b00001)
+				CalculPI(0);
+			else
+				pwmDuty[0] = 2500;
+			if (cur_pid_sel & 0b00010)
+				CalculPI(1);
+			else
+				pwmDuty[1] = 2500;
+			if (cur_pid_sel & 0b00100)
+				CalculPI(2);
+			else
+				pwmDuty[2] = 2500;
+			if (cur_pid_sel & 0b01000)
+				CalculPI(3);
+			else
+				pwmDuty[3] = 2500;
+			if (cur_pid_sel & 0b10000)
+				CalculPI(4);
+			else
+				pwmDuty[4] = 2500;
+			if (cur_pid_sel & 0b0000100000)
+				CalculPI(5);
+			else
+				pwmDuty[5] = 2500;
+			if (cur_pid_sel & 0b0001000000)
+				CalculPI(6);
+			else
+				pwmDuty[6] = 2500;
+			if (cur_pid_sel & 0b0010000000)
+				CalculPI(7);
+			else
+				pwmDuty[7] = 2500;
+			if (cur_pid_sel & 0b0100000000)
+				CalculPI(8);
+			else
+				pwmDuty[8] = 2500;
+			if (cur_pid_sel & 0b1000000000)
+				CalculPI(9);
+			else
+				pwmDuty[9] = 2500;
 		}
 		// update pwm duty
 		UpdatePWMDuty();

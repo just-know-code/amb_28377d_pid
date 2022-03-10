@@ -15,7 +15,7 @@ extern float posIntegralArray[5];
 extern float rotorPosition[5];
 extern float forwardFirstPos[5];
 extern float refPosition[5];
-extern float propotion[5];
+extern float proportion[5];
 extern float differential[5];
 
 extern float coilCurrent[10];
@@ -31,6 +31,7 @@ extern uint16_t pwmDuty[10];
 extern uint16_t sampling_times;
 extern uint16_t loop_sel;
 extern uint16_t pos_pid_sel;
+extern uint16_t cur_pid_sel;
 extern void CalculPID(uint16_t index);
 extern void CalculPI(uint16_t index);
 extern void Variable_init();

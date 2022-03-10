@@ -16,7 +16,7 @@ float posIntegralArray[5];
 float rotorPosition[5];
 float forwardFirstPos[5];
 float refPosition[5];
-float propotion[5];
+float proportion[5];
 float differential[5];
 
 float coilCurrent[10];
@@ -38,6 +38,7 @@ uint16_t loop_sel;
  */
 
 uint16_t pos_pid_sel;
+
 /*
  * 0b00000 all PID operations do not work
  * 0b00001 only the first PID works
@@ -45,23 +46,30 @@ uint16_t pos_pid_sel;
  * 0b11000 trailing radial directions PID work, 24
  * 0b11110 all radial directions PID work, 30(2 4 8 16)
  */
-
+uint16_t cur_pid_sel;
+/*
+ * 0b0000000000   NO PI RUN
+ * 0b0000000001	  the first PI run
+ * 0b0000000010	  the second PI run
+ * -----------
+ * 0b1111111111	  all PI run
+ */
 #define CONTROL_PERIOD 0.00005f
-#define MAX_POS_INTEGRAL 4.0f
-#define MIN_POS_INTEGRAL -4.0f
-#define MAX_CONTROL_CURRENT 6.0f
-#define MIN_CONTROL_CURRENT -6.0f
+#define MAX_POS_INTEGRAL 1.0f
+#define MIN_POS_INTEGRAL -1.0f
+#define MAX_CONTROL_CURRENT 2.0f
+#define MIN_CONTROL_CURRENT -2.0f
 
 void CalculPID(uint16_t index) {
 
-//	float propotion, differential;
+//	float proportion, differential;
 	float pos_loop_outcome, error, firstOrderDiff;
 	error = refPosition[index] - rotorPosition[index]; /* 平衡位置与设定点的差值 */
 	firstOrderDiff = rotorPosition[index] - forwardFirstPos[index]; /* 相邻两点之间的差值 */
 	forwardFirstPos[index] = rotorPosition[index];
 
-	propotion[index] = pid_tArray[index].P * error;
-	differential[index] = pid_tArray[index].D * firstOrderDiff / CONTROL_PERIOD;
+	proportion[index] = pid_tArray[index].P * 0.001f * error;
+	differential[index] = pid_tArray[index].D * 0.001f * firstOrderDiff / CONTROL_PERIOD;
 
 	posIntegralArray[index] += error * CONTROL_PERIOD;
 	if (posIntegralArray[index] > MAX_POS_INTEGRAL)
@@ -69,8 +77,8 @@ void CalculPID(uint16_t index) {
 	if (posIntegralArray[index] < MIN_POS_INTEGRAL)
 		posIntegralArray[index] = MIN_POS_INTEGRAL;
 
-	pos_loop_outcome = propotion[index]
-					   + pid_tArray[index].I * posIntegralArray[index]
+	pos_loop_outcome = proportion[index]
+					   + pid_tArray[index].I * 0.001f * posIntegralArray[index]
 					   + differential[index];
 
 	if (pos_loop_outcome > MAX_CONTROL_CURRENT)
@@ -159,10 +167,10 @@ void Variable_init() {
 	coilBiasCurrent[4] = 2.0f;
 
 	refPosition[0] = 100;
-	refPosition[1] = 100;
-	refPosition[2] = 200;
-	refPosition[3] = 200;
-	refPosition[4] = 300;
+	refPosition[1] = 323.1f;
+	refPosition[2] = 333.2f;
+	refPosition[3] = 192.8f;
+	refPosition[4] = 233.6f;
 
 	pid_tArray[0].P = 2;
 	pid_tArray[0].I = 10;
@@ -176,9 +184,9 @@ void Variable_init() {
 	pid_tArray[2].I = 10;
 	pid_tArray[2].D = 0.0001;
 
-	pid_tArray[3].P = 1.1;
-	pid_tArray[3].I = 10;
-	pid_tArray[3].D = 0.0001;
+	pid_tArray[3].P = 10;
+	pid_tArray[3].I = 100;
+	pid_tArray[3].D = 0.00001;
 
 	pid_tArray[4].P = 0.9;
 	pid_tArray[4].I = 10;
@@ -187,46 +195,75 @@ void Variable_init() {
 	sampling_times = 0;
 	loop_sel = 0;
 	pos_pid_sel = 0;
+	cur_pid_sel = 0;
 }
 
 #define MeasureCurrent 4.0f
 void AutoMeasurCenterPos(){
-	static uint16_t count = 0;
+	static uint32_t count = 0;
 	uint16_t index;
-	if (count < 30000){
-		if (count == 0){
-			for (index = 0; index < 5; index++){
-				refCurrent[index * 2] = MeasureCurrent;
-				refCurrent[index * 2 + 1] = 0.0f;
+	if (count < 30000){				//Magnetic attraction upward
+		if (count == 1){
+			for (index = 0; index < 10; index++){
+				refCurrent[index] = 0.0f;
 			}
+			refCurrent[2] = MeasureCurrent;
+			refCurrent[3] = 0.0f;
+			refCurrent[6] = MeasureCurrent;
+			refCurrent[7] = 0.0f;
 			for (index = 0; index < 5; index++){
 				refPosition[index] = 0;
 			}
 		}
 		if (count >= 29995){
-			for (index = 0; index < 5; index++){
-				refPosition[index] += rotorPosition[index];
-			}
+			refPosition[1] += rotorPosition[1];
+			refPosition[3] += rotorPosition[3];
 		}
-	} else if (count < 60000){
+	} else if (count < 60000){		//Magnetic attraction downward
 		if (count == 30000){
-			for (index = 0; index < 5; index++){
-				refCurrent[index * 2] = 0.0f;
-				refCurrent[index * 2 + 1] = MeasureCurrent;
+			for (index = 0; index < 10; index++){
+				refCurrent[index] = 0.0f;
 			}
+			refCurrent[2] = 0.0f;
+			refCurrent[3] = MeasureCurrent;
+			refCurrent[6] = 0.0f;
+			refCurrent[7] = MeasureCurrent;
 		}
 		if (count >= 59995){
-			for (index = 0; index < 5; index++){
-				refPosition[index] += rotorPosition[index];
+			refPosition[1] += rotorPosition[1];
+			refPosition[3] += rotorPosition[3];
+		}
+	} else if (count < 90000){		//Magnetic attraction to the left
+		if (count == 60000){
+			for (index = 0; index < 10; index++){
+				refCurrent[index] = 0.0f;
 			}
+			refCurrent[4] = MeasureCurrent;
+			refCurrent[5] = 0.0f;
+			refCurrent[8] = MeasureCurrent;
+			refCurrent[9] = 0.0f;
+		}
+		if (count >= 89995){
+			refPosition[2] += rotorPosition[2];
+			refPosition[4] += rotorPosition[4];
+		}
+	} else if (count < 120000){		//Magnetic attraction to the right
+		if (count == 90000){
+			for (index = 0; index < 10; index++){
+				refCurrent[index] = 0.0f;
+			}
+			refCurrent[4] = 0.0f;
+			refCurrent[5] = MeasureCurrent;
+			refCurrent[8] = 0.0f;
+			refCurrent[9] = MeasureCurrent;
+		}
+		if (count >= 119995){
+			refPosition[2] += rotorPosition[2];
+			refPosition[4] += rotorPosition[4];
 		}
 	} else {
 		for (index = 0; index < 5; index++){
-			refPosition[index] /= 10;
-		}
-		for (index = 0; index < 5; index++){
-			refCurrent[index * 2] = 0.0f;
-			refCurrent[index * 2 + 1] = 0.0f;
+			refPosition[index] /= 10.0f;
 		}
 		for (index = 0; index < 10; index++){
 			refCurrent[index] = 0.0f;
