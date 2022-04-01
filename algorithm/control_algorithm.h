@@ -10,29 +10,24 @@
 
 #include "stdint.h"
 
-extern struct pid_t pid_tArray[5];
-extern float posIntegralArray[5];
-extern float rotorPosition[5];
-extern float forwardFirstPos[5];
-extern float refPosition[5];
-extern float proportion[5];
-extern float differential[5];
+extern int16_t rotorPosition[5];
 
 extern float coilCurrent[10];
-extern float coilBiasCurrent[5];
+
 extern float refCurrent[10];
 extern float currIntegralArray[10];
 extern struct pi_t currentLoopPI;
 
+
 extern uint32_t rawPosData[5];
 extern uint32_t rawCurrData[10];
 extern uint16_t pwmDuty[10];
-
+extern struct PID s_PID[5];
 extern uint16_t sampling_times;
 extern uint16_t loop_sel;
 extern uint16_t pos_pid_sel;
 extern uint16_t cur_pid_sel;
-extern void CalculPID(uint16_t index);
+void PIDCalc(int16_t channel, int16_t NextPoint);
 extern void CalculPI(uint16_t index);
 extern void Variable_init();
 extern void AutoMeasurCenterPos();

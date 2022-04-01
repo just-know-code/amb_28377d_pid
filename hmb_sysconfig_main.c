@@ -52,7 +52,7 @@
 #include "device.h"
 #include "board.h"
 #include "control_algorithm.h"
-
+#include "debug.h"
 //
 // Main
 //

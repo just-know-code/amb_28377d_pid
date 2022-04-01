@@ -15,6 +15,8 @@ const adc3   = adc.addInstance();
 const adc4   = adc.addInstance();
 const can    = scripting.addModule("/driverlib/can.js", {}, false);
 const can1   = can.addInstance();
+const dac    = scripting.addModule("/driverlib/dac.js", {}, false);
+const dac1   = dac.addInstance();
 const emif1  = scripting.addModule("/driverlib/emif1.js", {}, false);
 const emif11 = emif1.addInstance();
 const epwm   = scripting.addModule("/driverlib/epwm.js", {}, false);
@@ -215,6 +217,11 @@ can1.$name                = "myCAN0";
 can1.can.$assign          = "CANA";
 can1.can.canrxPin.$assign = "ball.108";
 can1.can.cantxPin.$assign = "ball.109";
+
+dac1.$name            = "myDAC0";
+dac1.enableOutput     = true;
+dac1.lockedRegisters  = ["DAC_LOCK_OUTPUT"];
+dac1.referenceVoltage = "DAC_REF_ADC_VREFHI";
 
 emif11.$name                    = "myEMIF10";
 emif11.useCase                  = "CUSTOM";

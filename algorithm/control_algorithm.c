@@ -1,26 +1,12 @@
 #include "control_algorithm.h"
 
-struct pid_t {
-	float P;
-	float I;
-	float D;
-};
-
 struct pi_t {
 	float P;
 	float I;
 };
 
-struct pid_t pid_tArray[5];
-float posIntegralArray[5];
-float rotorPosition[5];
-float forwardFirstPos[5];
-float refPosition[5];
-float proportion[5];
-float differential[5];
-
 float coilCurrent[10];
-float coilBiasCurrent[5];
+
 float refCurrent[10];
 float currIntegralArray[10];
 struct pi_t currentLoopPI;
@@ -54,40 +40,65 @@ uint16_t cur_pid_sel;
  * -----------
  * 0b1111111111	  all PI run
  */
-#define CONTROL_PERIOD 0.00005f
-#define MAX_POS_INTEGRAL 1.0f
-#define MIN_POS_INTEGRAL -1.0f
-#define MAX_CONTROL_CURRENT 2.0f
-#define MIN_CONTROL_CURRENT -2.0f
+int16_t rotorPosition[5];
+float f_v[5] = {0.0, 0.0, 0.0, 0.0, 0.0};
+float f_pv[5] = {0.0, 0.0, 0.0, 0.0, 0.0};
+float f_iv[5] = {0.0, 0.0, 0.0, 0.0, 0.0};
+float f_dv[5] = {0.0, 0.0, 0.0, 0.0, 0.0};
+int16_t PID_OUT[5] = { 0.0, 0.0, 0.0, 0.0, 0.0};
+float current_bias[10] = {550.0f, 550.0f, 550.0f, 550.0f, 550.0f, 550.0f, 550.0f, 550.0f, 550.0f, 550.0f};
 
-void CalculPID(uint16_t index) {
+struct PID                         /* 定义PID结构体函数 */
+{
+	int16_t      SetPoint;
+	//	 float    Proportion0;                 /* 变参数的PID */
+	//	 float    Derivative0;
+	float    Proportion;
+	float    Integral;
+	float    Derivative;
+	int16_t      LastV;
+};
 
-//	float proportion, differential;
-	float pos_loop_outcome, error, firstOrderDiff;
-	error = refPosition[index] - rotorPosition[index]; /* 平衡位置与设定点的差值 */
-	firstOrderDiff = rotorPosition[index] - forwardFirstPos[index]; /* 相邻两点之间的差值 */
-	forwardFirstPos[index] = rotorPosition[index];
+struct PID  s_PID[5];
 
-	proportion[index] = pid_tArray[index].P * 0.001f * error;
-	differential[index] = pid_tArray[index].D * 0.001f * firstOrderDiff / CONTROL_PERIOD;
+#define maxi  500.0f     //积分饱和
+#define mini -500.0f       //积分饱和
+#define maxv  1000.0f       //电压输出上限   PID饱和
+#define minv -1000.0f       //电压输出下限   PID饱和
+#define DT 0.00005f
 
-	posIntegralArray[index] += error * CONTROL_PERIOD;
-	if (posIntegralArray[index] > MAX_POS_INTEGRAL)
-		posIntegralArray[index] = MAX_POS_INTEGRAL;
-	if (posIntegralArray[index] < MIN_POS_INTEGRAL)
-		posIntegralArray[index] = MIN_POS_INTEGRAL;
+void PIDCalc(int16_t channel, int16_t NextPoint) {
 
-	pos_loop_outcome = proportion[index]
-					   + pid_tArray[index].I * 0.001f * posIntegralArray[index]
-					   + differential[index];
+	float i_dError, i_Error;
+	i_Error = NextPoint - s_PID[channel].SetPoint; /* 平衡位置与设定点的差值 */
+	i_dError = NextPoint - s_PID[channel].LastV; /* 相邻两点之间的差值 */
+	s_PID[channel].LastV = NextPoint;
 
-	if (pos_loop_outcome > MAX_CONTROL_CURRENT)
-		pos_loop_outcome = MAX_CONTROL_CURRENT;
-	if (pos_loop_outcome < MIN_CONTROL_CURRENT)
-		pos_loop_outcome = MIN_CONTROL_CURRENT;
+	f_pv[channel] = s_PID[channel].Proportion * i_Error;
+	f_iv[channel] += s_PID[channel].Integral * i_Error * DT;
+	f_dv[channel] = s_PID[channel].Derivative * i_dError / DT;
 
-	refCurrent[index * 2] = coilBiasCurrent[index] - pos_loop_outcome;
-	refCurrent[index * 2 + 1] = coilBiasCurrent[index] + pos_loop_outcome;
+	if (f_iv[channel] > maxi)
+		f_iv[channel] = maxi;
+	if (f_iv[channel] < mini)
+		f_iv[channel] = mini;
+
+//	if (f_dv[channel] > 300)
+//		f_dv[channel] = 300;
+//	if (f_dv[channel] < -300)
+//		f_dv[channel] = -300;
+
+	f_v[channel] = f_pv[channel] + f_iv[channel] + f_dv[channel];
+	if (f_v[channel] > maxv)
+		f_v[channel] = maxv;
+	if (f_v[channel] < minv)
+		f_v[channel] = minv;
+
+	int pid_out = (f_v[channel]*current_bias[channel]/900.0F);
+
+	refCurrent[channel * 2] = (float)(current_bias[channel] + pid_out) / 235.5f;
+	refCurrent[channel * 2] = (float)(current_bias[channel] - pid_out) / 235.5f;
+}
 	/*
 	 * %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	 *轴向：
@@ -109,7 +120,7 @@ void CalculPID(uint16_t index) {
 	 * 					7 号线圈
 	 * %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	 * */
-}
+
 
 #define MAX_PWM_DUTY 0.45f
 #define MIN_PWM_DUTY -0.45f
@@ -119,7 +130,7 @@ void CalculPI(uint16_t index) {
 
 	float propotion, integral, error, outcome;
 	error = refCurrent[index] - coilCurrent[index];
-	currIntegralArray[index] += error * CONTROL_PERIOD;
+	currIntegralArray[index] += error * DT;
 	propotion = currentLoopPI.P * error;
 	if (currIntegralArray[index] > MAX_CURR_INTEGRAL)
 		currIntegralArray[index] = MAX_CURR_INTEGRAL;
@@ -145,11 +156,7 @@ void CalculPI(uint16_t index) {
 void Variable_init() {
 
 	uint16_t i;
-	for (i = 0; i < 5; i++) {
-		posIntegralArray[i] = 0;
-		forwardFirstPos[i] = 0;
-		refPosition[i] = 250;
-	}
+
 	for (i = 0; i < 10; i++) {
 		currIntegralArray[i] = 0;
 		pwmDuty[i] = 2500;
@@ -160,37 +167,7 @@ void Variable_init() {
 	currentLoopPI.P = 0.32;
 	currentLoopPI.I = 0.1;
 
-	coilBiasCurrent[0] = 2.0f;
-	coilBiasCurrent[1] = 2.0f;
-	coilBiasCurrent[2] = 2.0f;
-	coilBiasCurrent[3] = 2.0f;
-	coilBiasCurrent[4] = 2.0f;
 
-	refPosition[0] = 100;
-	refPosition[1] = 323.1f;
-	refPosition[2] = 333.2f;
-	refPosition[3] = 192.8f;
-	refPosition[4] = 233.6f;
-
-	pid_tArray[0].P = 2;
-	pid_tArray[0].I = 10;
-	pid_tArray[0].D = 0.0001;
-
-	pid_tArray[1].P = 2;
-	pid_tArray[1].I = 10;
-	pid_tArray[1].D = 0.0001;
-
-	pid_tArray[2].P = 0.5;
-	pid_tArray[2].I = 10;
-	pid_tArray[2].D = 0.0001;
-
-	pid_tArray[3].P = 10;
-	pid_tArray[3].I = 100;
-	pid_tArray[3].D = 0.00001;
-
-	pid_tArray[4].P = 0.9;
-	pid_tArray[4].I = 10;
-	pid_tArray[4].D = 0.0001;
 
 	sampling_times = 0;
 	loop_sel = 0;
@@ -212,12 +189,11 @@ void AutoMeasurCenterPos(){
 			refCurrent[6] = MeasureCurrent;
 			refCurrent[7] = 0.0f;
 			for (index = 0; index < 5; index++){
-				refPosition[index] = 0;
+
 			}
 		}
 		if (count >= 29995){
-			refPosition[1] += rotorPosition[1];
-			refPosition[3] += rotorPosition[3];
+
 		}
 	} else if (count < 60000){		//Magnetic attraction downward
 		if (count == 30000){
@@ -230,8 +206,7 @@ void AutoMeasurCenterPos(){
 			refCurrent[7] = MeasureCurrent;
 		}
 		if (count >= 59995){
-			refPosition[1] += rotorPosition[1];
-			refPosition[3] += rotorPosition[3];
+
 		}
 	} else if (count < 90000){		//Magnetic attraction to the left
 		if (count == 60000){
@@ -244,8 +219,7 @@ void AutoMeasurCenterPos(){
 			refCurrent[9] = 0.0f;
 		}
 		if (count >= 89995){
-			refPosition[2] += rotorPosition[2];
-			refPosition[4] += rotorPosition[4];
+
 		}
 	} else if (count < 120000){		//Magnetic attraction to the right
 		if (count == 90000){
@@ -258,15 +232,13 @@ void AutoMeasurCenterPos(){
 			refCurrent[9] = MeasureCurrent;
 		}
 		if (count >= 119995){
-			refPosition[2] += rotorPosition[2];
-			refPosition[4] += rotorPosition[4];
+
 		}
 	} else {
 		for (index = 0; index < 5; index++){
-			refPosition[index] /= 10.0f;
+
 		}
 		for (index = 0; index < 10; index++){
-			refCurrent[index] = 0.0f;
 			pwmDuty[index] = 2500;
 		}
 		loop_sel = 0;

@@ -639,7 +639,7 @@ uint16_t Device_bootCPU2(uint32_t bootMode) {
 // Error handling function to be called when an ASSERT is violated
 //
 //*****************************************************************************
-void __error__(char *filename, uint32_t line) {
+void __error__(const char *filename, const uint32_t line) {
 	//
 	// An ASSERT condition was evaluated as false. You can use the filename and
 	// line parameters to determine what went wrong.
@@ -725,11 +725,11 @@ __interrupt void INT_curADCD_1_ISR(void) {
 	sampling_times++;
 	if (sampling_times == OVERSAMPLING_TIMES) {
 		uint16_t index;
-		float tempPos;
+		long tempPos;
 		for (index = 0; index < 5; index++){
-			tempPos = ((float)rawPosData[index] / OVERSAMPLING_TIMES - 32768.0f) / 32768.0f ; //µ¥¶Ë
+			tempPos = (rawPosData[index] / OVERSAMPLING_TIMES - 32768) / 8; //µ¥¶Ë
 //			tempPos = (float)rawPosData[index] / 65535.0f / OVERSAMPLING_TIMES; //²î·Ö
-			rotorPosition[index] = 500.0f * tempPos;
+			rotorPosition[index] = tempPos;
 		}
 
 		int32_t tempCur;
@@ -745,15 +745,15 @@ __interrupt void INT_curADCD_1_ISR(void) {
 		//compute displacement loop pid
 		if (loop_sel & 0b10) {
 			if (pos_pid_sel & 0b00001)
-				CalculPID(0);
+				PIDCalc(0, rotorPosition[0]);
 			if (pos_pid_sel & 0b00010)
-				CalculPID(1);
+				PIDCalc(1, rotorPosition[1]);
 			if (pos_pid_sel & 0b00100)
-				CalculPID(2);
+				PIDCalc(2, rotorPosition[2]);
 			if (pos_pid_sel & 0b01000)
-				CalculPID(3);
+				PIDCalc(3, rotorPosition[3]);
 			if (pos_pid_sel & 0b10000)
-				CalculPID(4);
+				PIDCalc(4, rotorPosition[4]);
 			if (pos_pid_sel == 0) {
 				for (index = 0; index < 10; index++)
 					refCurrent[index] = 2.0f;
