@@ -46,7 +46,7 @@ float f_pv[5] = {0.0, 0.0, 0.0, 0.0, 0.0};
 float f_iv[5] = {0.0, 0.0, 0.0, 0.0, 0.0};
 float f_dv[5] = {0.0, 0.0, 0.0, 0.0, 0.0};
 int16_t PID_OUT[5] = { 0.0, 0.0, 0.0, 0.0, 0.0};
-float current_bias[10] = {550.0f, 550.0f, 550.0f, 550.0f, 550.0f, 550.0f, 550.0f, 550.0f, 550.0f, 550.0f};
+float current_bias[10] = {350.0f, 350.0f, 350.0f, 350.0f, 350.0f, 350.0f, 350.0f, 350.0f, 350.0f, 350.0f};
 
 struct PID                         /* 定义PID结构体函数 */
 {
@@ -61,10 +61,10 @@ struct PID                         /* 定义PID结构体函数 */
 
 struct PID  s_PID[5];
 
-#define maxi  500.0f     //积分饱和
-#define mini -500.0f       //积分饱和
-#define maxv  1000.0f       //电压输出上限   PID饱和
-#define minv -1000.0f       //电压输出下限   PID饱和
+#define maxi  175.0f     //积分饱和
+#define mini -175.0f       //积分饱和
+#define maxv  350.0f       //输出上限   PID饱和
+#define minv -350.0f       //输出下限   PID饱和
 #define DT 0.00005f
 
 void PIDCalc(int16_t channel, int16_t NextPoint) {
@@ -94,10 +94,10 @@ void PIDCalc(int16_t channel, int16_t NextPoint) {
 	if (f_v[channel] < minv)
 		f_v[channel] = minv;
 
-	int pid_out = (f_v[channel]*current_bias[channel]/900.0F);
-
-	refCurrent[channel * 2] = (float)(current_bias[channel] + pid_out) / 235.5f;
-	refCurrent[channel * 2] = (float)(current_bias[channel] - pid_out) / 235.5f;
+//	int pid_out = (f_v[channel]*current_bias[channel]/900.0f);
+	int pid_out = f_v[channel];
+	refCurrent[channel * 2] = (float)(current_bias[channel] + pid_out) / 235.5f;//9 路 后上 sensor
+	refCurrent[channel * 2 + 1] = (float)(current_bias[channel] - pid_out) / 235.5f;//10  路 后下
 }
 	/*
 	 * %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -160,14 +160,45 @@ void Variable_init() {
 	for (i = 0; i < 10; i++) {
 		currIntegralArray[i] = 0;
 		pwmDuty[i] = 2500;
-		refCurrent[i] = 2.0f;
+		refCurrent[i] = 0.0f;
 
 	}
 
 	currentLoopPI.P = 0.32;
 	currentLoopPI.I = 0.1;
 
+	s_PID[0].Proportion = 0.2;    // 0.4-0.5
+	s_PID[0].Integral = 5;
+	s_PID[0].Derivative = 0.00005;
+	s_PID[0].SetPoint = 1672;
+	s_PID[0].LastV = 0.0;
 
+	s_PID[1].Proportion = 0.6;    // 0.4-0.5
+	s_PID[1].Integral = 10;
+	s_PID[1].Derivative = 0.0001;
+	s_PID[1].SetPoint = 2103;
+	s_PID[1].LastV = 0.0;
+
+
+	s_PID[2].Proportion = 0.6;
+	s_PID[2].Integral = 10;
+	s_PID[2].Derivative = 0.0001;  // 50.0
+	s_PID[2].SetPoint = 2577;        //501
+	s_PID[2].LastV = 0.0;
+
+
+	s_PID[3].Proportion = 0.5;
+	s_PID[3].Integral = 10;
+	s_PID[3].Derivative = 0.0005;  // 50.0
+	s_PID[3].SetPoint = 2267;        //273
+	s_PID[3].LastV = 0.0;
+
+
+	s_PID[4].Proportion = 0.5;
+	s_PID[4].Integral = 10;
+	s_PID[4].Derivative = 0.0005;  // 50.0
+	s_PID[4].SetPoint = 2554;
+	s_PID[4].LastV = 0.0;
 
 	sampling_times = 0;
 	loop_sel = 0;

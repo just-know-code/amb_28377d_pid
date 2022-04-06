@@ -5,7 +5,7 @@
 	<deviceVariant value="TMS320C28XX.TMS320F28377D"/>
 	<deviceFamily value="C2000"/>
 	<deviceEndianness value="little"/>
-	<codegenToolVersion value="21.6.0.LTS"/>
+	<codegenToolVersion value="20.1.2.LTS"/>
 	<isElfFormat value="true"/>
 	<rts value="libc.a"/>
 	<createSlaveProjects value=""/>
