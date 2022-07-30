@@ -61,7 +61,7 @@ void main(void)
 	//
 	// Initialize device clock and peripherals.
 	//
-	Device_init();
+		Device_init();
 
 #ifdef _STANDALONE
 #ifdef _FLASH

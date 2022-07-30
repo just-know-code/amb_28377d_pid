@@ -6,7 +6,6 @@ struct pi_t {
 };
 
 float coilCurrent[10];
-
 float refCurrent[10];
 float currIntegralArray[10];
 struct pi_t currentLoopPI;
@@ -17,13 +16,14 @@ uint16_t pwmDuty[10];
 
 uint16_t sampling_times;
 
-uint16_t loop_sel;
 /*
  * 0b0000 two loops are open loop, 0b11 two loops are closed loop
  * 0b01 only current is closed loop, 0b10 only position loop is closed loop
  */
+uint16_t loop_sel;
 
-uint16_t pos_pid_sel;
+
+
 
 /*
  * 0b00000 all PID operations do not work
@@ -32,21 +32,33 @@ uint16_t pos_pid_sel;
  * 0b11000 trailing radial directions PID work, 24
  * 0b11110 all radial directions PID work, 30(2 4 8 16)
  */
-uint16_t cur_pid_sel;
+uint16_t pos_pid_sel;
+
+
 /*
  * 0b0000000000   NO PI RUN
  * 0b0000000001	  the first PI run
  * 0b0000000010	  the second PI run
  * -----------
- * 0b1111111111	  all PI run
+ * 0b1111111111	  all PI run(1020)
+ * 0b0000111100   60
+ * 0b1111000000   960
  */
+uint16_t cur_pid_sel;
+
+
 int16_t rotorPosition[5];
 float f_v[5] = {0.0, 0.0, 0.0, 0.0, 0.0};
 float f_pv[5] = {0.0, 0.0, 0.0, 0.0, 0.0};
 float f_iv[5] = {0.0, 0.0, 0.0, 0.0, 0.0};
 float f_dv[5] = {0.0, 0.0, 0.0, 0.0, 0.0};
 int16_t PID_OUT[5] = { 0.0, 0.0, 0.0, 0.0, 0.0};
-float current_bias[10] = {350.0f, 350.0f, 350.0f, 350.0f, 350.0f, 350.0f, 350.0f, 350.0f, 350.0f, 350.0f};
+
+#define BIAS_CURRENT 525.0f
+#define BIAS_CURRENT_FREE_END 525.0f
+
+float current_bias[10] = {BIAS_CURRENT, BIAS_CURRENT, BIAS_CURRENT, BIAS_CURRENT, BIAS_CURRENT, BIAS_CURRENT, \
+					BIAS_CURRENT_FREE_END, BIAS_CURRENT_FREE_END, BIAS_CURRENT_FREE_END, BIAS_CURRENT_FREE_END};
 
 struct PID                         /* 定义PID结构体函数 */
 {
@@ -63,8 +75,7 @@ struct PID  s_PID[5];
 
 #define maxi  175.0f     //积分饱和
 #define mini -175.0f       //积分饱和
-#define maxv  350.0f       //输出上限   PID饱和
-#define minv -350.0f       //输出下限   PID饱和
+
 #define DT 0.00005f
 
 void PIDCalc(int16_t channel, int16_t NextPoint) {
@@ -89,10 +100,10 @@ void PIDCalc(int16_t channel, int16_t NextPoint) {
 //		f_dv[channel] = -300;
 
 	f_v[channel] = f_pv[channel] + f_iv[channel] + f_dv[channel];
-	if (f_v[channel] > maxv)
-		f_v[channel] = maxv;
-	if (f_v[channel] < minv)
-		f_v[channel] = minv;
+	if (f_v[channel] > current_bias[channel])
+		f_v[channel] = current_bias[channel];
+	if (f_v[channel] < -current_bias[channel])
+		f_v[channel] = -current_bias[channel];
 
 //	int pid_out = (f_v[channel]*current_bias[channel]/900.0f);
 	int pid_out = f_v[channel];
@@ -173,31 +184,32 @@ void Variable_init() {
 	s_PID[0].SetPoint = 1672;
 	s_PID[0].LastV = 0.0;
 
-	s_PID[1].Proportion = 0.6;    // 0.4-0.5
-	s_PID[1].Integral = 10;
+
+	s_PID[1].Proportion = 0.4;    // 0.4-0.5
+	s_PID[1].Integral = 5;
 	s_PID[1].Derivative = 0.0001;
-	s_PID[1].SetPoint = 2103;
+	s_PID[1].SetPoint = 2009;
 	s_PID[1].LastV = 0.0;
 
 
-	s_PID[2].Proportion = 0.6;
-	s_PID[2].Integral = 10;
+	s_PID[2].Proportion = 0.4;
+	s_PID[2].Integral = 5;
 	s_PID[2].Derivative = 0.0001;  // 50.0
-	s_PID[2].SetPoint = 2577;        //501
+	s_PID[2].SetPoint = 2205;        //501
 	s_PID[2].LastV = 0.0;
 
 
-	s_PID[3].Proportion = 0.5;
+	s_PID[3].Proportion = 0.45;
 	s_PID[3].Integral = 10;
-	s_PID[3].Derivative = 0.0005;  // 50.0
-	s_PID[3].SetPoint = 2267;        //273
+	s_PID[3].Derivative = 0.00065;  // 50.0
+	s_PID[3].SetPoint = 2205;        //273
 	s_PID[3].LastV = 0.0;
 
 
-	s_PID[4].Proportion = 0.5;
+	s_PID[4].Proportion = 0.45;
 	s_PID[4].Integral = 10;
-	s_PID[4].Derivative = 0.0005;  // 50.0
-	s_PID[4].SetPoint = 2554;
+	s_PID[4].Derivative = 0.00065;  // 50.0
+	s_PID[4].SetPoint = 1292;
 	s_PID[4].LastV = 0.0;
 
 	sampling_times = 0;
@@ -262,15 +274,10 @@ void AutoMeasurCenterPos(){
 			refCurrent[8] = 0.0f;
 			refCurrent[9] = MeasureCurrent;
 		}
-		if (count >= 119995){
-
-		}
 	} else {
-		for (index = 0; index < 5; index++){
-
-		}
 		for (index = 0; index < 10; index++){
 			pwmDuty[index] = 2500;
+			refCurrent[index] = 0.0f;
 		}
 		loop_sel = 0;
 		count = 0;

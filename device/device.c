@@ -760,7 +760,7 @@ __interrupt void INT_curADCD_1_ISR(void) {
             }
         }
         if (loop_sel & 0b100){
-            //			AutoMeasurCenterPos();
+//        	AutoMeasurCenterPos();
         }
         //compute current loop pi
         if (loop_sel & 0b01) {
