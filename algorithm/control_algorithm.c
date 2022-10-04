@@ -5,6 +5,9 @@ struct pi_t {
 	float I;
 };
 
+#pragma DATA_SECTION(point, "mydata_sec")
+int point[2000];
+
 float coilCurrent[10];
 float refCurrent[10];
 float currIntegralArray[10];
@@ -15,15 +18,13 @@ uint32_t rawCurrData[10];
 uint16_t pwmDuty[10];
 
 uint16_t sampling_times;
+uint16_t shift_phase;
 
 /*
  * 0b0000 two loops are open loop, 0b11 two loops are closed loop
  * 0b01 only current is closed loop, 0b10 only position loop is closed loop
  */
 uint16_t loop_sel;
-
-
-
 
 /*
  * 0b00000 all PID operations do not work
@@ -45,8 +46,8 @@ uint16_t pos_pid_sel;
  * 0b1111000000   960
  */
 uint16_t cur_pid_sel;
-
-
+uint16_t epwm_tbprd;
+const float u_dc = 50.0;
 int16_t rotorPosition[5];
 float f_v[5] = {0.0, 0.0, 0.0, 0.0, 0.0};
 float f_pv[5] = {0.0, 0.0, 0.0, 0.0, 0.0};
@@ -77,7 +78,8 @@ struct PID  s_PID[5];
 #define mini -175.0f       //积分饱和
 
 #define DT 0.00005f
-
+float tick_pre = 0.000000005 * 5000;
+float tick = 0.000000005 * 5000;
 void PIDCalc(int16_t channel, int16_t NextPoint) {
 
 	float i_dError, i_Error;
@@ -110,28 +112,28 @@ void PIDCalc(int16_t channel, int16_t NextPoint) {
 	refCurrent[channel * 2] = (float)(current_bias[channel] + pid_out) / 235.5f;//9 路 后上 sensor
 	refCurrent[channel * 2 + 1] = (float)(current_bias[channel] - pid_out) / 235.5f;//10  路 后下
 }
-	/*
-	 * %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	 *轴向：
-	 *		【传感器0】0 号线圈			1号线圈
-	 * %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	 *径向A：			       【传感器1】
-	 * 					2 号线圈
-	 *
-	 * 	      【传感器2】4号线圈			5号线圈
-	 *
-	 * 					3 号线圈
-	 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	 *径向B:
-	 *				        【传感器3】
-	 * 					6 号线圈
-	 *
-	 * 	       【传感器4】8 号线圈			9号线圈
-	 *
-	 * 					7 号线圈
-	 * %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	 * */
 
+/*
+ * %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ *轴向：
+ *		【传感器0】0 号线圈			1号线圈
+ * %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ *径向A：			       【传感器1】
+ * 					2 号线圈
+ *
+ * 	      【传感器2】4号线圈			5号线圈
+ *
+ * 					3 号线圈
+ *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ *径向B:
+ *				        【传感器3】
+ * 					6 号线圈
+ *
+ * 	       【传感器4】8 号线圈			9号线圈
+ *
+ * 					7 号线圈
+ * %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ * */
 
 #define MAX_PWM_DUTY 0.45f
 #define MIN_PWM_DUTY -0.45f
@@ -155,7 +157,117 @@ void CalculPI(uint16_t index) {
 	if (outcome < MIN_PWM_DUTY)
 		outcome = MIN_PWM_DUTY;
 	outcome += 0.5;
-	pwmDuty[index] = (uint16_t) (outcome * EPWM_TIMER_TBPRD);
+	pwmDuty[index] = (uint16_t) (outcome * epwm_tbprd);
+}
+
+static float CalculPI_I0() {
+
+	static float currIntegral = 0;
+	float propotion, integral, error, outcome;
+	error = refCurrent[0] - coilCurrent[0];
+	currIntegral += error * DT;
+	propotion = currentLoopPI.P * error;
+	if (currIntegral > u_dc)
+		currIntegral = u_dc;
+	if (currIntegral < -u_dc)
+		currIntegral = -u_dc;
+	integral = currentLoopPI.I * currIntegral;
+	outcome = propotion + integral;
+	if (outcome > u_dc)
+		outcome = u_dc;
+	if (outcome < -u_dc)
+		outcome = -u_dc;
+	return outcome;
+}
+
+
+static float CalculPI_I1() {
+
+	static float currIntegral = 0;
+	float propotion, integral, error, outcome;
+	error = refCurrent[1] - coilCurrent[1];
+	currIntegral += error * DT;
+	propotion = currentLoopPI.P * error;
+	if (currIntegral > u_dc)
+		currIntegral = u_dc;
+	if (currIntegral < -u_dc)
+		currIntegral = -u_dc;
+	integral = currentLoopPI.I * currIntegral;
+	outcome = propotion + integral;
+	if (outcome > u_dc)
+		outcome = u_dc;
+	if (outcome < -u_dc)
+		outcome = -u_dc;
+	return outcome;
+}
+
+
+
+
+#define sqrt_2 1.4142
+static void modulate(float ux, float uy) {
+
+	uint16_t ts = epwm_tbprd * 2;
+	float t0, t1, t2;
+	int ta, tb, tc;
+	if (ux >= 0.0 && uy >= 0.0 && ux >= uy) {
+		t1 = ts * (ux-uy) / u_dc;
+		t2 = sqrt_2 * ts * uy / u_dc;
+	} else if (ux >= 0.0 && uy >= 0.0 && ux <= uy) {
+	    t1 = ts * (uy - ux) / u_dc;
+	    t2 = sqrt_2 * ts * ux / u_dc;
+	} else if (ux <= 0.0 && uy >= 0.0) {
+	    t1 = ts * (ux - uy) / u_dc;
+	    t2 = sqrt_2 * ts * uy / u_dc;
+	}  else if (ux >= 0.0 && uy <= 0.0) {
+	    t1 = ts * ux / u_dc;
+	    t2 = - ts * uy / u_dc;
+	} else if (ux <= 0 && uy <= 0 && ux <= uy) {
+	    t1 = - sqrt_2 * ts * uy / u_dc;
+	    t2 = ts * (uy - ux) / u_dc;
+	} else if (ux <= 0 && uy <= 0 && ux >= uy) {
+	    t1 = - sqrt_2 * ts * ux / u_dc;
+	    t2 = ts * (ux - uy) / u_dc;
+	}
+	t0 = ts - t1 - t2;
+    ta = t0 / 4;
+    tb = ta + t1 / 2;
+    tc = ta + t1 / 2 + t2 / 2;
+    ta /= 2;
+    tb /= 2;
+    tc /= 2;
+    uint16_t max_duty = epwm_tbprd * 0.9;
+    uint16_t min_duty = epwm_tbprd * 0.1;
+    if (ta >= max_duty) {
+    	ta = max_duty;
+    } else if (ta <= min_duty) {
+    	ta = min_duty;
+    }
+    if (ta >= max_duty) {
+		ta = max_duty;
+	} else if (ta <= min_duty) {
+		ta = min_duty;
+	}
+    if (tb >= max_duty) {
+    	tb = max_duty;
+	} else if (tb <= min_duty) {
+		tb = min_duty;
+	}
+    if (tc >= max_duty) {
+    	tc = max_duty;
+	} else if (tc <= min_duty) {
+		tc = min_duty;
+	}
+	pwmDuty[0] = ta;
+	pwmDuty[1] = tb;
+	pwmDuty[2] = tc;
+}
+
+
+void svpwm() {
+	float ux = CalculPI_I0();
+	float uy = CalculPI_I1();
+	modulate(ux, uy);
 }
 
 
@@ -167,17 +279,13 @@ void CalculPI(uint16_t index) {
 void Variable_init() {
 
 	uint16_t i;
-
 	for (i = 0; i < 10; i++) {
 		currIntegralArray[i] = 0;
 		pwmDuty[i] = 2500;
 		refCurrent[i] = 0.0f;
-
 	}
-
-	currentLoopPI.P = 0.32;
-	currentLoopPI.I = 0.1;
-
+	currentLoopPI.P = 32;
+	currentLoopPI.I = 1.5;
 	s_PID[0].Proportion = 0.2;    // 0.4-0.5
 	s_PID[0].Integral = 5;
 	s_PID[0].Derivative = 0.00005;
@@ -194,21 +302,21 @@ void Variable_init() {
 
 	s_PID[2].Proportion = 0.4;
 	s_PID[2].Integral = 5;
-	s_PID[2].Derivative = 0.0001;  // 50.0
-	s_PID[2].SetPoint = 2205;        //501
+	s_PID[2].Derivative = 0.0001;
+	s_PID[2].SetPoint = 2205;
 	s_PID[2].LastV = 0.0;
 
 
 	s_PID[3].Proportion = 0.45;
 	s_PID[3].Integral = 10;
-	s_PID[3].Derivative = 0.00065;  // 50.0
-	s_PID[3].SetPoint = 2205;        //273
+	s_PID[3].Derivative = 0.00065;
+	s_PID[3].SetPoint = 2205;
 	s_PID[3].LastV = 0.0;
 
 
 	s_PID[4].Proportion = 0.45;
 	s_PID[4].Integral = 10;
-	s_PID[4].Derivative = 0.00065;  // 50.0
+	s_PID[4].Derivative = 0.00065;
 	s_PID[4].SetPoint = 1292;
 	s_PID[4].LastV = 0.0;
 
@@ -216,71 +324,7 @@ void Variable_init() {
 	loop_sel = 0;
 	pos_pid_sel = 0;
 	cur_pid_sel = 0;
+	shift_phase = 2500;
+	epwm_tbprd = 2500;
 }
 
-#define MeasureCurrent 4.0f
-void AutoMeasurCenterPos(){
-	static uint32_t count = 0;
-	uint16_t index;
-	if (count < 30000){				//Magnetic attraction upward
-		if (count == 1){
-			for (index = 0; index < 10; index++){
-				refCurrent[index] = 0.0f;
-			}
-			refCurrent[2] = MeasureCurrent;
-			refCurrent[3] = 0.0f;
-			refCurrent[6] = MeasureCurrent;
-			refCurrent[7] = 0.0f;
-			for (index = 0; index < 5; index++){
-
-			}
-		}
-		if (count >= 29995){
-
-		}
-	} else if (count < 60000){		//Magnetic attraction downward
-		if (count == 30000){
-			for (index = 0; index < 10; index++){
-				refCurrent[index] = 0.0f;
-			}
-			refCurrent[2] = 0.0f;
-			refCurrent[3] = MeasureCurrent;
-			refCurrent[6] = 0.0f;
-			refCurrent[7] = MeasureCurrent;
-		}
-		if (count >= 59995){
-
-		}
-	} else if (count < 90000){		//Magnetic attraction to the left
-		if (count == 60000){
-			for (index = 0; index < 10; index++){
-				refCurrent[index] = 0.0f;
-			}
-			refCurrent[4] = MeasureCurrent;
-			refCurrent[5] = 0.0f;
-			refCurrent[8] = MeasureCurrent;
-			refCurrent[9] = 0.0f;
-		}
-		if (count >= 89995){
-
-		}
-	} else if (count < 120000){		//Magnetic attraction to the right
-		if (count == 90000){
-			for (index = 0; index < 10; index++){
-				refCurrent[index] = 0.0f;
-			}
-			refCurrent[4] = 0.0f;
-			refCurrent[5] = MeasureCurrent;
-			refCurrent[8] = 0.0f;
-			refCurrent[9] = MeasureCurrent;
-		}
-	} else {
-		for (index = 0; index < 10; index++){
-			pwmDuty[index] = 2500;
-			refCurrent[index] = 0.0f;
-		}
-		loop_sel = 0;
-		count = 0;
-	}
-	count++;
-}

@@ -32,6 +32,7 @@
  */
 
 #include "board.h"
+#include "control_algorithm.h"
 
 
 void Board_init()
@@ -219,29 +220,29 @@ void ADC_init(){
     // Start of Conversion 0 Configuration
     // Configures a start-of-conversion (SOC) in the ADC and its interrupt SOC trigger.
     //      SOC number      : 0
-    //      Trigger         : ADC_TRIGGER_EPWM6_SOCA
+    //      Trigger         : ADC_TRIGGER_EPWM1_SOCA
     //      Channel         : ADC_CH_ADCIN0_ADCIN1
     //      Sample Window   : 50 SYSCLK cycles
     //      Interrupt Trigger: ADC_INT_SOC_TRIGGER_NONE
-    ADC_setupSOC(posADCA_BASE, ADC_SOC_NUMBER0, ADC_TRIGGER_EPWM6_SOCA, ADC_CH_ADCIN0_ADCIN1, 50U);
+    ADC_setupSOC(posADCA_BASE, ADC_SOC_NUMBER0, ADC_TRIGGER_EPWM1_SOCA, ADC_CH_ADCIN0_ADCIN1, 50U);
     ADC_setInterruptSOCTrigger(posADCA_BASE, ADC_SOC_NUMBER0, ADC_INT_SOC_TRIGGER_NONE);
     // Start of Conversion 1 Configuration
     // Configures a start-of-conversion (SOC) in the ADC and its interrupt SOC trigger.
     //      SOC number      : 1
-    //      Trigger         : ADC_TRIGGER_EPWM6_SOCA
+    //      Trigger         : ADC_TRIGGER_EPWM1_SOCA
     //      Channel         : ADC_CH_ADCIN2_ADCIN3
     //      Sample Window   : 50 SYSCLK cycles
     //      Interrupt Trigger: ADC_INT_SOC_TRIGGER_NONE
-    ADC_setupSOC(posADCA_BASE, ADC_SOC_NUMBER1, ADC_TRIGGER_EPWM6_SOCA, ADC_CH_ADCIN2_ADCIN3, 50U);
+    ADC_setupSOC(posADCA_BASE, ADC_SOC_NUMBER1, ADC_TRIGGER_EPWM1_SOCA, ADC_CH_ADCIN2_ADCIN3, 50U);
     ADC_setInterruptSOCTrigger(posADCA_BASE, ADC_SOC_NUMBER1, ADC_INT_SOC_TRIGGER_NONE);
     // Start of Conversion 2 Configuration
     // Configures a start-of-conversion (SOC) in the ADC and its interrupt SOC trigger.
     //      SOC number      : 2
-    //      Trigger         : ADC_TRIGGER_EPWM6_SOCA
+    //      Trigger         : ADC_TRIGGER_EPWM1_SOCA
     //      Channel         : ADC_CH_ADCIN4_ADCIN5
     //      Sample Window   : 50 SYSCLK cycles
     //      Interrupt Trigger: ADC_INT_SOC_TRIGGER_NONE
-    ADC_setupSOC(posADCA_BASE, ADC_SOC_NUMBER2, ADC_TRIGGER_EPWM6_SOCA, ADC_CH_ADCIN4_ADCIN5, 50U);
+    ADC_setupSOC(posADCA_BASE, ADC_SOC_NUMBER2, ADC_TRIGGER_EPWM1_SOCA, ADC_CH_ADCIN4_ADCIN5, 50U);
     ADC_setInterruptSOCTrigger(posADCA_BASE, ADC_SOC_NUMBER2, ADC_INT_SOC_TRIGGER_NONE);
 
     //posADCB initialization
@@ -266,20 +267,20 @@ void ADC_init(){
     // Start of Conversion 0 Configuration
     // Configures a start-of-conversion (SOC) in the ADC and its interrupt SOC trigger.
     //      SOC number      : 0
-    //      Trigger         : ADC_TRIGGER_EPWM6_SOCA
+    //      Trigger         : ADC_TRIGGER_EPWM1_SOCA
     //      Channel         : ADC_CH_ADCIN0_ADCIN1
     //      Sample Window   : 50 SYSCLK cycles
     //      Interrupt Trigger: ADC_INT_SOC_TRIGGER_NONE
-    ADC_setupSOC(posADCB_BASE, ADC_SOC_NUMBER0, ADC_TRIGGER_EPWM6_SOCA, ADC_CH_ADCIN0_ADCIN1, 50U);
+    ADC_setupSOC(posADCB_BASE, ADC_SOC_NUMBER0, ADC_TRIGGER_EPWM1_SOCA, ADC_CH_ADCIN0_ADCIN1, 50U);
     ADC_setInterruptSOCTrigger(posADCB_BASE, ADC_SOC_NUMBER0, ADC_INT_SOC_TRIGGER_NONE);
     // Start of Conversion 1 Configuration
     // Configures a start-of-conversion (SOC) in the ADC and its interrupt SOC trigger.
     //      SOC number      : 1
-    //      Trigger         : ADC_TRIGGER_EPWM6_SOCA
+    //      Trigger         : ADC_TRIGGER_EPWM1_SOCA
     //      Channel         : ADC_CH_ADCIN2_ADCIN3
     //      Sample Window   : 50 SYSCLK cycles
     //      Interrupt Trigger: ADC_INT_SOC_TRIGGER_NONE
-    ADC_setupSOC(posADCB_BASE, ADC_SOC_NUMBER1, ADC_TRIGGER_EPWM6_SOCA, ADC_CH_ADCIN2_ADCIN3, 50U);
+    ADC_setupSOC(posADCB_BASE, ADC_SOC_NUMBER1, ADC_TRIGGER_EPWM1_SOCA, ADC_CH_ADCIN2_ADCIN3, 50U);
     ADC_setInterruptSOCTrigger(posADCB_BASE, ADC_SOC_NUMBER1, ADC_INT_SOC_TRIGGER_NONE);
 
     //curADCC initialization
@@ -304,29 +305,29 @@ void ADC_init(){
     // Start of Conversion 0 Configuration
     // Configures a start-of-conversion (SOC) in the ADC and its interrupt SOC trigger.
     //      SOC number      : 0
-    //      Trigger         : ADC_TRIGGER_EPWM6_SOCA
+    //      Trigger         : ADC_TRIGGER_EPWM1_SOCA
     //      Channel         : ADC_CH_ADCIN2
     //      Sample Window   : 50 SYSCLK cycles
     //      Interrupt Trigger: ADC_INT_SOC_TRIGGER_NONE
-    ADC_setupSOC(curADCC_BASE, ADC_SOC_NUMBER0, ADC_TRIGGER_EPWM6_SOCA, ADC_CH_ADCIN2, 50U);
+    ADC_setupSOC(curADCC_BASE, ADC_SOC_NUMBER0, ADC_TRIGGER_EPWM1_SOCA, ADC_CH_ADCIN2, 50U);
     ADC_setInterruptSOCTrigger(curADCC_BASE, ADC_SOC_NUMBER0, ADC_INT_SOC_TRIGGER_NONE);
     // Start of Conversion 1 Configuration
     // Configures a start-of-conversion (SOC) in the ADC and its interrupt SOC trigger.
     //      SOC number      : 1
-    //      Trigger         : ADC_TRIGGER_EPWM6_SOCA
+    //      Trigger         : ADC_TRIGGER_EPWM1_SOCA
     //      Channel         : ADC_CH_ADCIN3
     //      Sample Window   : 50 SYSCLK cycles
     //      Interrupt Trigger: ADC_INT_SOC_TRIGGER_NONE
-    ADC_setupSOC(curADCC_BASE, ADC_SOC_NUMBER1, ADC_TRIGGER_EPWM6_SOCA, ADC_CH_ADCIN3, 50U);
+    ADC_setupSOC(curADCC_BASE, ADC_SOC_NUMBER1, ADC_TRIGGER_EPWM1_SOCA, ADC_CH_ADCIN3, 50U);
     ADC_setInterruptSOCTrigger(curADCC_BASE, ADC_SOC_NUMBER1, ADC_INT_SOC_TRIGGER_NONE);
     // Start of Conversion 2 Configuration
     // Configures a start-of-conversion (SOC) in the ADC and its interrupt SOC trigger.
     //      SOC number      : 2
-    //      Trigger         : ADC_TRIGGER_EPWM6_SOCA
+    //      Trigger         : ADC_TRIGGER_EPWM1_SOCA
     //      Channel         : ADC_CH_ADCIN4
     //      Sample Window   : 50 SYSCLK cycles
     //      Interrupt Trigger: ADC_INT_SOC_TRIGGER_NONE
-    ADC_setupSOC(curADCC_BASE, ADC_SOC_NUMBER2, ADC_TRIGGER_EPWM6_SOCA, ADC_CH_ADCIN4, 50U);
+    ADC_setupSOC(curADCC_BASE, ADC_SOC_NUMBER2, ADC_TRIGGER_EPWM1_SOCA, ADC_CH_ADCIN4, 50U);
     ADC_setInterruptSOCTrigger(curADCC_BASE, ADC_SOC_NUMBER2, ADC_INT_SOC_TRIGGER_NONE);
 
     //curADCD initialization
@@ -351,65 +352,65 @@ void ADC_init(){
     // Start of Conversion 0 Configuration
     // Configures a start-of-conversion (SOC) in the ADC and its interrupt SOC trigger.
     //      SOC number      : 0
-    //      Trigger         : ADC_TRIGGER_EPWM6_SOCA
+    //      Trigger         : ADC_TRIGGER_EPWM1_SOCA
     //      Channel         : ADC_CH_ADCIN0
     //      Sample Window   : 50 SYSCLK cycles
     //      Interrupt Trigger: ADC_INT_SOC_TRIGGER_NONE
-    ADC_setupSOC(curADCD_BASE, ADC_SOC_NUMBER0, ADC_TRIGGER_EPWM6_SOCA, ADC_CH_ADCIN0, 50U);
+    ADC_setupSOC(curADCD_BASE, ADC_SOC_NUMBER0, ADC_TRIGGER_EPWM1_SOCA, ADC_CH_ADCIN0, 50U);
     ADC_setInterruptSOCTrigger(curADCD_BASE, ADC_SOC_NUMBER0, ADC_INT_SOC_TRIGGER_NONE);
     // Start of Conversion 1 Configuration
     // Configures a start-of-conversion (SOC) in the ADC and its interrupt SOC trigger.
     //      SOC number      : 1
-    //      Trigger         : ADC_TRIGGER_EPWM6_SOCA
+    //      Trigger         : ADC_TRIGGER_EPWM1_SOCA
     //      Channel         : ADC_CH_ADCIN1
     //      Sample Window   : 50 SYSCLK cycles
     //      Interrupt Trigger: ADC_INT_SOC_TRIGGER_NONE
-    ADC_setupSOC(curADCD_BASE, ADC_SOC_NUMBER1, ADC_TRIGGER_EPWM6_SOCA, ADC_CH_ADCIN1, 50U);
+    ADC_setupSOC(curADCD_BASE, ADC_SOC_NUMBER1, ADC_TRIGGER_EPWM1_SOCA, ADC_CH_ADCIN1, 50U);
     ADC_setInterruptSOCTrigger(curADCD_BASE, ADC_SOC_NUMBER1, ADC_INT_SOC_TRIGGER_NONE);
     // Start of Conversion 2 Configuration
     // Configures a start-of-conversion (SOC) in the ADC and its interrupt SOC trigger.
     //      SOC number      : 2
-    //      Trigger         : ADC_TRIGGER_EPWM6_SOCA
+    //      Trigger         : ADC_TRIGGER_EPWM1_SOCA
     //      Channel         : ADC_CH_ADCIN2
     //      Sample Window   : 50 SYSCLK cycles
     //      Interrupt Trigger: ADC_INT_SOC_TRIGGER_NONE
-    ADC_setupSOC(curADCD_BASE, ADC_SOC_NUMBER2, ADC_TRIGGER_EPWM6_SOCA, ADC_CH_ADCIN2, 50U);
+    ADC_setupSOC(curADCD_BASE, ADC_SOC_NUMBER2, ADC_TRIGGER_EPWM1_SOCA, ADC_CH_ADCIN2, 50U);
     ADC_setInterruptSOCTrigger(curADCD_BASE, ADC_SOC_NUMBER2, ADC_INT_SOC_TRIGGER_NONE);
     // Start of Conversion 3 Configuration
     // Configures a start-of-conversion (SOC) in the ADC and its interrupt SOC trigger.
     //      SOC number      : 3
-    //      Trigger         : ADC_TRIGGER_EPWM6_SOCA
+    //      Trigger         : ADC_TRIGGER_EPWM1_SOCA
     //      Channel         : ADC_CH_ADCIN3
     //      Sample Window   : 50 SYSCLK cycles
     //      Interrupt Trigger: ADC_INT_SOC_TRIGGER_NONE
-    ADC_setupSOC(curADCD_BASE, ADC_SOC_NUMBER3, ADC_TRIGGER_EPWM6_SOCA, ADC_CH_ADCIN3, 50U);
+    ADC_setupSOC(curADCD_BASE, ADC_SOC_NUMBER3, ADC_TRIGGER_EPWM1_SOCA, ADC_CH_ADCIN3, 50U);
     ADC_setInterruptSOCTrigger(curADCD_BASE, ADC_SOC_NUMBER3, ADC_INT_SOC_TRIGGER_NONE);
     // Start of Conversion 4 Configuration
     // Configures a start-of-conversion (SOC) in the ADC and its interrupt SOC trigger.
     //      SOC number      : 4
-    //      Trigger         : ADC_TRIGGER_EPWM6_SOCA
+    //      Trigger         : ADC_TRIGGER_EPWM1_SOCA
     //      Channel         : ADC_CH_ADCIN4
     //      Sample Window   : 50 SYSCLK cycles
     //      Interrupt Trigger: ADC_INT_SOC_TRIGGER_NONE
-    ADC_setupSOC(curADCD_BASE, ADC_SOC_NUMBER4, ADC_TRIGGER_EPWM6_SOCA, ADC_CH_ADCIN4, 50U);
+    ADC_setupSOC(curADCD_BASE, ADC_SOC_NUMBER4, ADC_TRIGGER_EPWM1_SOCA, ADC_CH_ADCIN4, 50U);
     ADC_setInterruptSOCTrigger(curADCD_BASE, ADC_SOC_NUMBER4, ADC_INT_SOC_TRIGGER_NONE);
     // Start of Conversion 5 Configuration
     // Configures a start-of-conversion (SOC) in the ADC and its interrupt SOC trigger.
     //      SOC number      : 5
-    //      Trigger         : ADC_TRIGGER_EPWM6_SOCA
+    //      Trigger         : ADC_TRIGGER_EPWM1_SOCA
     //      Channel         : ADC_CH_ADCIN14
     //      Sample Window   : 50 SYSCLK cycles
     //      Interrupt Trigger: ADC_INT_SOC_TRIGGER_NONE
-    ADC_setupSOC(curADCD_BASE, ADC_SOC_NUMBER5, ADC_TRIGGER_EPWM6_SOCA, ADC_CH_ADCIN14, 50U);
+    ADC_setupSOC(curADCD_BASE, ADC_SOC_NUMBER5, ADC_TRIGGER_EPWM1_SOCA, ADC_CH_ADCIN14, 50U);
     ADC_setInterruptSOCTrigger(curADCD_BASE, ADC_SOC_NUMBER5, ADC_INT_SOC_TRIGGER_NONE);
     // Start of Conversion 6 Configuration
     // Configures a start-of-conversion (SOC) in the ADC and its interrupt SOC trigger.
     //      SOC number      : 6
-    //      Trigger         : ADC_TRIGGER_EPWM6_SOCA
+    //      Trigger         : ADC_TRIGGER_EPWM1_SOCA
     //      Channel         : ADC_CH_ADCIN15
     //      Sample Window   : 50 SYSCLK cycles
     //      Interrupt Trigger: ADC_INT_SOC_TRIGGER_NONE
-    ADC_setupSOC(curADCD_BASE, ADC_SOC_NUMBER6, ADC_TRIGGER_EPWM6_SOCA, ADC_CH_ADCIN15, 50U);
+    ADC_setupSOC(curADCD_BASE, ADC_SOC_NUMBER6, ADC_TRIGGER_EPWM1_SOCA, ADC_CH_ADCIN15, 50U);
     ADC_setInterruptSOCTrigger(curADCD_BASE, ADC_SOC_NUMBER6, ADC_INT_SOC_TRIGGER_NONE);
     // ADC Interrupt 1 Configuration
     //      SOC/EOC number  : 6
@@ -502,13 +503,12 @@ void EMIF1_init(){
 
 }
 
-#define EPWM_TIMER_TBPRD 5000U
 static void initEPWM(uint32_t base)
 {
     //
     // Set-up TBCLK
     //
-    EPWM_setTimeBasePeriod(base, EPWM_TIMER_TBPRD);
+    EPWM_setTimeBasePeriod(base, epwm_tbprd);
     EPWM_setPhaseShift(base, 0U);
     EPWM_setTimeBaseCounter(base, 0U);
 
@@ -517,15 +517,15 @@ static void initEPWM(uint32_t base)
     //
     EPWM_setCounterCompareValue(base,
                                 EPWM_COUNTER_COMPARE_A,
-                                EPWM_TIMER_TBPRD/2);
+								epwm_tbprd/2);
     EPWM_setCounterCompareValue(base,
                                 EPWM_COUNTER_COMPARE_B,
-                                EPWM_TIMER_TBPRD/2);
+								epwm_tbprd/2);
 
     //
     // Set up counter mode
     //
-    EPWM_setTimeBaseCounterMode(base, EPWM_COUNTER_MODE_UP);
+    EPWM_setTimeBaseCounterMode(base, EPWM_COUNTER_MODE_UP_DOWN);
     EPWM_disablePhaseShiftLoad(base);
     EPWM_setClockPrescaler(base,
                            EPWM_CLOCK_DIVIDER_1,
@@ -536,10 +536,10 @@ static void initEPWM(uint32_t base)
     //
     EPWM_setCounterCompareShadowLoadMode(base,
                                          EPWM_COUNTER_COMPARE_A,
-                                         EPWM_COMP_LOAD_ON_CNTR_ZERO);
+										 EPWM_COMP_LOAD_ON_SYNC_CNTR_ZERO_PERIOD);
     EPWM_setCounterCompareShadowLoadMode(base,
                                          EPWM_COUNTER_COMPARE_B,
-                                         EPWM_COMP_LOAD_ON_CNTR_ZERO);
+										 EPWM_COMP_LOAD_ON_SYNC_CNTR_ZERO_PERIOD);
 
     //
     // Set actions
@@ -547,20 +547,81 @@ static void initEPWM(uint32_t base)
     EPWM_setActionQualifierAction(base,
                                   EPWM_AQ_OUTPUT_A,
                                   EPWM_AQ_OUTPUT_HIGH,
-                                  EPWM_AQ_OUTPUT_ON_TIMEBASE_ZERO);
+								  EPWM_AQ_OUTPUT_ON_TIMEBASE_UP_CMPA);
     EPWM_setActionQualifierAction(base,
                                   EPWM_AQ_OUTPUT_B,
                                   EPWM_AQ_OUTPUT_HIGH,
-                                  EPWM_AQ_OUTPUT_ON_TIMEBASE_ZERO);
+								  EPWM_AQ_OUTPUT_ON_TIMEBASE_UP_CMPB);
     EPWM_setActionQualifierAction(base,
                                   EPWM_AQ_OUTPUT_A,
                                   EPWM_AQ_OUTPUT_LOW,
-                                  EPWM_AQ_OUTPUT_ON_TIMEBASE_UP_CMPA);
+								  EPWM_AQ_OUTPUT_ON_TIMEBASE_DOWN_CMPA);
     EPWM_setActionQualifierAction(base,
                                   EPWM_AQ_OUTPUT_B,
                                   EPWM_AQ_OUTPUT_LOW,
-                                  EPWM_AQ_OUTPUT_ON_TIMEBASE_UP_CMPB);
+								  EPWM_AQ_OUTPUT_ON_TIMEBASE_DOWN_CMPB);
 }
+
+
+static void initEPWM_AQ_REVERSE(uint32_t base)
+{
+    //
+    // Set-up TBCLK
+    //
+    EPWM_setTimeBasePeriod(base, epwm_tbprd);
+    EPWM_setPhaseShift(base, 0U);
+    EPWM_setTimeBaseCounter(base, 0U);
+
+    //
+    // Set Compare values
+    //
+    EPWM_setCounterCompareValue(base,
+                                EPWM_COUNTER_COMPARE_A,
+								epwm_tbprd/2);
+    EPWM_setCounterCompareValue(base,
+                                EPWM_COUNTER_COMPARE_B,
+								epwm_tbprd/2);
+
+    //
+    // Set up counter mode
+    //
+    EPWM_setTimeBaseCounterMode(base, EPWM_COUNTER_MODE_UP_DOWN);
+    EPWM_disablePhaseShiftLoad(base);
+    EPWM_setClockPrescaler(base,
+                           EPWM_CLOCK_DIVIDER_1,
+                           EPWM_HSCLOCK_DIVIDER_1);
+
+    //
+    // Set up shadowing
+    //
+    EPWM_setCounterCompareShadowLoadMode(base,
+                                         EPWM_COUNTER_COMPARE_A,
+										 EPWM_COMP_LOAD_ON_SYNC_CNTR_ZERO_PERIOD);
+    EPWM_setCounterCompareShadowLoadMode(base,
+                                         EPWM_COUNTER_COMPARE_B,
+										 EPWM_COMP_LOAD_ON_SYNC_CNTR_ZERO_PERIOD);
+
+    //
+    // Set actions
+    //
+    EPWM_setActionQualifierAction(base,
+                                  EPWM_AQ_OUTPUT_A,
+								  EPWM_AQ_OUTPUT_LOW,
+								  EPWM_AQ_OUTPUT_ON_TIMEBASE_UP_CMPA);
+    EPWM_setActionQualifierAction(base,
+                                  EPWM_AQ_OUTPUT_B,
+								  EPWM_AQ_OUTPUT_LOW,
+								  EPWM_AQ_OUTPUT_ON_TIMEBASE_UP_CMPB);
+    EPWM_setActionQualifierAction(base,
+                                  EPWM_AQ_OUTPUT_A,
+								  EPWM_AQ_OUTPUT_HIGH,
+								  EPWM_AQ_OUTPUT_ON_TIMEBASE_DOWN_CMPA);
+    EPWM_setActionQualifierAction(base,
+                                  EPWM_AQ_OUTPUT_B,
+								  EPWM_AQ_OUTPUT_HIGH,
+								  EPWM_AQ_OUTPUT_ON_TIMEBASE_DOWN_CMPB);
+}
+
 
 void EPWM_init(){
 
@@ -576,14 +637,18 @@ void EPWM_init(){
     //
     initEPWM(myEPWM0_BASE);
     EPWM_selectPeriodLoadEvent(myEPWM0_BASE, EPWM_SHADOW_LOAD_MODE_COUNTER_ZERO);
+    EPWM_setSyncOutPulseMode(myEPWM0_BASE, EPWM_SYNC_OUT_PULSE_ON_COUNTER_COMPARE_C);
+    EPWM_enableOneShotSync(myEPWM0_BASE);
 
     //
     // Initialize PWM2
     //
     initEPWM(myEPWM1_BASE);
-    EPWM_selectPeriodLoadEvent(myEPWM1_BASE, EPWM_SHADOW_LOAD_MODE_COUNTER_ZERO);
-
-
+    EPWM_selectPeriodLoadEvent(myEPWM1_BASE, EPWM_SHADOW_LOAD_MODE_COUNTER_SYNC);
+    EPWM_enablePhaseShiftLoad(myEPWM1_BASE);
+    EPWM_setPhaseShift(myEPWM1_BASE, 0U);
+    EPWM_setCountModeAfterSync(myEPWM1_BASE, EPWM_COUNT_MODE_UP_AFTER_SYNC);
+    EPWM_enableOneShotSync(myEPWM1_BASE);
     //
     // Initialize PWM3
     //
@@ -611,16 +676,15 @@ void EPWM_init(){
     //
     // Disable SOCA
     //
-    EPWM_disableADCTrigger(EPWM6_BASE, EPWM_SOC_A);
+    EPWM_disableADCTrigger(EPWM1_BASE, EPWM_SOC_A);
 
     //
     // Configure the SOC to occur on the first up-count event
     //
-    EPWM_setADCTriggerSource(EPWM6_BASE, EPWM_SOC_A, EPWM_SOC_TBCTR_U_CMPA);
-    EPWM_setADCTriggerEventPrescale(EPWM6_BASE, EPWM_SOC_A, 1);
-
+    EPWM_setCounterCompareValue(EPWM1_BASE, EPWM_COUNTER_COMPARE_D, epwm_tbprd/2);
+    EPWM_setADCTriggerSource(EPWM1_BASE, EPWM_SOC_A, EPWM_SOC_TBCTR_U_CMPD);
+    EPWM_setADCTriggerEventPrescale(EPWM1_BASE, EPWM_SOC_A, 1);
     SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_TBCLKSYNC);
-
 
 }
 void GPIO_init(){

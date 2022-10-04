@@ -53,6 +53,9 @@
 #include "board.h"
 #include "control_algorithm.h"
 #include "debug.h"
+#include <stdlib.h>
+
+
 //
 // Main
 //
@@ -92,9 +95,8 @@ void main(void)
 	// Service Routines (ISR).
 	//
 	Interrupt_initVectorTable();
-
-	Board_init();
 	Variable_init();
+	Board_init();
 
 	//
 	// Enable Global Interrupt (INTM) and realtime interrupt (DBGM)
@@ -102,14 +104,18 @@ void main(void)
 	EINT;
 	ERTM;
 
+	srand(point[0]);
+
     //
     // Enable SOCA
     //
-    EPWM_enableADCTrigger(EPWM6_BASE, EPWM_SOC_A);
+    EPWM_enableADCTrigger(EPWM1_BASE, EPWM_SOC_A);
+
+    EPWM_setCounterCompareValue(EPWM1_BASE, EPWM_COUNTER_COMPARE_C, 0);
+    EPWM_startOneShotSync(EPWM1_BASE);
 
 	for (;;){
 	}
-
 }
 
 
