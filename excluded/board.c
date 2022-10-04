@@ -502,7 +502,7 @@ void EMIF1_init(){
 
 }
 
-#define EPWM_TIMER_TBPRD 5000U
+#define EPWM_TIMER_TBPRD 2500U
 static void initEPWM(uint32_t base)
 {
     //
@@ -525,7 +525,7 @@ static void initEPWM(uint32_t base)
     //
     // Set up counter mode
     //
-    EPWM_setTimeBaseCounterMode(base, EPWM_COUNTER_MODE_UP);
+    EPWM_setTimeBaseCounterMode(base, EPWM_COUNTER_MODE_UP_DOWN);
     EPWM_disablePhaseShiftLoad(base);
     EPWM_setClockPrescaler(base,
                            EPWM_CLOCK_DIVIDER_1,
@@ -536,10 +536,10 @@ static void initEPWM(uint32_t base)
     //
     EPWM_setCounterCompareShadowLoadMode(base,
                                          EPWM_COUNTER_COMPARE_A,
-                                         EPWM_COMP_LOAD_ON_CNTR_ZERO);
+										 EPWM_COMP_LOAD_ON_SYNC_CNTR_ZERO_PERIOD);
     EPWM_setCounterCompareShadowLoadMode(base,
                                          EPWM_COUNTER_COMPARE_B,
-                                         EPWM_COMP_LOAD_ON_CNTR_ZERO);
+										 EPWM_COMP_LOAD_ON_SYNC_CNTR_ZERO_PERIOD);
 
     //
     // Set actions
@@ -547,20 +547,81 @@ static void initEPWM(uint32_t base)
     EPWM_setActionQualifierAction(base,
                                   EPWM_AQ_OUTPUT_A,
                                   EPWM_AQ_OUTPUT_HIGH,
-                                  EPWM_AQ_OUTPUT_ON_TIMEBASE_ZERO);
+								  EPWM_AQ_OUTPUT_ON_TIMEBASE_UP_CMPA);
     EPWM_setActionQualifierAction(base,
                                   EPWM_AQ_OUTPUT_B,
                                   EPWM_AQ_OUTPUT_HIGH,
-                                  EPWM_AQ_OUTPUT_ON_TIMEBASE_ZERO);
+								  EPWM_AQ_OUTPUT_ON_TIMEBASE_UP_CMPB);
     EPWM_setActionQualifierAction(base,
                                   EPWM_AQ_OUTPUT_A,
                                   EPWM_AQ_OUTPUT_LOW,
-                                  EPWM_AQ_OUTPUT_ON_TIMEBASE_UP_CMPA);
+								  EPWM_AQ_OUTPUT_ON_TIMEBASE_DOWN_CMPA);
     EPWM_setActionQualifierAction(base,
                                   EPWM_AQ_OUTPUT_B,
                                   EPWM_AQ_OUTPUT_LOW,
-                                  EPWM_AQ_OUTPUT_ON_TIMEBASE_UP_CMPB);
+								  EPWM_AQ_OUTPUT_ON_TIMEBASE_DOWN_CMPB);
 }
+
+
+static void initEPWM_AQ_REVERSE(uint32_t base)
+{
+    //
+    // Set-up TBCLK
+    //
+    EPWM_setTimeBasePeriod(base, EPWM_TIMER_TBPRD);
+    EPWM_setPhaseShift(base, 0U);
+    EPWM_setTimeBaseCounter(base, 0U);
+
+    //
+    // Set Compare values
+    //
+    EPWM_setCounterCompareValue(base,
+                                EPWM_COUNTER_COMPARE_A,
+                                EPWM_TIMER_TBPRD/2);
+    EPWM_setCounterCompareValue(base,
+                                EPWM_COUNTER_COMPARE_B,
+                                EPWM_TIMER_TBPRD/2);
+
+    //
+    // Set up counter mode
+    //
+    EPWM_setTimeBaseCounterMode(base, EPWM_COUNTER_MODE_UP_DOWN);
+    EPWM_disablePhaseShiftLoad(base);
+    EPWM_setClockPrescaler(base,
+                           EPWM_CLOCK_DIVIDER_1,
+                           EPWM_HSCLOCK_DIVIDER_1);
+
+    //
+    // Set up shadowing
+    //
+    EPWM_setCounterCompareShadowLoadMode(base,
+                                         EPWM_COUNTER_COMPARE_A,
+										 EPWM_COMP_LOAD_ON_SYNC_CNTR_ZERO_PERIOD);
+    EPWM_setCounterCompareShadowLoadMode(base,
+                                         EPWM_COUNTER_COMPARE_B,
+										 EPWM_COMP_LOAD_ON_SYNC_CNTR_ZERO_PERIOD);
+
+    //
+    // Set actions
+    //
+    EPWM_setActionQualifierAction(base,
+                                  EPWM_AQ_OUTPUT_A,
+								  EPWM_AQ_OUTPUT_LOW,
+								  EPWM_AQ_OUTPUT_ON_TIMEBASE_UP_CMPA);
+    EPWM_setActionQualifierAction(base,
+                                  EPWM_AQ_OUTPUT_B,
+								  EPWM_AQ_OUTPUT_LOW,
+								  EPWM_AQ_OUTPUT_ON_TIMEBASE_UP_CMPB);
+    EPWM_setActionQualifierAction(base,
+                                  EPWM_AQ_OUTPUT_A,
+                                  EPWM_AQ_OUTPUT_HIGH,
+								  EPWM_AQ_OUTPUT_ON_TIMEBASE_DOWN_CMPA);
+    EPWM_setActionQualifierAction(base,
+                                  EPWM_AQ_OUTPUT_B,
+								  EPWM_AQ_OUTPUT_HIGH,
+								  EPWM_AQ_OUTPUT_ON_TIMEBASE_DOWN_CMPB);
+}
+
 
 void EPWM_init(){
 
@@ -576,14 +637,18 @@ void EPWM_init(){
     //
     initEPWM(myEPWM0_BASE);
     EPWM_selectPeriodLoadEvent(myEPWM0_BASE, EPWM_SHADOW_LOAD_MODE_COUNTER_ZERO);
+    EPWM_setSyncOutPulseMode(myEPWM0_BASE, EPWM_SYNC_OUT_PULSE_ON_COUNTER_COMPARE_C);
+    EPWM_enableOneShotSync(myEPWM0_BASE);
 
     //
     // Initialize PWM2
     //
-    initEPWM(myEPWM1_BASE);
-    EPWM_selectPeriodLoadEvent(myEPWM1_BASE, EPWM_SHADOW_LOAD_MODE_COUNTER_ZERO);
-
-
+    initEPWM_AQ_REVERSE(myEPWM1_BASE);
+    EPWM_selectPeriodLoadEvent(myEPWM1_BASE, EPWM_SHADOW_LOAD_MODE_SYNC);
+    EPWM_enablePhaseShiftLoad(myEPWM1_BASE);
+    EPWM_setPhaseShift(myEPWM1_BASE, 0U);
+    EPWM_setCountModeAfterSync(myEPWM1_BASE, EPWM_COUNT_MODE_UP_AFTER_SYNC);
+    EPWM_enableOneShotSync(myEPWM1_BASE);
     //
     // Initialize PWM3
     //
@@ -620,7 +685,6 @@ void EPWM_init(){
     EPWM_setADCTriggerEventPrescale(EPWM6_BASE, EPWM_SOC_A, 1);
 
     SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_TBCLKSYNC);
-
 
 }
 void GPIO_init(){

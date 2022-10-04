@@ -15,6 +15,7 @@ uint32_t rawCurrData[10];
 uint16_t pwmDuty[10];
 
 uint16_t sampling_times;
+uint16_t shift_phase;
 
 /*
  * 0b0000 two loops are open loop, 0b11 two loops are closed loop
@@ -158,6 +159,31 @@ void CalculPI(uint16_t index) {
 	pwmDuty[index] = (uint16_t) (outcome * EPWM_TIMER_TBPRD);
 }
 
+void CalculPI_I1() {
+
+	float propotion, integral, error, outcome;
+	error = refCurrent[1] - coilCurrent[1];
+	currIntegralArray[1] += error * DT;
+	propotion = currentLoopPI.P * error;
+	if (currIntegralArray[1] > MAX_CURR_INTEGRAL)
+		currIntegralArray[1] = MAX_CURR_INTEGRAL;
+	if (currIntegralArray[1] < MIN_CURR_INTEGRAL)
+		currIntegralArray[1] = MIN_CURR_INTEGRAL;
+
+	integral = currentLoopPI.I * currIntegralArray[1];
+	outcome = propotion + integral;
+	if (outcome > MAX_PWM_DUTY)
+		outcome = MAX_PWM_DUTY;
+	if (outcome < MIN_PWM_DUTY)
+		outcome = MIN_PWM_DUTY;
+	outcome += 0.5;
+	uint16_t pwm_duty = outcome * EPWM_TIMER_TBPRD;
+	pwmDuty[1] = pwm_duty;
+	pwmDuty[2] = pwm_duty;
+}
+
+
+
 
 //*****************************************************************************
 //
@@ -172,7 +198,6 @@ void Variable_init() {
 		currIntegralArray[i] = 0;
 		pwmDuty[i] = 2500;
 		refCurrent[i] = 0.0f;
-
 	}
 
 	currentLoopPI.P = 0.32;
@@ -216,71 +241,6 @@ void Variable_init() {
 	loop_sel = 0;
 	pos_pid_sel = 0;
 	cur_pid_sel = 0;
+	shift_phase = 2500;
 }
 
-#define MeasureCurrent 4.0f
-void AutoMeasurCenterPos(){
-	static uint32_t count = 0;
-	uint16_t index;
-	if (count < 30000){				//Magnetic attraction upward
-		if (count == 1){
-			for (index = 0; index < 10; index++){
-				refCurrent[index] = 0.0f;
-			}
-			refCurrent[2] = MeasureCurrent;
-			refCurrent[3] = 0.0f;
-			refCurrent[6] = MeasureCurrent;
-			refCurrent[7] = 0.0f;
-			for (index = 0; index < 5; index++){
-
-			}
-		}
-		if (count >= 29995){
-
-		}
-	} else if (count < 60000){		//Magnetic attraction downward
-		if (count == 30000){
-			for (index = 0; index < 10; index++){
-				refCurrent[index] = 0.0f;
-			}
-			refCurrent[2] = 0.0f;
-			refCurrent[3] = MeasureCurrent;
-			refCurrent[6] = 0.0f;
-			refCurrent[7] = MeasureCurrent;
-		}
-		if (count >= 59995){
-
-		}
-	} else if (count < 90000){		//Magnetic attraction to the left
-		if (count == 60000){
-			for (index = 0; index < 10; index++){
-				refCurrent[index] = 0.0f;
-			}
-			refCurrent[4] = MeasureCurrent;
-			refCurrent[5] = 0.0f;
-			refCurrent[8] = MeasureCurrent;
-			refCurrent[9] = 0.0f;
-		}
-		if (count >= 89995){
-
-		}
-	} else if (count < 120000){		//Magnetic attraction to the right
-		if (count == 90000){
-			for (index = 0; index < 10; index++){
-				refCurrent[index] = 0.0f;
-			}
-			refCurrent[4] = 0.0f;
-			refCurrent[5] = MeasureCurrent;
-			refCurrent[8] = 0.0f;
-			refCurrent[9] = MeasureCurrent;
-		}
-	} else {
-		for (index = 0; index < 10; index++){
-			pwmDuty[index] = 2500;
-			refCurrent[index] = 0.0f;
-		}
-		loop_sel = 0;
-		count = 0;
-	}
-	count++;
-}

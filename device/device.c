@@ -651,6 +651,8 @@ static inline void UpdatePWMDuty() {
 
     EPWM_setCounterCompareValue(EPWM1_BASE, EPWM_COUNTER_COMPARE_A, pwmDuty[0]);
     EPWM_setCounterCompareValue(EPWM1_BASE, EPWM_COUNTER_COMPARE_B, pwmDuty[1]);
+    EPWM_setCounterCompareValue(EPWM1_BASE, EPWM_COUNTER_COMPARE_C, shift_phase);
+    EPWM_startOneShotSync(EPWM1_BASE);
 
     EPWM_setCounterCompareValue(EPWM2_BASE, EPWM_COUNTER_COMPARE_A, pwmDuty[2]);
     EPWM_setCounterCompareValue(EPWM2_BASE, EPWM_COUNTER_COMPARE_B, pwmDuty[3]);
@@ -740,10 +742,11 @@ __interrupt void INT_curADCD_1_ISR(void) {
 
         if (loop_sel == 0U){
             for (index = 0; index < 10; index++)
-                pwmDuty[index] = 2500;
+                pwmDuty[index] = 1250;
         }
         //compute displacement loop pid
-        if (loop_sel & 0b10) {
+/*
+		if (loop_sel & 0b10) {
             if (pos_pid_sel & 0b00001)
                 PIDCalc(0, rotorPosition[0]);
             if (pos_pid_sel & 0b00010)
@@ -759,51 +762,22 @@ __interrupt void INT_curADCD_1_ISR(void) {
                     refCurrent[index] = 0.0f;
             }
         }
-        if (loop_sel & 0b100){
-//        	AutoMeasurCenterPos();
-        }
+ */
+
         //compute current loop pi
-        if (loop_sel & 0b01) {
-            if (cur_pid_sel & 0b00001)
-                CalculPI(0);
-            else
-                pwmDuty[0] = 2500;
-            if (cur_pid_sel & 0b00010)
-                CalculPI(1);
-            else
-                pwmDuty[1] = 2500;
-            if (cur_pid_sel & 0b00100)
-                CalculPI(2);
-            else
-                pwmDuty[2] = 2500;
-            if (cur_pid_sel & 0b01000)
-                CalculPI(3);
-            else
-                pwmDuty[3] = 2500;
-            if (cur_pid_sel & 0b10000)
-                CalculPI(4);
-            else
-                pwmDuty[4] = 2500;
-            if (cur_pid_sel & 0b0000100000)
-                CalculPI(5);
-            else
-                pwmDuty[5] = 2500;
-            if (cur_pid_sel & 0b0001000000)
-                CalculPI(6);
-            else
-                pwmDuty[6] = 2500;
-            if (cur_pid_sel & 0b0010000000)
-                CalculPI(7);
-            else
-                pwmDuty[7] = 2500;
-            if (cur_pid_sel & 0b0100000000)
-                CalculPI(8);
-            else
-                pwmDuty[8] = 2500;
-            if (cur_pid_sel & 0b1000000000)
-                CalculPI(9);
-            else
-                pwmDuty[9] = 2500;
+        if (!loop_sel) {
+            pwmDuty[0] = 1250;
+            pwmDuty[1] = 1250;
+            pwmDuty[2] = 1250;
+            pwmDuty[3] = 1250;
+            pwmDuty[4] = 1250;
+            pwmDuty[5] = 1250;
+            pwmDuty[6] = 1250;
+            pwmDuty[7] = 1250;
+            pwmDuty[8] = 1250;
+            pwmDuty[9] = 1250;
+        } else if (loop_sel == 1){
+        	CalculPI_I1();
         }
         // update pwm duty
         UpdatePWMDuty();
