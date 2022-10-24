@@ -10,6 +10,7 @@ int point[2000];
 
 float coilCurrent[10];
 float refCurrent[10];
+float currIntegral[10];
 float currIntegralArray[10];
 struct pi_t currentLoopPI;
 
@@ -160,18 +161,17 @@ void CalculPI(uint16_t index) {
 	pwmDuty[index] = (uint16_t) (outcome * epwm_tbprd);
 }
 
-static float CalculPI_I0() {
+static float CalculPI_(uint16_t index) {
 
-	static float currIntegral = 0;
 	float propotion, integral, error, outcome;
-	error = refCurrent[0] - coilCurrent[0];
-	currIntegral += error * DT;
+	error = refCurrent[index] - coilCurrent[index];
+	currIntegral[index] += error * tick;
 	propotion = currentLoopPI.P * error;
-	if (currIntegral > u_dc)
-		currIntegral = u_dc;
-	if (currIntegral < -u_dc)
-		currIntegral = -u_dc;
-	integral = currentLoopPI.I * currIntegral;
+	if (currIntegral[0] > u_dc)
+		currIntegral[0] = u_dc;
+	if (currIntegral[0] < -u_dc)
+		currIntegral[0] = -u_dc;
+	integral = currentLoopPI.I * currIntegral[index];
 	outcome = propotion + integral;
 	if (outcome > u_dc)
 		outcome = u_dc;
@@ -179,65 +179,40 @@ static float CalculPI_I0() {
 		outcome = -u_dc;
 	return outcome;
 }
-
-
-static float CalculPI_I1() {
-
-	static float currIntegral = 0;
-	float propotion, integral, error, outcome;
-	error = refCurrent[1] - coilCurrent[1];
-	currIntegral += error * DT;
-	propotion = currentLoopPI.P * error;
-	if (currIntegral > u_dc)
-		currIntegral = u_dc;
-	if (currIntegral < -u_dc)
-		currIntegral = -u_dc;
-	integral = currentLoopPI.I * currIntegral;
-	outcome = propotion + integral;
-	if (outcome > u_dc)
-		outcome = u_dc;
-	if (outcome < -u_dc)
-		outcome = -u_dc;
-	return outcome;
-}
-
-
 
 
 #define sqrt_2 1.4142
 static void modulate(float ux, float uy) {
 
-	uint16_t ts = epwm_tbprd * 2;
+    float max_duty = epwm_tbprd * 0.9;
+    float min_duty = epwm_tbprd * 0.1;
+	float ts = epwm_tbprd * 2;
 	float t0, t1, t2;
-	int ta, tb, tc;
-	if (ux >= 0.0 && uy >= 0.0 && ux >= uy) {
-		t1 = ts * (ux-uy) / u_dc;
+	float ta, tb, tc;
+	if (ux >= 0.0 && uy >= 0.0 && ux >= uy) {           //区域1
+		t1 = ts * (ux - uy) / u_dc;
 		t2 = sqrt_2 * ts * uy / u_dc;
-	} else if (ux >= 0.0 && uy >= 0.0 && ux <= uy) {
+	} else if (ux >= 0.0 && uy >= 0.0 && ux <= uy) {    //区域2
 	    t1 = ts * (uy - ux) / u_dc;
 	    t2 = sqrt_2 * ts * ux / u_dc;
-	} else if (ux <= 0.0 && uy >= 0.0) {
-	    t1 = ts * (ux - uy) / u_dc;
-	    t2 = sqrt_2 * ts * uy / u_dc;
-	}  else if (ux >= 0.0 && uy <= 0.0) {
+	} else if (ux <= 0.0 && uy > 0.0) {                //区域3
+	    t1 = ts * uy / u_dc;
+	    t2 = - ts * ux / u_dc;
+	}  else if (ux > 0.0 && uy < 0.0) {				//区域6
 	    t1 = ts * ux / u_dc;
 	    t2 = - ts * uy / u_dc;
-	} else if (ux <= 0 && uy <= 0 && ux <= uy) {
+	} else if (ux <= 0.0 && uy <= 0.0 && ux <= uy) {		//区域4
 	    t1 = - sqrt_2 * ts * uy / u_dc;
 	    t2 = ts * (uy - ux) / u_dc;
-	} else if (ux <= 0 && uy <= 0 && ux >= uy) {
+	} else if (ux < 0.0 && uy <= 0.0 && ux >= uy) {		//区域5
 	    t1 = - sqrt_2 * ts * ux / u_dc;
 	    t2 = ts * (ux - uy) / u_dc;
 	}
 	t0 = ts - t1 - t2;
-    ta = t0 / 4;
-    tb = ta + t1 / 2;
-    tc = ta + t1 / 2 + t2 / 2;
-    ta /= 2;
-    tb /= 2;
-    tc /= 2;
-    uint16_t max_duty = epwm_tbprd * 0.9;
-    uint16_t min_duty = epwm_tbprd * 0.1;
+	tc = t0 / 4;
+    ta = tc + t1 / 2 + t2 / 2;
+    tb = tc + t2 / 2;
+
     if (ta >= max_duty) {
     	ta = max_duty;
     } else if (ta <= min_duty) {
@@ -258,15 +233,16 @@ static void modulate(float ux, float uy) {
 	} else if (tc <= min_duty) {
 		tc = min_duty;
 	}
-	pwmDuty[0] = ta;
-	pwmDuty[1] = tb;
-	pwmDuty[2] = tc;
+	pwmDuty[0] = (uint16_t)ta;
+	pwmDuty[1] = (uint16_t)tb;
+	pwmDuty[2] = (uint16_t)tc;
 }
 
 
 void svpwm() {
-	float ux = CalculPI_I0();
-	float uy = CalculPI_I1();
+	tick = 1e-8f * epwm_tbprd * 2U;
+	float ux = CalculPI_(0);
+	float uy = CalculPI_(1);
 	modulate(ux, uy);
 }
 
@@ -283,6 +259,7 @@ void Variable_init() {
 		currIntegralArray[i] = 0;
 		pwmDuty[i] = 2500;
 		refCurrent[i] = 0.0f;
+		currIntegral[i] = 0.0f;
 	}
 	currentLoopPI.P = 32;
 	currentLoopPI.I = 1.5;
