@@ -182,60 +182,88 @@ static float CalculPI_(uint16_t index) {
 
 
 #define sqrt_2 1.4142
+
+
+#define calculations_and_checks() do {	\
+	t0 = ts - t1 - t2; 			\
+	ta = t0 / 4;				\
+	tb = ta + t1 / 2;			\
+	tc = ta + t1 / 2  + t2 / 2; \
+	if (ta >= max_duty) {		\
+		ta = max_duty;			\
+	} else if (ta < min_duty) {	\
+		ta = min_duty;			\
+	}							\
+	if (tb >= max_duty) {		\
+		tb = max_duty;			\
+	} else if (tb < min_duty) {	\
+		tb = min_duty;			\
+	}							\
+	if (tc >= max_duty) {		\
+		tc = max_duty;			\
+	} else if (tc < min_duty) {	\
+		tc = min_duty;			\
+	}							\
+} while(0)
+
+
 static void modulate(float ux, float uy) {
 
-    float max_duty = epwm_tbprd * 0.9;
-    float min_duty = epwm_tbprd * 0.1;
-	float ts = epwm_tbprd * 2;
-	float t0, t1, t2;
-	float ta, tb, tc;
-	if (ux >= 0.0 && uy >= 0.0 && ux >= uy) {           //区域1
+	float ts = epwm_tbprd * 2u;
+	uint16_t max_duty = epwm_tbprd * 0.9;
+	uint16_t min_duty = epwm_tbprd * 0.1;
+	uint16_t t0, t1, t2;
+	uint16_t ta, tb, tc;
+
+if (ux >= 0.0 && uy >= 0.0 && ux >= uy) {           	//区域1
 		t1 = ts * (ux - uy) / u_dc;
 		t2 = sqrt_2 * ts * uy / u_dc;
-	} else if (ux >= 0.0 && uy >= 0.0 && ux <= uy) {    //区域2
+		calculations_and_checks();
+		pwmDuty[0] = ta;
+		pwmDuty[1] = tc;
+		pwmDuty[2] = tb;
+
+	} else if (ux >= 0.0 && uy >= 0.0 && ux < uy) {    	//区域2
 	    t1 = ts * (uy - ux) / u_dc;
 	    t2 = sqrt_2 * ts * ux / u_dc;
-	} else if (ux <= 0.0 && uy > 0.0) {                //区域3
+	    calculations_and_checks();
+		pwmDuty[0] = tb;
+		pwmDuty[1] = tc;
+		pwmDuty[2] = ta;
+
+	} else if (ux <= 0.0 && uy > 0.0) {                	//区域3
 	    t1 = ts * uy / u_dc;
 	    t2 = - ts * ux / u_dc;
-	}  else if (ux > 0.0 && uy < 0.0) {				//区域6
-	    t1 = ts * ux / u_dc;
-	    t2 = - ts * uy / u_dc;
-	} else if (ux <= 0.0 && uy <= 0.0 && ux <= uy) {		//区域4
+	    calculations_and_checks();
+		pwmDuty[0] = tc;
+		pwmDuty[1] = tb;
+		pwmDuty[2] = ta;
+
+	} else if (ux <= 0.0 && uy <= 0.0 && ux <= uy) {	//区域4
 	    t1 = - sqrt_2 * ts * uy / u_dc;
 	    t2 = ts * (uy - ux) / u_dc;
-	} else if (ux < 0.0 && uy <= 0.0 && ux >= uy) {		//区域5
+	    calculations_and_checks();
+		pwmDuty[0] = tc;
+		pwmDuty[1] = ta;
+		pwmDuty[2] = tb;
+
+	} else if (ux < 0.0 && uy <= 0.0 && ux > uy) {		//区域5
 	    t1 = - sqrt_2 * ts * ux / u_dc;
 	    t2 = ts * (ux - uy) / u_dc;
-	}
-	t0 = ts - t1 - t2;
-	tc = t0 / 4;
-    ta = tc + t1 / 2 + t2 / 2;
-    tb = tc + t2 / 2;
+	    calculations_and_checks();
+		pwmDuty[0] = tb;
+		pwmDuty[1] = ta;
+		pwmDuty[2] = tc;
 
-    if (ta >= max_duty) {
-    	ta = max_duty;
-    } else if (ta <= min_duty) {
-    	ta = min_duty;
-    }
-    if (ta >= max_duty) {
-		ta = max_duty;
-	} else if (ta <= min_duty) {
-		ta = min_duty;
+	} else if (ux > 0.0 && uy < 0.0) {					//区域6
+	    t1 = ts * ux / u_dc;
+	    t2 = - ts * uy / u_dc;
+	    calculations_and_checks();
+		pwmDuty[0] = ta;
+		pwmDuty[1] = tb;
+		pwmDuty[2] = tc;
+
 	}
-    if (tb >= max_duty) {
-    	tb = max_duty;
-	} else if (tb <= min_duty) {
-		tb = min_duty;
-	}
-    if (tc >= max_duty) {
-    	tc = max_duty;
-	} else if (tc <= min_duty) {
-		tc = min_duty;
-	}
-	pwmDuty[0] = (uint16_t)ta;
-	pwmDuty[1] = (uint16_t)tb;
-	pwmDuty[2] = (uint16_t)tc;
 }
 
 
