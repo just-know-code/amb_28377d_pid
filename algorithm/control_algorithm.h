@@ -9,6 +9,7 @@
 #define DEVICE_CONTROL_ALGORITHM_H_
 
 #include "stdint.h"
+#include <stdlib.h>
 
 extern int16_t rotorPosition[5];
 

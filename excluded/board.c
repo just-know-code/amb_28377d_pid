@@ -540,6 +540,12 @@ static void initEPWM(uint32_t base)
     EPWM_setCounterCompareShadowLoadMode(base,
                                          EPWM_COUNTER_COMPARE_B,
 										 EPWM_COMP_LOAD_ON_SYNC_CNTR_ZERO_PERIOD);
+    EPWM_setCounterCompareShadowLoadMode(base,
+                                         EPWM_COUNTER_COMPARE_C,
+										 EPWM_COMP_LOAD_ON_SYNC_CNTR_ZERO_PERIOD);
+    EPWM_setCounterCompareShadowLoadMode(base,
+                                         EPWM_COUNTER_COMPARE_D,
+										 EPWM_COMP_LOAD_ON_SYNC_CNTR_ZERO_PERIOD);
 
     //
     // Set actions
