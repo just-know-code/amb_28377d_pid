@@ -289,7 +289,7 @@ void Variable_init() {
 		refCurrent[i] = 0.0f;
 		currIntegral[i] = 0.0f;
 	}
-	currentLoopPI.P = 32;
+	currentLoopPI.P = 60;
 	currentLoopPI.I = 1.5;
 	s_PID[0].Proportion = 0.2;    // 0.4-0.5
 	s_PID[0].Integral = 5;
