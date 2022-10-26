@@ -48,6 +48,7 @@ uint16_t pos_pid_sel;
  */
 uint16_t cur_pid_sel;
 uint16_t epwm_tbprd;
+uint16_t epwm_tbprd_old;
 const float u_dc = 50.0;
 int16_t rotorPosition[5];
 float f_v[5] = {0.0, 0.0, 0.0, 0.0, 0.0};
@@ -282,10 +283,12 @@ void svpwm() {
 //*****************************************************************************
 void Variable_init() {
 
+	shift_phase = 2500;
+	epwm_tbprd = 2500;
 	uint16_t i;
 	for (i = 0; i < 10; i++) {
 		currIntegralArray[i] = 0;
-		pwmDuty[i] = 2500;
+		pwmDuty[i] = epwm_tbprd;
 		refCurrent[i] = 0.0f;
 		currIntegral[i] = 0.0f;
 	}
@@ -329,7 +332,6 @@ void Variable_init() {
 	loop_sel = 0;
 	pos_pid_sel = 0;
 	cur_pid_sel = 0;
-	shift_phase = 2500;
-	epwm_tbprd = 2500;
+
 }
 

@@ -31,7 +31,7 @@ extern uint16_t loop_sel;
 extern uint16_t pos_pid_sel;
 extern uint16_t cur_pid_sel;
 extern uint16_t epwm_tbprd;
-
+extern uint16_t epwm_tbprd_old;
 
 void PIDCalc(int16_t channel, int16_t NextPoint);
 extern void CalculPI(uint16_t index);

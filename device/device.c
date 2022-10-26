@@ -53,7 +53,7 @@
 using std::memcpy;
 #endif
 
-#define OVERSAMPLING_TIMES 4U
+#define OVERSAMPLING_TIMES 2U
 
 //*****************************************************************************
 //
@@ -666,17 +666,21 @@ static inline void UpdatePWMDuty() {
     EPWM_setCounterCompareValue(EPWM5_BASE, EPWM_COUNTER_COMPARE_B, pwmDuty[9]);
 }
 
-static int index_ = 0;
-void randpwm() {
-	if (index_ < 2000) {
-		epwm_tbprd = 1563u + (rand() % 1563);   //16k - 32k
-		point[index_++] = epwm_tbprd;
-		EPWM_setTimeBasePeriod(EPWM1_BASE, epwm_tbprd);
-		EPWM_setTimeBasePeriod(EPWM2_BASE, epwm_tbprd);
-	}
-	pwmDuty[0] = epwm_tbprd * 0.5;
-	pwmDuty[1] = epwm_tbprd * 0.5;
-	pwmDuty[2] = epwm_tbprd * 0.5;
+
+static void randpwm() {
+
+	epwm_tbprd_old = epwm_tbprd;
+	epwm_tbprd = 1563u + (rand() % 1563);   //16k - 32k
+//	static int iflag = 0;
+//	if (iflag == 0) {
+//		epwm_tbprd = 2500u;   //16k - 32k
+//		iflag = 1;
+//	} else {
+//		epwm_tbprd = 3000u;   //16k - 32k
+//		iflag = 0;
+//	}
+	EPWM_setTimeBasePeriod(EPWM1_BASE, epwm_tbprd);
+	EPWM_setTimeBasePeriod(EPWM2_BASE, epwm_tbprd);
 }
 
 
@@ -754,7 +758,7 @@ __interrupt void INT_curADCD_1_ISR(void) {
 
         if (loop_sel == 0U){
             for (index = 0; index < 10; index++)
-                pwmDuty[index] = 1250;
+                pwmDuty[index] = epwm_tbprd / 2u;
         }
         //compute displacement loop pid
 /*
@@ -777,20 +781,21 @@ __interrupt void INT_curADCD_1_ISR(void) {
  */
         //compute current loop pi
         if (!loop_sel) {
-            pwmDuty[0] = 1250;
-            pwmDuty[1] = 1250;
-            pwmDuty[2] = 1250;
-            pwmDuty[3] = 1250;
-            pwmDuty[4] = 1250;
-            pwmDuty[5] = 1250;
-            pwmDuty[6] = 1250;
-            pwmDuty[7] = 1250;
-            pwmDuty[8] = 1250;
-            pwmDuty[9] = 1250;
+            pwmDuty[0] = epwm_tbprd / 2u;
+            pwmDuty[1] = epwm_tbprd / 2u;
+            pwmDuty[2] = epwm_tbprd / 2u;
+            pwmDuty[3] = epwm_tbprd / 2u;
+            pwmDuty[4] = epwm_tbprd / 2u;
+            pwmDuty[5] = epwm_tbprd / 2u;
+            pwmDuty[6] = epwm_tbprd / 2u;
+            pwmDuty[7] = epwm_tbprd / 2u;
+            pwmDuty[8] = epwm_tbprd / 2u;
+            pwmDuty[9] = epwm_tbprd / 2u;
         } else if (loop_sel == 1){
         	svpwm();
         } else if (loop_sel == 2){
         	randpwm();
+        	svpwm();
         }
         // update pwm duty
         UpdatePWMDuty();
