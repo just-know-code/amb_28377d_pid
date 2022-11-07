@@ -292,8 +292,8 @@ void Variable_init() {
 		refCurrent[i] = 0.0f;
 		currIntegral[i] = 0.0f;
 	}
-	currentLoopPI.P = 25;
-	currentLoopPI.I = 1.0;
+	currentLoopPI.P = 30;
+	currentLoopPI.I = 1.6;
 	s_PID[0].Proportion = 0.2;    // 0.4-0.5
 	s_PID[0].Integral = 5;
 	s_PID[0].Derivative = 0.00005;
