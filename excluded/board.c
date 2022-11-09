@@ -503,77 +503,11 @@ void EMIF1_init(){
 
 }
 
-static void initEPWM(uint32_t base)
-{
-
-	EPWM_setEmulationMode(base, EPWM_EMULATION_STOP_AFTER_FULL_CYCLE);
-
-    //
-    // Set-up TBCLK
-    //
-    EPWM_setTimeBasePeriod(base, epwm_tbprd);
-    EPWM_setPhaseShift(base, 0U);
-    EPWM_setTimeBaseCounter(base, 0U);
-
-    //
-    // Set Compare values
-    //
-    EPWM_setCounterCompareValue(base,
-                                EPWM_COUNTER_COMPARE_A,
-								epwm_tbprd/2);
-    EPWM_setCounterCompareValue(base,
-                                EPWM_COUNTER_COMPARE_B,
-								epwm_tbprd/2);
-
-    //
-    // Set up counter mode
-    //
-    EPWM_setTimeBaseCounterMode(base, EPWM_COUNTER_MODE_UP_DOWN);
-    EPWM_disablePhaseShiftLoad(base);
-    EPWM_setClockPrescaler(base,
-                           EPWM_CLOCK_DIVIDER_1,
-                           EPWM_HSCLOCK_DIVIDER_1);
-
-    //
-    // Set up shadowing
-    //
-    EPWM_setCounterCompareShadowLoadMode(base,
-                                         EPWM_COUNTER_COMPARE_A,
-										 EPWM_COMP_LOAD_ON_SYNC_CNTR_ZERO);
-    EPWM_setCounterCompareShadowLoadMode(base,
-                                         EPWM_COUNTER_COMPARE_B,
-										 EPWM_COMP_LOAD_ON_SYNC_CNTR_ZERO);
-    EPWM_setCounterCompareShadowLoadMode(base,
-                                         EPWM_COUNTER_COMPARE_C,
-										 EPWM_COMP_LOAD_ON_SYNC_CNTR_ZERO);
-    EPWM_setCounterCompareShadowLoadMode(base,
-                                         EPWM_COUNTER_COMPARE_D,
-										 EPWM_COMP_LOAD_ON_SYNC_CNTR_ZERO);
-
-    //
-    // Set actions
-    //
-    EPWM_setActionQualifierAction(base,
-                                  EPWM_AQ_OUTPUT_A,
-                                  EPWM_AQ_OUTPUT_HIGH,
-								  EPWM_AQ_OUTPUT_ON_TIMEBASE_UP_CMPA);
-    EPWM_setActionQualifierAction(base,
-                                  EPWM_AQ_OUTPUT_B,
-                                  EPWM_AQ_OUTPUT_HIGH,
-								  EPWM_AQ_OUTPUT_ON_TIMEBASE_UP_CMPB);
-    EPWM_setActionQualifierAction(base,
-                                  EPWM_AQ_OUTPUT_A,
-                                  EPWM_AQ_OUTPUT_LOW,
-								  EPWM_AQ_OUTPUT_ON_TIMEBASE_DOWN_CMPA);
-    EPWM_setActionQualifierAction(base,
-                                  EPWM_AQ_OUTPUT_B,
-                                  EPWM_AQ_OUTPUT_LOW,
-								  EPWM_AQ_OUTPUT_ON_TIMEBASE_DOWN_CMPB);
-}
-
-
-//static void initEPWM_AQ_REVERSE(uint32_t base)
+//static void initEPWM(uint32_t base)
 //{
+//
+//	EPWM_setEmulationMode(base, EPWM_EMULATION_STOP_AFTER_FULL_CYCLE);
+//
 //    //
 //    // Set-up TBCLK
 //    //
@@ -605,36 +539,102 @@ static void initEPWM(uint32_t base)
 //    //
 //    EPWM_setCounterCompareShadowLoadMode(base,
 //                                         EPWM_COUNTER_COMPARE_A,
-//										 EPWM_COMP_LOAD_ON_SYNC_CNTR_ZERO_PERIOD);
+//										 EPWM_COMP_LOAD_ON_SYNC_CNTR_ZERO);
 //    EPWM_setCounterCompareShadowLoadMode(base,
 //                                         EPWM_COUNTER_COMPARE_B,
-//										 EPWM_COMP_LOAD_ON_SYNC_CNTR_ZERO_PERIOD);
+//										 EPWM_COMP_LOAD_ON_SYNC_CNTR_ZERO);
 //    EPWM_setCounterCompareShadowLoadMode(base,
 //                                         EPWM_COUNTER_COMPARE_C,
-//										 EPWM_COMP_LOAD_ON_SYNC_CNTR_ZERO_PERIOD);
+//										 EPWM_COMP_LOAD_ON_SYNC_CNTR_ZERO);
 //    EPWM_setCounterCompareShadowLoadMode(base,
 //                                         EPWM_COUNTER_COMPARE_D,
-//										 EPWM_COMP_LOAD_ON_SYNC_CNTR_ZERO_PERIOD);
+//										 EPWM_COMP_LOAD_ON_SYNC_CNTR_ZERO);
+//
 //    //
 //    // Set actions
 //    //
 //    EPWM_setActionQualifierAction(base,
 //                                  EPWM_AQ_OUTPUT_A,
-//								  EPWM_AQ_OUTPUT_LOW,
+//                                  EPWM_AQ_OUTPUT_HIGH,
 //								  EPWM_AQ_OUTPUT_ON_TIMEBASE_UP_CMPA);
 //    EPWM_setActionQualifierAction(base,
 //                                  EPWM_AQ_OUTPUT_B,
-//								  EPWM_AQ_OUTPUT_LOW,
+//                                  EPWM_AQ_OUTPUT_HIGH,
 //								  EPWM_AQ_OUTPUT_ON_TIMEBASE_UP_CMPB);
 //    EPWM_setActionQualifierAction(base,
 //                                  EPWM_AQ_OUTPUT_A,
-//								  EPWM_AQ_OUTPUT_HIGH,
+//                                  EPWM_AQ_OUTPUT_LOW,
 //								  EPWM_AQ_OUTPUT_ON_TIMEBASE_DOWN_CMPA);
 //    EPWM_setActionQualifierAction(base,
 //                                  EPWM_AQ_OUTPUT_B,
-//								  EPWM_AQ_OUTPUT_HIGH,
+//                                  EPWM_AQ_OUTPUT_LOW,
 //								  EPWM_AQ_OUTPUT_ON_TIMEBASE_DOWN_CMPB);
 //}
+
+
+static void initEPWM_AQ_REVERSE(uint32_t base)
+{
+    //
+    // Set-up TBCLK
+    //
+    EPWM_setTimeBasePeriod(base, epwm_tbprd);
+    EPWM_setPhaseShift(base, 0U);
+    EPWM_setTimeBaseCounter(base, 0U);
+
+    //
+    // Set Compare values
+    //
+    EPWM_setCounterCompareValue(base,
+                                EPWM_COUNTER_COMPARE_A,
+								epwm_tbprd/2);
+    EPWM_setCounterCompareValue(base,
+                                EPWM_COUNTER_COMPARE_B,
+								epwm_tbprd/2);
+
+    //
+    // Set up counter mode
+    //
+    EPWM_setTimeBaseCounterMode(base, EPWM_COUNTER_MODE_UP_DOWN);
+    EPWM_disablePhaseShiftLoad(base);
+    EPWM_setClockPrescaler(base,
+                           EPWM_CLOCK_DIVIDER_1,
+                           EPWM_HSCLOCK_DIVIDER_1);
+
+    //
+    // Set up shadowing
+    //
+    EPWM_setCounterCompareShadowLoadMode(base,
+                                         EPWM_COUNTER_COMPARE_A,
+										 EPWM_COMP_LOAD_ON_SYNC_CNTR_ZERO_PERIOD);
+    EPWM_setCounterCompareShadowLoadMode(base,
+                                         EPWM_COUNTER_COMPARE_B,
+										 EPWM_COMP_LOAD_ON_SYNC_CNTR_ZERO_PERIOD);
+    EPWM_setCounterCompareShadowLoadMode(base,
+                                         EPWM_COUNTER_COMPARE_C,
+										 EPWM_COMP_LOAD_ON_SYNC_CNTR_ZERO_PERIOD);
+    EPWM_setCounterCompareShadowLoadMode(base,
+                                         EPWM_COUNTER_COMPARE_D,
+										 EPWM_COMP_LOAD_ON_SYNC_CNTR_ZERO_PERIOD);
+    //
+    // Set actions
+    //
+    EPWM_setActionQualifierAction(base,
+                                  EPWM_AQ_OUTPUT_A,
+								  EPWM_AQ_OUTPUT_LOW,
+								  EPWM_AQ_OUTPUT_ON_TIMEBASE_UP_CMPA);
+    EPWM_setActionQualifierAction(base,
+                                  EPWM_AQ_OUTPUT_B,
+								  EPWM_AQ_OUTPUT_LOW,
+								  EPWM_AQ_OUTPUT_ON_TIMEBASE_UP_CMPB);
+    EPWM_setActionQualifierAction(base,
+                                  EPWM_AQ_OUTPUT_A,
+								  EPWM_AQ_OUTPUT_HIGH,
+								  EPWM_AQ_OUTPUT_ON_TIMEBASE_DOWN_CMPA);
+    EPWM_setActionQualifierAction(base,
+                                  EPWM_AQ_OUTPUT_B,
+								  EPWM_AQ_OUTPUT_HIGH,
+								  EPWM_AQ_OUTPUT_ON_TIMEBASE_DOWN_CMPB);
+}
 
 
 void EPWM_init(){
@@ -649,16 +649,16 @@ void EPWM_init(){
     //
     // Initialize PWM1 without phase shift as master
     //
-    initEPWM(myEPWM0_BASE);
+    initEPWM_AQ_REVERSE(myEPWM0_BASE);
     EPWM_selectPeriodLoadEvent(myEPWM0_BASE, EPWM_SHADOW_LOAD_MODE_COUNTER_ZERO);
-    EPWM_setSyncOutPulseMode(myEPWM0_BASE, EPWM_SYNC_OUT_PULSE_ON_COUNTER_COMPARE_C);
+    EPWM_setSyncOutPulseMode(myEPWM0_BASE, EPWM_SYNC_OUT_PULSE_ON_SOFTWARE);
     EPWM_enableOneShotSync(myEPWM0_BASE);
 
     //
     // Initialize PWM2
     //
-    initEPWM(myEPWM1_BASE);
-    EPWM_selectPeriodLoadEvent(myEPWM1_BASE, EPWM_SHADOW_LOAD_MODE_COUNTER_SYNC);
+    initEPWM_AQ_REVERSE(myEPWM1_BASE);
+    EPWM_selectPeriodLoadEvent(myEPWM1_BASE, EPWM_SHADOW_LOAD_MODE_COUNTER_ZERO);
     EPWM_enablePhaseShiftLoad(myEPWM1_BASE);
     EPWM_setPhaseShift(myEPWM1_BASE, 0U);
     EPWM_setCountModeAfterSync(myEPWM1_BASE, EPWM_COUNT_MODE_UP_AFTER_SYNC);
@@ -666,25 +666,25 @@ void EPWM_init(){
     //
     // Initialize PWM3
     //
-    initEPWM(myEPWM2_BASE);
+    initEPWM_AQ_REVERSE(myEPWM2_BASE);
     EPWM_selectPeriodLoadEvent(myEPWM2_BASE, EPWM_SHADOW_LOAD_MODE_COUNTER_ZERO);
 
     //
     // Initialize PWM4
     //
-    initEPWM(myEPWM3_BASE);
+    initEPWM_AQ_REVERSE(myEPWM3_BASE);
     EPWM_selectPeriodLoadEvent(myEPWM3_BASE, EPWM_SHADOW_LOAD_MODE_COUNTER_ZERO);
 
     //
     // Initialize PWM5
     //
-    initEPWM(myEPWM4_BASE);
+    initEPWM_AQ_REVERSE(myEPWM4_BASE);
     EPWM_selectPeriodLoadEvent(myEPWM4_BASE, EPWM_SHADOW_LOAD_MODE_COUNTER_ZERO);
 
     //
     // Initialize PWM6
     //
-    initEPWM(myEPWM5_BASE);
+    initEPWM_AQ_REVERSE(myEPWM5_BASE);
     EPWM_selectPeriodLoadEvent(myEPWM5_BASE, EPWM_SHADOW_LOAD_MODE_COUNTER_ZERO);
 
     //
@@ -695,8 +695,7 @@ void EPWM_init(){
     //
     // Configure the SOC to occur on the first up-count event
     //
-//    EPWM_setCounterCompareValue(EPWM1_BASE, EPWM_COUNTER_COMPARE_D, epwm_tbprd/2);
-    EPWM_setCounterCompareValue(EPWM1_BASE, EPWM_COUNTER_COMPARE_D, 1);
+    EPWM_setCounterCompareValue(EPWM1_BASE, EPWM_COUNTER_COMPARE_D, 0);
     EPWM_setADCTriggerSource(EPWM1_BASE, EPWM_SOC_A, EPWM_SOC_TBCTR_U_CMPD);
     EPWM_setADCTriggerEventPrescale(EPWM1_BASE, EPWM_SOC_A, 1);
     SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_TBCLKSYNC);
