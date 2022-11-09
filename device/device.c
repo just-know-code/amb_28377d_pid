@@ -650,21 +650,48 @@ void __error__(const char *filename, const uint32_t line) {
 
 static inline void UpdatePWMDuty() {
 
-    EPWM_setCounterCompareValue(EPWM1_BASE, EPWM_COUNTER_COMPARE_A, pwmDuty[0]);
-    EPWM_setCounterCompareValue(EPWM1_BASE, EPWM_COUNTER_COMPARE_B, pwmDuty[1]);
+    EPWM_setCounterCompareValue(EPWM1_BASE, EPWM_COUNTER_COMPARE_A, epwm_tbprd - pwmDuty[0]);
+    EPWM_setCounterCompareValue(EPWM1_BASE, EPWM_COUNTER_COMPARE_B, epwm_tbprd - pwmDuty[1]);
 //    EPWM_setTimeBasePeriod(EPWM1_BASE, 0x0011);
 //    EPWM_setTimeBasePeriod(EPWM2_BASE, 0x0011);
-    EPWM_setCounterCompareValue(EPWM2_BASE, EPWM_COUNTER_COMPARE_A, pwmDuty[2]);
-    EPWM_setCounterCompareValue(EPWM2_BASE, EPWM_COUNTER_COMPARE_B, pwmDuty[3]);
+    EPWM_setCounterCompareValue(EPWM2_BASE, EPWM_COUNTER_COMPARE_A, epwm_tbprd - pwmDuty[2]);
+    EPWM_setCounterCompareValue(EPWM2_BASE, EPWM_COUNTER_COMPARE_B, epwm_tbprd - pwmDuty[3]);
 
-    EPWM_setCounterCompareValue(EPWM3_BASE, EPWM_COUNTER_COMPARE_A, pwmDuty[4]);
-    EPWM_setCounterCompareValue(EPWM3_BASE, EPWM_COUNTER_COMPARE_B, pwmDuty[5]);
+//    EPWM_setCounterCompareValue(EPWM3_BASE, EPWM_COUNTER_COMPARE_A, pwmDuty[4]);
+//    EPWM_setCounterCompareValue(EPWM3_BASE, EPWM_COUNTER_COMPARE_B, pwmDuty[5]);
 
-    EPWM_setCounterCompareValue(EPWM4_BASE, EPWM_COUNTER_COMPARE_A, pwmDuty[6]);
-    EPWM_setCounterCompareValue(EPWM4_BASE, EPWM_COUNTER_COMPARE_B, pwmDuty[7]);
+//    EPWM_setCounterCompareValue(EPWM4_BASE, EPWM_COUNTER_COMPARE_A, pwmDuty[6]);
+//    EPWM_setCounterCompareValue(EPWM4_BASE, EPWM_COUNTER_COMPARE_B, pwmDuty[7]);
 
-    EPWM_setCounterCompareValue(EPWM5_BASE, EPWM_COUNTER_COMPARE_A, pwmDuty[8]);
-    EPWM_setCounterCompareValue(EPWM5_BASE, EPWM_COUNTER_COMPARE_B, pwmDuty[9]);
+//    EPWM_setCounterCompareValue(EPWM5_BASE, EPWM_COUNTER_COMPARE_A, pwmDuty[8]);
+//    EPWM_setCounterCompareValue(EPWM5_BASE, EPWM_COUNTER_COMPARE_B, pwmDuty[9]);
+}
+
+
+static void exp_UpdatePWM() {
+    static int exp_i = 0;
+
+    if (exp_i == 0) {
+    	exp_i++;
+    	pwmDuty[0] = 1250;
+    	pwmDuty[1] = 1250;
+    	pwmDuty[2] = 1250;
+    } else if (exp_i == 1) {
+    	exp_i++;
+    	pwmDuty[0] = 1000;
+		pwmDuty[1] = 1250;
+		pwmDuty[2] = 1000;
+    } else if (exp_i == 2) {
+    	exp_i++;
+    	pwmDuty[0] = 1500;
+		pwmDuty[1] = 1250;
+		pwmDuty[2] = 1500;
+    } else if (exp_i == 3) {
+    	exp_i = 0;
+    	pwmDuty[0] = 1000;
+		pwmDuty[1] = 1250;
+		pwmDuty[2] = 1500;
+    }
 }
 
 
@@ -777,6 +804,10 @@ __interrupt void INT_curADCD_1_ISR(void) {
             pwmDuty[9] = 1250;
         } else if (loop_sel == 1){
         	svpwm();
+        } else if (loop_sel == 2){
+
+        } else if (loop_sel == 3){
+        	exp_UpdatePWM();
         }
         // update pwm duty
         UpdatePWMDuty();

@@ -635,16 +635,16 @@ void EPWM_init(){
     //
     // Initialize PWM1 without phase shift as master
     //
-    initEPWM(myEPWM0_BASE);
+    initEPWM_AQ_REVERSE(myEPWM0_BASE);
     EPWM_selectPeriodLoadEvent(myEPWM0_BASE, EPWM_SHADOW_LOAD_MODE_COUNTER_ZERO);
-    EPWM_setSyncOutPulseMode(myEPWM0_BASE, EPWM_SYNC_OUT_PULSE_ON_COUNTER_COMPARE_C);
+    EPWM_setSyncOutPulseMode(myEPWM0_BASE, EPWM_SYNC_OUT_PULSE_ON_SOFTWARE);
     EPWM_enableOneShotSync(myEPWM0_BASE);
 
     //
     // Initialize PWM2
     //
-    initEPWM(myEPWM1_BASE);
-    EPWM_selectPeriodLoadEvent(myEPWM1_BASE, EPWM_SHADOW_LOAD_MODE_COUNTER_SYNC);
+    initEPWM_AQ_REVERSE(myEPWM1_BASE);
+    EPWM_selectPeriodLoadEvent(myEPWM1_BASE, EPWM_SHADOW_LOAD_MODE_COUNTER_ZERO);
     EPWM_enablePhaseShiftLoad(myEPWM1_BASE);
     EPWM_setPhaseShift(myEPWM1_BASE, 0U);
     EPWM_setCountModeAfterSync(myEPWM1_BASE, EPWM_COUNT_MODE_UP_AFTER_SYNC);
@@ -652,25 +652,25 @@ void EPWM_init(){
     //
     // Initialize PWM3
     //
-    initEPWM(myEPWM2_BASE);
+    initEPWM_AQ_REVERSE(myEPWM2_BASE);
     EPWM_selectPeriodLoadEvent(myEPWM2_BASE, EPWM_SHADOW_LOAD_MODE_COUNTER_ZERO);
 
     //
     // Initialize PWM4
     //
-    initEPWM(myEPWM3_BASE);
+    initEPWM_AQ_REVERSE(myEPWM3_BASE);
     EPWM_selectPeriodLoadEvent(myEPWM3_BASE, EPWM_SHADOW_LOAD_MODE_COUNTER_ZERO);
 
     //
     // Initialize PWM5
     //
-    initEPWM(myEPWM4_BASE);
+    initEPWM_AQ_REVERSE(myEPWM4_BASE);
     EPWM_selectPeriodLoadEvent(myEPWM4_BASE, EPWM_SHADOW_LOAD_MODE_COUNTER_ZERO);
 
     //
     // Initialize PWM6
     //
-    initEPWM(myEPWM5_BASE);
+    initEPWM_AQ_REVERSE(myEPWM5_BASE);
     EPWM_selectPeriodLoadEvent(myEPWM5_BASE, EPWM_SHADOW_LOAD_MODE_COUNTER_ZERO);
 
     //
@@ -681,7 +681,7 @@ void EPWM_init(){
     //
     // Configure the SOC to occur on the first up-count event
     //
-    EPWM_setCounterCompareValue(EPWM1_BASE, EPWM_COUNTER_COMPARE_D, epwm_tbprd/2);
+    EPWM_setCounterCompareValue(EPWM1_BASE, EPWM_COUNTER_COMPARE_D, 0);
     EPWM_setADCTriggerSource(EPWM1_BASE, EPWM_SOC_A, EPWM_SOC_TBCTR_U_CMPD);
     EPWM_setADCTriggerEventPrescale(EPWM1_BASE, EPWM_SOC_A, 1);
     SysCtl_enablePeripheral(SYSCTL_PERIPH_CLK_TBCLKSYNC);
