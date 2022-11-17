@@ -650,6 +650,7 @@ void __error__(const char *filename, const uint32_t line) {
 #define PI_200 628.3185f
 static float x_t = 0.0;
 static inline void sinCur() {
+
 	if (x_t >= 100.0f) {
 		x_t = 0.0;
 	}
@@ -663,7 +664,8 @@ static inline void UpdatePWMDuty() {
 
     EPWM_setCounterCompareValue(EPWM1_BASE, EPWM_COUNTER_COMPARE_A, epwm_tbprd - pwmDuty[0]);
     EPWM_setCounterCompareValue(EPWM1_BASE, EPWM_COUNTER_COMPARE_B, epwm_tbprd - pwmDuty[1]);
-
+//    EPWM_setTimeBasePeriod(EPWM1_BASE, 0x0011);
+//    EPWM_setTimeBasePeriod(EPWM2_BASE, 0x0011);
     EPWM_setCounterCompareValue(EPWM2_BASE, EPWM_COUNTER_COMPARE_A, epwm_tbprd - pwmDuty[2]);
     EPWM_setCounterCompareValue(EPWM2_BASE, EPWM_COUNTER_COMPARE_B, epwm_tbprd - pwmDuty[3]);
 
