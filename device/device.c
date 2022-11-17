@@ -48,7 +48,7 @@
 #include "inc/hw_ipc.h"
 #include <string.h>
 #include "control_algorithm.h"
-
+#include <math.h>
 #ifdef __cplusplus
 using std::memcpy;
 #endif
@@ -647,6 +647,18 @@ void __error__(const char *filename, const uint32_t line) {
     ESTOP0;
 }
 
+#define PI_200 628.3185f
+static float x_t = 0.0;
+static inline void sinCur() {
+
+	if (x_t >= 100.0f) {
+		x_t = 0.0;
+	}
+	float y_cur = 2.0f * sinf(PI_200 * x_t);
+	refCurrent[1] = y_cur;
+	x_t += epwm_tbprd * 2E-8f;
+}
+
 
 static inline void UpdatePWMDuty() {
 
@@ -808,6 +820,9 @@ __interrupt void INT_curADCD_1_ISR(void) {
 
         } else if (loop_sel == 3){
         	exp_UpdatePWM();
+        } else if (loop_sel == 4){
+        	sinCur();
+        	svpwm();
         }
         // update pwm duty
         UpdatePWMDuty();
