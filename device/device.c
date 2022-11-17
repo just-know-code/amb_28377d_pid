@@ -683,7 +683,6 @@ static inline void UpdatePWMDuty() {
 
 static void randpwm() {
 
-	epwm_tbprd_old = epwm_tbprd;
 	epwm_tbprd = 1563u + (rand() % 1563);   //16k - 32k
 //	static int iflag = 0;
 //	if (iflag == 0) {
